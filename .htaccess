@@ -1,0 +1,33 @@
+# Deny access to .ht* files
+<Files ~ "^\.ht">
+    Deny from all
+</Files>
+
+# Restricting HTTP Methods
+<LimitExcept GET POST PUT DELETE>
+    Require all denied
+</LimitExcept>
+
+# Deny access to all directories by default
+RewriteEngine On
+RewriteRule ^(.+)/$ - [F,L]
+
+# Allow access to specific directories like /themes
+RewriteCond %{REQUEST_URI} ^/themes/
+RewriteRule ^ - [L]
+
+# Handle static files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule \.(css|js|jpg|jpeg|gif|png|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|tar|wav|bmp|rtf|swf|ico|flv|txt|docx|xlsx)$ - [L]
+
+# Favicon handling
+RewriteCond %{REQUEST_URI} =/favicon.ico
+RewriteRule ^ - [L,R=204]
+
+# PHP Handling
+AddType application/x-httpd-php .php
+
+# Main entry point
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php?url=%{REQUEST_URI} [QSA,L]

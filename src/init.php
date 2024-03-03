@@ -1,5 +1,7 @@
 <?php
-function classesAutoloader($className) {
+
+function classesAutoloader($className)
+{
     $path = 'classes' . DIRECTORY_SEPARATOR;
     $extension = '.php';
 
