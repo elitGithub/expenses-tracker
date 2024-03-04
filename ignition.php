@@ -29,9 +29,8 @@ if (!$foundCurrPath) {
     ini_set('include_path', '.' . PATH_SEPARATOR . ini_get('include_path'));
 }
 
-//
+
 // Tweak some PHP configuration values
 // Warning: be sure the server has enough memory and stack for PHP
-//
 ini_set('pcre.backtrack_limit', '100000000');
 ini_set('pcre.recursion_limit', '100000000');
