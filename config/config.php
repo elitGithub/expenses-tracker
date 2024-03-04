@@ -23,17 +23,3 @@ $dbConfigOption = [
 $default_charset = 'utf-8';
 
 $app_unique_key = 'q2GZoS8jgi1VOyke2QOeKEJ1d';
-
-// Define the PROJECT_ROOT dynamically
-// Initialize the PROJECT_ROOT global variable
-/**
- * @return void
- */
-function initProjectRoot() {
-    $rootPath = realpath(dirname(__FILE__)); // Adjust the path as needed
-    if (!defined('PROJECT_ROOT')) {
-        define('PROJECT_ROOT', $rootPath);
-    }
-}
-
-initProjectRoot();

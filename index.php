@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types = 1);
+$rootPath = realpath(dirname(__FILE__)); // Adjust the path as needed
+if (!defined('PROJECT_ROOT')) {
+    define('PROJECT_ROOT', $rootPath);
+}
+require_once $rootPath . '/src/engine/ignition.php';
+
+
 session_start();
 ob_start();
 require_once('./src/db_config.php');
 // $con = register('localhost', 'root', 'admin', 'expense_tracker');
 
 //A function to get difference between to numbers
-function diff($a = 0, $b = 0)
-{
-    return ($a - $b);
-}
-
 
 if (isset($_POST['submit']) && !empty($_POST['amount_spent']) && !empty($_POST['expense_category_id']) && !empty($_POST['expense_date'])
     && !empty($_POST['expense_description'])) {
@@ -108,19 +111,19 @@ if (@$data === true) {
 
 
     <script language="JavaScript"><!--
-        function trim (strText) {
-            // this will get rid of leading spaces
-            while (strText.substring(0, 1) == ' ')
-                strText = strText.substring(1, strText.length)
+      function trim (strText) {
+        // this will get rid of leading spaces
+        while (strText.substring(0, 1) == ' ')
+          strText = strText.substring(1, strText.length)
 
-            // this will get rid of trailing spaces
-            while (strText.substring(strText.length - 1, strText.length) == ' ')
-                strText = strText.substring(0, strText.length - 1)
+        // this will get rid of trailing spaces
+        while (strText.substring(strText.length - 1, strText.length) == ' ')
+          strText = strText.substring(0, strText.length - 1)
 
-            return strText
-        }
+        return strText
+      }
 
-        //--></script>
+      //--></script>
 
 
 </head>
@@ -374,12 +377,12 @@ if (@$data === true) {
                                             echo '<tr>';
                                             echo '<td>' . $row['expense_category_name'] . '</td>';
                                             echo '<td>' . $row['amount'] . '</td>';
-                                            echo '<td>' . number_format((float)$row['amount_spent'], 2, '.', '') . '</td>';
+                                            echo '<td>' . number_format((float) $row['amount_spent'], 2, '.', '') . '</td>';
                                             $diff = diff($row['amount'], $row['amount_spent']);
                                             echo '<td>';
                                             if ($diff < 0) {
                                                 echo '<div class="btn btn-danger btn-xs" title="You have over spent  ' . $row['expense_category_name'] . '  budget">' . number_format(
-                                                        (float)($diff),
+                                                        (float) ($diff),
                                                         2,
                                                         '.',
                                                         ''
@@ -388,7 +391,7 @@ if (@$data === true) {
 
                                             if ($diff == 0) {
                                                 echo '<div class="btn btn-warning btn-xs" title="You have no budget for ' . $row['expense_category_name'] . ' budget">' . number_format(
-                                                        (float)($diff),
+                                                        (float) ($diff),
                                                         2,
                                                         '.',
                                                         ''
@@ -397,7 +400,7 @@ if (@$data === true) {
 
                                             if ($diff > 0) {
                                                 echo '<div class="btn btn-primary btn-xs" title="You are within ' . $row['expense_category_name'] . '  budget"">' . number_format(
-                                                        (float)($diff),
+                                                        (float) ($diff),
                                                         2,
                                                         '.',
                                                         ''
@@ -445,10 +448,10 @@ if (@$data === true) {
 
 
                 <script>
-                    $(document).ready(function () {
-                        $('#dataTables-example').dataTable()
+                  $(document).ready(function () {
+                    $('#dataTables-example').dataTable()
 
-                    })
+                  })
                 </script>
                 <!-- CUSTOM SCRIPTS -->
                 <script src="assets/js/custom.js"></script>
