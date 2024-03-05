@@ -34,6 +34,12 @@ session_start();
 $db = PearDatabase::getInstance();
 
 // TODO: implement class loader to load static classes like System.
+// Usage:
+$loader = new UniversalClassLoader();
+$loader->addNamespace('Core', '/src/Core');
+//$loader->addNamespace('AnotherVendor\\Package', '/path/to/another/package');
+$loader->register();
+
 ?>
 
 

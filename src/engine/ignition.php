@@ -3,46 +3,47 @@
 declare(strict_types = 1);
 
 
-
 require_once './config/config.php';
 spl_autoload_register(function ($className) {
-    $baseDir = EXTR_SRC_DIR . '/classes/'; // Adjust the base directory as needed
+    $baseDir = EXTR_SRC_DIR; // Adjust the base directory as needed
 
     // Normalize class name for namespace and directory separator
     $className = ltrim($className, '\\');
-    $fileName = '';
-    $namespace = '';
 
-    // Handle both namespaced and non-namespaced classes
-    if ($lastNsPos = strrpos($className, '\\')) {
-        $namespace = substr($className, 0, $lastNsPos);
-        $className = substr($className, $lastNsPos + 1);
-        $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-    }
+    // Generate the classes map using RecursiveDirectoryIterator
+    $classesMap = scanDirectoryForClassesUsingIterator($baseDir);
 
-    // Convert PEAR-like class names to directory paths and handle both .php and .class.php extensions
-    $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className);
-
-    // Attempt to load the file with standard .php extension
-    $finalPath = $baseDir . $fileName . '.php';
-    if (file_exists($finalPath)) {
-        require_once $finalPath;
-        return;
-    }
-
-    // Attempt to load the file with .class.php extension
-    $finalPathClass = $baseDir . $fileName . '.class.php';
-    if (file_exists($finalPathClass)) {
-        require_once $finalPathClass;
+    if ($path = getClassPathUsingIterator($className, $classesMap)) {
+        require_once $path;
     }
 });
 
-// Helper function to check if a string ends with a specific substring
-function endsWith($haystack, $needle): bool
+function scanDirectoryForClassesUsingIterator($dir): array
 {
-    $length = strlen($needle);
-    if (!$length) {
-        return true;
+    $directory = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
+    $iterator = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::LEAVES_ONLY);
+    $classesMap = [];
+
+    foreach ($iterator as $file) {
+        if ($file->isFile() && preg_match('/\.(php|class\.php)$/', $file->getFilename())) {
+            $path = $file->getRealPath();
+            $className = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+            $classesMap[$className] = $path;
+        }
     }
-    return substr($haystack, -$length) === $needle;
+
+    return $classesMap;
 }
+
+function getClassPathUsingIterator($className, $classesMap) {
+    // Split class name into parts to handle namespace if needed
+    $classNameParts = explode('\\', $className);
+    $simpleClassName = end($classNameParts);
+
+    if (isset($classesMap[$simpleClassName])) {
+        return $classesMap[$simpleClassName];
+    }
+
+    return null;
+}
+
