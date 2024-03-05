@@ -32,14 +32,6 @@ if (DEBUG) {
 session_name('expenses-tracker-setup');
 session_start();
 $db = PearDatabase::getInstance();
-
-// TODO: implement class loader to load static classes like System.
-// Usage:
-$loader = new UniversalClassLoader();
-$loader->addNamespace('Core', '/src/Core');
-//$loader->addNamespace('AnotherVendor\\Package', '/path/to/another/package');
-$loader->register();
-
 ?>
 
 
@@ -50,8 +42,9 @@ $loader->register();
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="application-name" content="Expenses Tracker <?= System::getVersion() ?>">
-    <meta name="copyright" content="(c) 2001-<?= date('Y') ?> Eli Tokar">
+    <meta name="copyright" content="(c) 2024-<?= date('Y') ?> Eli Tokar">
     <link rel="stylesheet" href="../assets/dist/styles.css">
+    <link rel="shortcut icon" href="../assets/img/favicon_1.ico">
     <script src="../assets/dist/setup.js"></script>
     <title>Expenses Tracker <?= System::getVersion() ?> Setup</title>
 </head>
@@ -60,24 +53,28 @@ $loader->register();
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                <li class="pmf-nav-link">
-                    <a href="#" class="pmf-nav-link" target="_blank">
-                        Documentation
-                    </a>
-                </li>
-                <li class="pmf-nav-link {{ activeAddContent }}">
-                    <a href="https://www.phpmyfaq.de/support" class="pmf-nav-link" target="_blank">
-                        Support
-                    </a>
-                </li>
-                <li class="pmf-nav-link {{ activeAddQuestion }}">
-                    <a href="https://forum.phpmyfaq.de/" class="pmf-nav-link" target="_blank">
-                        Forums
-                    </a>
-                </li>
             </ul>
         </div>
     </div>
 </nav>
+
+<main role="main">
+    <section id="content">
+        <div class="container shadow-lg p-5 mt-5 bg-light-subtle">
+            <form action="index.php"
+                  method="post"
+                  id="expenses-tracker-setup-form"
+                  name="expenses-tracker-setup-form"
+                  class="needs-validation" novalidate>
+                <div class="form-header d-flex mb-4">
+                    <span class="stepIndicator">Database Setup</span>
+                    <span class="stepIndicator">LDAP Setup</span>
+                    <span class="stepIndicator">Elasticsearch Setup</span>
+                    <span class="stepIndicator">Admin user account</span>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
 </body>
 </html>
