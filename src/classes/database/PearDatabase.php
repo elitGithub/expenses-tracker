@@ -17,7 +17,8 @@ if (!defined('DS')) {
 }
 
 include_once('config.performance.php');
-require_once PROJECT_ROOT . '/classes/database/adodb/adodb.inc.php';
+
+require_once PROJECT_ROOT . '/src/classes/database/adodb/adodb.inc.php';
 
 /**
  * Database wrapper classes for ADODB connection handling.

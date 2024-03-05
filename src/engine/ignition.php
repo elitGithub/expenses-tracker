@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 
 
-require_once '../config.php';
+require_once './config/config.php';
 spl_autoload_register(function ($className) {
     $baseDir = EXTR_SRC_DIR . '/classes/'; // Adjust the base directory as needed
 

@@ -5,9 +5,12 @@ $rootPath = realpath(dirname(__FILE__)); // Adjust the path as needed
 if (!defined('PROJECT_ROOT')) {
     define('PROJECT_ROOT', $rootPath);
 }
-require_once $rootPath . '/src/engine/ignition.php';
+require_once './ignition.php';
 
-
+if (!file_exists('./config/database.php')) {
+    require_once 'install/index.php';
+    exit(1);
+}
 session_start();
 ob_start();
 require_once('./src/db_config.php');
