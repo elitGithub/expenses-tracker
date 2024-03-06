@@ -5,6 +5,10 @@ declare(strict_types = 1);
 use Core\System;
 use database\PearDatabase;
 
+if (file_exists('./config/database.php')) {
+    header('Location: /');
+    exit(1);
+}
 
 define('EXTR_ROOT_DIR', dirname(__FILE__, 2));
 const EXTR_SRC_DIR = EXTR_ROOT_DIR . '/src';
@@ -43,9 +47,9 @@ $db = PearDatabase::getInstance();
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="application-name" content="Expenses Tracker <?= System::getVersion() ?>">
     <meta name="copyright" content="(c) 2024-<?= date('Y') ?> Eli Tokar">
-    <link rel="stylesheet" href="../assets/dist/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../assets/css/custom.css">
     <link rel="shortcut icon" href="../assets/img/favicon_1.ico">
-    <script src="../assets/dist/setup.js"></script>
     <title>Expenses Tracker <?= System::getVersion() ?> Setup</title>
 </head>
 <body>
@@ -66,7 +70,7 @@ $db = PearDatabase::getInstance();
                   id="expenses-tracker-setup-form"
                   name="expenses-tracker-setup-form"
                   class="needs-validation" novalidate>
-                <div class="form-header d-flex mb-4">
+                <div class="form-header d-flex mb-4 justify-content-between">
                     <span class="stepIndicator">Database Setup</span>
                     <span class="stepIndicator">LDAP Setup</span>
                     <span class="stepIndicator">Elasticsearch Setup</span>
@@ -76,5 +80,7 @@ $db = PearDatabase::getInstance();
         </div>
     </section>
 </main>
+
+<script src="../assets/js/install.js"></script>
 </body>
 </html>

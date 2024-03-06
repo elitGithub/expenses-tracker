@@ -85,7 +85,7 @@ if (@$data === true) {
 
 
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -113,7 +113,7 @@ if (@$data === true) {
  </script> -->
 
 
-    <script language="JavaScript"><!--
+    <script>
       function trim (strText) {
         // this will get rid of leading spaces
         while (strText.substring(0, 1) == ' ')
@@ -125,8 +125,7 @@ if (@$data === true) {
 
         return strText
       }
-
-      //--></script>
+    </script>
 
 
 </head>
