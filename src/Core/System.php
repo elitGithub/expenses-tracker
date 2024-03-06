@@ -77,5 +77,13 @@ class System
         return strlen(self::VERSION_PRE_RELEASE) > 0;
     }
 
+    /**
+     * @return string
+     */
+    public static function getApiVersion(): string
+    {
+        return self::VERSION_API;
+    }
+
 
 }
