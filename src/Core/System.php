@@ -53,6 +53,30 @@ class System
     ];
 
     /**
+     * Supported databases for phpMyFAQ.
+     *
+     * @var array<string, array<int, string>>
+     */
+    private array $supportedDatabases = [
+        'mysqli' => [
+            self::VERSION_MINIMUM_PHP,
+            'MySQL v8 / MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL'
+        ],
+        'pgsql' => [
+            self::VERSION_MINIMUM_PHP,
+            'PostgreSQL v10 or later'
+        ],
+        'sqlite3' => [
+            self::VERSION_MINIMUM_PHP,
+            'SQLite 3'
+        ],
+        'sqlsrv' => [
+            self::VERSION_MINIMUM_PHP,
+            'MS SQL Server 2016 or later'
+        ]
+    ];
+
+    /**
      * Array of missing PHP extensions.
      *
      * @var array<string>
@@ -85,5 +109,48 @@ class System
         return self::VERSION_API;
     }
 
+    /**
+     * @return bool
+     */
+    public function checkDatabase(): bool
+    {
+        foreach (array_keys($this->supportedDatabases) as $extension) {
+            if (extension_loaded($extension)) {
+                return true;
+            }
+        }
 
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function checkRequiredExtensions(): bool
+    {
+        foreach ($this->requiredExtensions as $requiredExtension) {
+            if (!extension_loaded($requiredExtension)) {
+                $this->missingExtensions[] = $requiredExtension;
+            }
+        }
+        return count($this->missingExtensions) <= 0;
+    }
+
+    /**
+     * Returns all missing extensions.
+     *
+     * @return array<string>
+     */
+    public function getMissingExtensions(): array
+    {
+        return $this->missingExtensions;
+    }
+
+    /**
+     * Checks for an installed phpMyFAQ version
+     */
+    public function checkInstallation(): bool
+    {
+        return !is_file(EXTR_ROOT_DIR . '/src/config/database.php');
+    }
 }

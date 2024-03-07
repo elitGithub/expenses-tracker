@@ -13,7 +13,7 @@ class Setup
      */
     public function __construct()
     {
-        $this->setRootDir(EXTR_SRC_DIR);
+        $this->setRootDir(EXTR_ROOT_DIR);
     }
 
     /**
@@ -39,14 +39,14 @@ class Setup
                 // If the folder does not exist try to create it
                 if (false === mkdir($this->rootDir . $dir)) {
                     // If the folder creation fails
-                    $failedDirs[] = 'Folder [' . $dir . '] could not be created.';
+                    $failedDirs[] = 'Folder [' . $this->rootDir . $dir . '] could not be created.';
                 } elseif (false === chmod($this->rootDir . $dir, 0775)) {
-                    $failedDirs[] = 'Folder [' . $dir . '] could not be given correct permissions (775).';
+                    $failedDirs[] = 'Folder [' . $this->rootDir . $dir . '] could not be given correct permissions (775).';
                 }
                 // The folder exists, check permissions
             } elseif (false === is_writable($this->rootDir . $dir)) {
                 // If the folder exists but is not writeable
-                $failedDirs[] = 'Folder [' . $dir . '] exists but is not writable.';
+                $failedDirs[] = 'Folder [' . $this->rootDir . $dir . '] exists but is not writable.';
             }
 
             if (0 === count($failedDirs)) {

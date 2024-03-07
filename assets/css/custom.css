@@ -29,7 +29,7 @@ body {
 
 #page-inner {
     width: 100%;
-    margin: 10px 20px 10px 0px;
+    margin: 10px 20px 10px 0;
     background-color: #fff !important;
     padding: 10px;
     min-height: 1200px;
@@ -52,10 +52,10 @@ h4 {
 }
 
 .square-btn-adjust {
-    border: 0px solid transparent;
-    -webkit-border-radius: 0px;
-    -moz-border-radius: 0px;
-    border-radius: 0px;
+    border: 0 solid transparent;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
 
 }
 
@@ -155,9 +155,9 @@ p {
     padding: 20px;
     font-size: 20px;
     font-weight: 500;
-    -webkit-border-radius: 0px;
-    -moz-border-radius: 0px;
-    border-radius: 0px;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
     background-color: #2EA7EB;
     color: #fff;
 }
@@ -172,12 +172,12 @@ p {
 
 .back-footer-green {
     background-color: #009B50;
-    border-top: 0px solid #fff;
+    border-top: 0 solid #fff;
 }
 
 .back-footer-red {
     background-color: #AF0000;
-    border-top: 0px solid #fff;
+    border-top: 0 solid #fff;
 }
 
 .color-bottom-txt {
@@ -322,7 +322,7 @@ p {
     width: 1px;
     height: 100%;
     background: #ff0000;
-    top: 0px;
+    top: 0;
     z-index: 10;
 }
 
@@ -356,7 +356,7 @@ p {
 }
 
 .navbar-default {
-    border: 0px solid black;
+    border: 0 solid black;
 
 }
 
@@ -383,7 +383,22 @@ p {
 
 .stepIndicator {
     cursor: pointer;
+    padding: 1rem;
 }
+
+.stepIndicator.active {
+    border: 1px solid #ccc;
+    background-color: #00CE6F;
+    color: #fff;
+}
+
+.control {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 /*==============================================
     UI ELEMENTS STYLES     
     =============================================*/

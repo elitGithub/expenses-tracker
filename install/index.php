@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 use Core\System;
 use database\PearDatabase;
+use Setup\Installer;
 
 if (file_exists('./config/database.php')) {
     header('Location: /');
@@ -36,6 +37,9 @@ if (DEBUG) {
 session_name('expenses-tracker-setup');
 session_start();
 $db = PearDatabase::getInstance();
+
+$system = new System();
+$installer = new Installer($system);
 ?>
 
 
@@ -47,7 +51,8 @@ $db = PearDatabase::getInstance();
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="application-name" content="Expenses Tracker <?= System::getVersion() ?>">
     <meta name="copyright" content="(c) 2024-<?= date('Y') ?> Eli Tokar">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="../assets/css/custom.css">
     <link rel="shortcut icon" href="../assets/img/favicon_1.ico">
     <title>Expenses Tracker <?= System::getVersion() ?> Setup</title>
@@ -81,6 +86,20 @@ $db = PearDatabase::getInstance();
     </section>
 </main>
 
+<?php
+try {
+    $installer->checkBasicStuff();
+} catch (Throwable $exception) {
+    echo sprintf('<div class="alert alert-danger alert-dismissible fade show mt-2">%s%s</div>',
+                 '<h4 class="alert-heading">Error occurred during basic check</h4>',
+                 "<p>{$exception->getMessage()}</p>");
+}
+?>
+<div class="control">
+<?php
+$installer->checkFilesystemPermissions();
+?>
+</div>
 <script src="../assets/js/install.js"></script>
 </body>
 </html>

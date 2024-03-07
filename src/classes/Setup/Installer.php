@@ -5,9 +5,11 @@ declare(strict_types = 1);
 namespace Setup;
 
 use Core\System;
+use Exception;
 
 class Installer extends Setup
 {
+
     protected System $system;
     /**
      * Array with user rights.
@@ -430,6 +432,84 @@ class Installer extends Setup
         ];
         $this->mainConfig = array_merge($this->mainConfig, $dynMainConfig);
     }
+    /**
+     * Check absolutely necessary stuff and die.
+     * @throws Exception
+     */
+    public function checkBasicStuff(): void
+    {
+        if (!$this->checkMinimumPhpVersion()) {
+            throw new Exception(
+                sprintf('Sorry, but you need PHP %s or later!', System::VERSION_MINIMUM_PHP)
+            );
+        }
 
+        if (!function_exists('date_default_timezone_set')) {
+            throw new Exception(
+                'Sorry, but setting a default timezone does not work in your environment!'
+            );
+        }
 
+        if (!$this->system->checkDatabase()) {
+            throw new Exception(
+                'No supported database detected!'
+            );
+        }
+
+        if (!$this->system->checkRequiredExtensions()) {
+            throw new Exception(
+                sprintf(
+                    'Some required PHP extensions are missing: %s',
+                    implode(', ', $this->system->getMissingExtensions())
+                )
+            );
+        }
+
+        if (!$this->system->checkInstallation()) {
+            throw new Exception(
+                'Expenses Tracker is already installed!'
+            );
+        }
+    }
+    public function checkFilesystemPermissions(): void
+    {
+        $instanceSetup = new Setup();
+        $instanceSetup->setRootDir(EXTR_ROOT_DIR);
+
+        $dirs = [
+            '/config/config',
+            '/config/data',
+            '/config/logs',
+            '/config/user/images',
+            '/config/user/attachments',
+        ];
+        $failedDirs = $instanceSetup->checkDirs($dirs);
+        $numDirs = count($failedDirs);
+
+        if (1 <= $numDirs) {
+            printf(
+                '<p class="alert alert-danger">The following %s could not be created or %s not writable:</p><ul>',
+                (1 < $numDirs) ? 'directories' : 'directory',
+                (1 < $numDirs) ? 'are' : 'is'
+            );
+            foreach ($failedDirs as $failedDir) {
+                echo "<li>{$failedDir}</li>\n";
+            }
+
+            printf(
+                '</ul><p class="alert alert-danger">Please create %s manually and/or change access to chmod 775 (or ' .
+                'greater if necessary).</p>',
+                (1 < $numDirs) ? 'them' : 'it'
+            );
+        }
+    }
+
+    /**
+     * Checks the minimum required PHP version, defined in System class.
+     * Returns true if it's okay.
+     */
+    public function checkMinimumPhpVersion(): bool
+    {
+        return version_compare(PHP_VERSION, System::VERSION_MINIMUM_PHP) >= 0;
+    }
 }
