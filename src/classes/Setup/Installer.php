@@ -480,6 +480,7 @@ class Installer extends Setup
             '/config/config',
             '/config/data',
             '/config/logs',
+            '/config/user',
             '/config/user/images',
             '/config/user/attachments',
         ];

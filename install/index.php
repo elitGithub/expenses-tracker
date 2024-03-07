@@ -70,6 +70,16 @@ $installer = new Installer($system);
 <main role="main">
     <section id="content">
         <div class="container shadow-lg p-5 mt-5 bg-light-subtle">
+            <div id="pre-install-instructions" class="mb-5">
+                <h2>Pre-installation Instructions</h2>
+                <p>Please follow these steps before proceeding with the setup:</p>
+                <ol>
+                    <li>Ensure your server meets all the required PHP and database versions.</li>
+                    <li>Adjust folder permissions as described in the documentation or the setup guide.</li>
+                    <li>Review and accept the terms and conditions of use.</li>
+                </ol>
+                <button id="show-setup-form" class="btn btn-primary">Proceed to Setup</button>
+            </div>
             <form action="index.php"
                   method="post"
                   id="expenses-tracker-setup-form"
