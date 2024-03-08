@@ -52,29 +52,41 @@ class System
         'zip',
     ];
 
+
     /**
-     * Supported databases for phpMyFAQ.
+     * Supported databases for Expense Tracker, matching PHP extension names and ADOdb support.
      *
      * @var array<string, array<int, string>>
      */
     private array $supportedDatabases = [
-        'mysqli' => [
+        'mysqli'  => [
             self::VERSION_MINIMUM_PHP,
-            'MySQL v8 / MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL'
+            'MySQL v5.7/ MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL',
         ],
-        'pgsql' => [
+        'pgsql'   => [
             self::VERSION_MINIMUM_PHP,
-            'PostgreSQL v10 or later'
+            'PostgreSQL v10 or later',
         ],
         'sqlite3' => [
             self::VERSION_MINIMUM_PHP,
-            'SQLite 3'
+            'SQLite 3',
         ],
-        'sqlsrv' => [
+        'sqlsrv'  => [
             self::VERSION_MINIMUM_PHP,
-            'MS SQL Server 2016 or later'
-        ]
+            'MS SQL Server 2016 or later',
+        ],
+        // Adding Oracle
+        'oci8'    => [
+            self::VERSION_MINIMUM_PHP,
+            'Oracle - v21c or later',
+        ],
+        // Adding IBM DB2
+        'ibm_db2' => [
+            self::VERSION_MINIMUM_PHP,
+            'IBM DB2 - v7.1 or later',
+        ],
     ];
+
 
     /**
      * Array of missing PHP extensions.
@@ -152,5 +164,36 @@ class System
     public function checkInstallation(): bool
     {
         return !is_file(EXTR_ROOT_DIR . '/src/config/database.php');
+    }
+
+    /**
+     * Returns the locally supported databases.
+     *
+     * @return array<string, string>
+     */
+    public function getSupportedSafeDatabases(bool $returnAsHtml = false): array
+    {
+        $retVal = [];
+        foreach ($this->getSupportedDatabases() as $extension => $database) {
+            if (extension_loaded($extension) && version_compare(PHP_VERSION, $database[0]) >= 0) {
+                if ($returnAsHtml) {
+                    $retVal[] = sprintf('<option value="%s">%s</option>', $extension, $database[1]);
+                } else {
+                    $retVal[$extension] = $database;
+                }
+            }
+        }
+
+        return $retVal;
+    }
+
+    /**
+     * Returns the supported databases.
+     *
+     * @return array<string, array<int, string>>
+     */
+    public function getSupportedDatabases(): array
+    {
+        return $this->supportedDatabases;
     }
 }

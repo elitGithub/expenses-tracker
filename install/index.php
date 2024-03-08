@@ -72,11 +72,21 @@ $installer = new Installer($system);
         <div class="container shadow-lg p-5 mt-5 bg-light-subtle">
             <div id="pre-install-instructions" class="mb-5">
                 <h2>Pre-installation Instructions</h2>
+                <div class="alert alert-success">
+                    Before proceeding with the installation, have you read the README file?
+                </div>
                 <p>Please follow these steps before proceeding with the setup:</p>
                 <ol>
-                    <li>Ensure your server meets all the required PHP and database versions.</li>
-                    <li>Adjust folder permissions as described in the documentation or the setup guide.</li>
-                    <li>Review and accept the terms and conditions of use.</li>
+                    <li>Web server: Apache or Nginx.</li>
+                    <li>PHP version 7.4.33 or newer.</li>
+                    <li>Change the ownership of the config folder and its subdirectories to the web server user (apache/nginx) or create the required directories under the config directory.
+                        <ol>
+                            <li>config</li>
+                            <li>data</li>
+                            <li>logs</li>
+                            <li>user</li>
+                        </ol>
+                    </li>
                 </ol>
                 <button id="show-setup-form" class="btn btn-primary">Proceed to Setup</button>
             </div>
@@ -84,13 +94,16 @@ $installer = new Installer($system);
                   method="post"
                   id="expenses-tracker-setup-form"
                   name="expenses-tracker-setup-form"
-                  class="needs-validation" novalidate>
+                  class="needs-validation d-none" novalidate>
                 <div class="form-header d-flex mb-4 justify-content-between">
                     <span class="stepIndicator">Database Setup</span>
                     <span class="stepIndicator">LDAP Setup</span>
                     <span class="stepIndicator">Elasticsearch Setup</span>
                     <span class="stepIndicator">Admin user account</span>
                 </div>
+                <input type="hidden" id="sqlite_default_path" value="<?php echo htmlspecialchars(dirname(__DIR__)); ?>">
+                <div id="available-databases" data-databases='<?php echo json_encode($system->getSupportedSafeDatabases()); ?>'></div>
+                <div class="step" id="step"></div>
             </form>
         </div>
     </section>
@@ -110,6 +123,7 @@ try {
 $installer->checkFilesystemPermissions();
 ?>
 </div>
-<script src="../assets/js/install.js"></script>
+<script defer src="../assets/js/install.js"></script>
+<script defer src="../assets/js/install_step_one.js"></script>
 </body>
 </html>

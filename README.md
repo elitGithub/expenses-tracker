@@ -30,7 +30,7 @@ or modification of this software is strictly prohibited and may be punishable by
 Before you begin the installation process, ensure your system meets the following requirements:
 
 - Web server: Apache or Nginx
-- PHP version [specify version] or newer
+- PHP version 7.4.33 or newer
 - Database system: MySQL, PostgreSQL, or MariaDB
 - Necessary PHP extensions: [list extensions]
 

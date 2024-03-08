@@ -6,10 +6,10 @@
 
     100% To use For Personal And Commercial Use.
     IN EXCHANGE JUST GIVE US CREDITS AND TELL YOUR FRIENDS ABOUT US
-   
+
     ========================================================  */
 /*==============================================
-    GENERAL  STYLES    
+    GENERAL  STYLES
     =============================================*/
 body {
     font-family: 'Open Sans', sans-serif;
@@ -66,7 +66,7 @@ p {
 }
 
 /*==============================================
-   DASHBOARD STYLES    
+   DASHBOARD STYLES
     =============================================*/
 .panel-back {
     background-color: #F8F8F8;
@@ -218,7 +218,7 @@ p {
 }
 
 /*==============================================
-    MENU STYLES    
+    MENU STYLES
     =============================================*/
 
 
@@ -388,8 +388,15 @@ p {
 
 .stepIndicator.active {
     border: 1px solid #ccc;
-    background-color: #00CE6F;
-    color: #fff;
+    --bs-alert-color: var(--bs-success-text-emphasis);
+    --bs-alert-bg: var(--bs-success-bg-subtle);
+    --bs-alert-border-color: var(--bs-success-border-subtle);
+    --bs-alert-link-color: var(--bs-success-text-emphasis);
+    --bs-alert-border: var(--bs-border-width) solid var(--bs-alert-border-color);
+    color: var(--bs-alert-color);
+    background-color: var(--bs-alert-bg);
+    border: var(--bs-alert-border);
+    border-radius: 5px;
 }
 
 .control {
@@ -400,7 +407,7 @@ p {
 }
 
 /*==============================================
-    UI ELEMENTS STYLES     
+    UI ELEMENTS STYLES
     =============================================*/
 .btn-circle {
     width: 50px;
@@ -415,7 +422,7 @@ p {
 }
 
 /*==============================================
-    MEDIA QUERIES     
+    MEDIA QUERIES
     =============================================*/
 
 @media (min-width: 768px) {
