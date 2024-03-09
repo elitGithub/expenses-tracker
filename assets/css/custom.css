@@ -399,6 +399,10 @@ p {
     border-radius: 5px;
 }
 
+.cursor-pointer {
+    cursor: pointer;
+}
+
 .control {
     display: flex;
     flex-direction: column;

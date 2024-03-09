@@ -103,24 +103,18 @@ if (@$data === true) {
     <!-- TABLE STYLES-->
     <link href="assets/js/dataTables/dataTables.bootstrap.css" rel="stylesheet"/>
 
-    <!--ASWESOME ICON-->
-    <link rel="stylesheet" href="font-awesome-4.5.0/css/font-awesome.min.css">
-
-    <!--  <script language="javascript" type="text/javascript">
- function removeSpaces(string) {
-  return string.split(' ').join('');
- }
- </script> -->
+    <!--AWESOME ICON-->
+    <link rel="stylesheet" href="assets/css/font-awesome-4.5.0/css/font-awesome.min.css">
 
 
     <script>
       function trim (strText) {
         // this will get rid of leading spaces
-        while (strText.substring(0, 1) == ' ')
+        while (strText.substring(0, 1) === ' ')
           strText = strText.substring(1, strText.length)
 
         // this will get rid of trailing spaces
-        while (strText.substring(strText.length - 1, strText.length) == ' ')
+        while (strText.substring(strText.length - 1, strText.length) === ' ')
           strText = strText.substring(0, strText.length - 1)
 
         return strText
@@ -141,7 +135,6 @@ if (@$data === true) {
             </button>
             <a class="navbar-brand" href="index.html">Expense Tracker</a>
         </div>
-        <!--  dddddddddd -->
         <div style="color: white;padding: 15px 50px 5px 50px;float: right;font-size: 16px;">Expense Tracker &nbsp;
             <div class="btn-group pull-right">
                 <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
