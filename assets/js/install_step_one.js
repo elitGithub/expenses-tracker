@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const showSqlPassword = document.getElementById('showSqlPassword');
     const showRootPassWord = document.getElementById('showRootPassWord');
     const toggleRootPassword = document.getElementById('toggleRootPassword');
-    const sqlUser = document.getElementById('sql_user');
+    const sqlUserControl = Array.from(document.getElementsByClassName('sql_user_control'));
+    const createMyOwnDbControl = Array.from(document.getElementsByClassName('create-my-own-db-control'));
     const sqlPassword = document.getElementById('sql_password');
     const useSameUser = document.getElementById('useSameUser');
     const createMyOwnDb = document.getElementById('createMyOwnDb');
@@ -27,26 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
     useSameUser.addEventListener('change', function () {
         const isChecked = this.checked;
         if (isChecked) {
-            document.getElementById('sql_user').classList.add('d-none');
-            document.getElementById('sql_password').classList.add('d-none');
+            sqlUserControl.map(el => el.classList.add('d-none'));
         } else {
-            document.getElementById('sql_user').classList.remove('d-none');
-            document.getElementById('sql_password').classList.remove('d-none');
+            sqlUserControl.map(el => el.classList.remove('d-none'));
         }
-
         databaseInfo.useSameUser = isChecked;
     });
 
     createMyOwnDb.addEventListener('change', function () {
         const isChecked = this.checked;
-        if (isChecked) {
-            document.getElementById('sql_user').classList.add('d-none');
-            document.getElementById('sql_password').classList.add('d-none');
-        } else {
-            document.getElementById('sql_user').classList.add('d-block');
-            document.getElementById('sql_password').classList.add('d-block');
-        }
-        // Logic to duplicate or separate user/password inputs for system usage based on checkbox
+      if (isChecked) {
+        createMyOwnDbControl.map(el => el.classList.remove('d-none'));
+      } else {
+        createMyOwnDbControl.map(el => el.classList.add('d-none'));
+      }
     });
 
     sqlTypeSelect.addEventListener('change', (ev) => {

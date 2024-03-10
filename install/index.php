@@ -80,7 +80,8 @@ $installer = new Installer($system);
                 <ol>
                     <li>Web server: Apache or Nginx.</li>
                     <li>PHP version 7.4.33 or newer.</li>
-                    <li>Change the ownership of the config folder and its subdirectories to the web server user (apache/nginx) or create the required directories under the config directory.
+                    <li>Change the ownership of the config folder and its subdirectories to the web server user (apache/nginx) or create the required
+                        directories under the config directory.
                         <ol>
                             <li>config</li>
                             <li>data</li>
@@ -89,21 +90,19 @@ $installer = new Installer($system);
                         </ol>
                     </li>
                 </ol>
-                <button id="show-setup-form" class="btn btn-primary">Proceed to Setup</button>
+                <button id="show-setup-form" class="btn btn-primary float-end">Proceed to Setup</button>
             </div>
             <form action="index.php"
                   method="post"
                   id="expenses-tracker-setup-form"
                   name="expenses-tracker-setup-form"
-                  class="needs-validation d-none" novalidate>
+                  class="install-form d-none" novalidate>
                 <div class="form-header d-flex mb-4 justify-content-between">
                     <span class="stepIndicator">Database Setup</span>
                     <span class="stepIndicator">LDAP Setup</span>
                     <span class="stepIndicator">Elasticsearch Setup</span>
                     <span class="stepIndicator">Admin user account</span>
                 </div>
-                <input type="hidden" id="sqlite_default_path" value="<?php echo htmlspecialchars(dirname(__DIR__)); ?>">
-                <div id="available-databases" data-databases='<?php echo json_encode($system->getSupportedSafeDatabases()); ?>'></div>
                 <div class="step">
                     <h3 class="mb-3"> Step 1/4: Database setup</h3>
                     <div class="row mb-2">
@@ -139,14 +138,15 @@ $installer = new Installer($system);
                         <div class="row mb-2">
                             <div class="col-sm-9 offset-sm-3">
                                 <input type="checkbox" name="useSameUser" class="form-check-input" id="useSameUser">
-                                <label for="useSameUser" class="form-check-label">Use the same user to create the database and for system operations.</label>
+                                <label for="useSameUser" class="form-check-label">Use the same user to create the database and for system
+                                    operations.</label>
                             </div>
                         </div>
                         <div class="row mb-2">
                             <label class="col-sm-3 col-form-label" for="root_user">User for database creation:</label>
                             <div class="col-sm-9">
                                 <input type="text" name="root_user" id="root_user" class="form-control" required>
-                                <small class="form-text text-muted">Please enter your database user.</small>
+                                <small class="form-text text-muted">Please enter your root database user.</small>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -155,25 +155,27 @@ $installer = new Installer($system);
                                 <div class="input-group" id="show_root_password">
                                     <input name="root_password" type="password" autocomplete="off" id="root_password"
                                            class="form-control" required>
-                                    <span class="input-group-text cursor-pointer" id="toggleRootPassword"><i class="fa fa-eye" id="showRootPassWord"></i></span>
+                                    <span class="input-group-text cursor-pointer" id="toggleRootPassword"><i class="fa fa-eye"
+                                                                                                             id="showRootPassWord"></i></span>
                                 </div>
                                 <small class="form-text text-muted">Please enter your root user password.</small>
                             </div>
                         </div>
-                        <div class="row mb-2">
+                        <div class="row mb-2 sql_user_control">
                             <label class="col-sm-3 col-form-label" for="sql_user">Database User for system operations:</label>
                             <div class="col-sm-9">
                                 <input type="text" name="sql_user" id="sql_user" class="form-control" required>
                                 <small class="form-text text-muted">Please enter your database user.</small>
                             </div>
                         </div>
-                        <div class="row mb-2">
+                        <div class="row mb-2 sql_user_control">
                             <label class="col-sm-3 col-form-label" for="sql_password">Password for system operations:</label>
                             <div class="col-sm-9">
                                 <div class="input-group">
                                     <input name="sql_password" type="password" autocomplete="off" id="sql_password"
                                            class="form-control" required>
-                                    <span class="input-group-text cursor-pointer" id="toggleSqlPassword"><i class="fa fa-eye" id="showSqlPassword"></i></span>
+                                    <span class="input-group-text cursor-pointer" id="toggleSqlPassword"><i class="fa fa-eye"
+                                                                                                            id="showSqlPassword"></i></span>
                                 </div>
                                 <small class="form-text text-muted">Please enter your database password.</small>
                             </div>
@@ -185,7 +187,7 @@ $installer = new Installer($system);
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row mb-3 d-none create-my-own-db-control">
                             <label class="col-sm-3 col-form-label" for="sql_db">Database:</label>
                             <div class="col-sm-9">
                                 <input type="text" name="sql_db" id="sql_db" class="form-control" required>
@@ -216,6 +218,7 @@ $installer = new Installer($system);
                             </small>
                         </div>
                     </div>
+                    <button class="btn btn-success float-end mt-3">Next Step</button>
                 </div>
             </form>
         </div>
@@ -232,9 +235,9 @@ try {
 }
 ?>
 <div class="control">
-<?php
-$installer->checkFilesystemPermissions();
-?>
+    <?php
+    $installer->checkFilesystemPermissions();
+    ?>
 </div>
 <script defer src="../assets/js/install.js"></script>
 <script defer src="../assets/js/install_step_one.js"></script>

@@ -425,6 +425,12 @@ p {
     line-height: 1.428571429;
 }
 
+.install-form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 /*==============================================
     MEDIA QUERIES
     =============================================*/
