@@ -99,7 +99,7 @@ $installer = new Installer($system);
                   class="install-form d-none" novalidate>
                 <div class="form-header d-flex mb-4 justify-content-between">
                     <span class="stepIndicator">Database Setup</span>
-                    <span class="stepIndicator">LDAP Setup</span>
+                    <span class="stepIndicator">User System Setup</span>
                     <span class="stepIndicator">Elasticsearch Setup</span>
                     <span class="stepIndicator">Admin user account</span>
                 </div>
@@ -218,7 +218,7 @@ $installer = new Installer($system);
                             </small>
                         </div>
                     </div>
-                    <button class="btn btn-success float-end mt-3">Next Step</button>
+                    <button id="step-button" class="btn btn-success float-end mt-3">Next Step</button>
                 </div>
             </form>
         </div>
