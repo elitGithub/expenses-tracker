@@ -25,6 +25,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const useSameUser = document.getElementById('useSameUser');
     const createMyOwnDb = document.getElementById('createMyOwnDb');
 
+    const stepButton = document.getElementById('step-button');
+
+    let currentStep = 1;
+
+    stepButton.addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent form submission
+        if (!validateCurrentStep(currentStep)) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        if (currentStep < 3) {
+            switchFormSection(currentStep, currentStep + 1);
+            currentStep++;
+        } else {
+            // Placeholder for final form submission or next action
+            console.log('Final step - implement submission or next action here.');
+        }
+    });
+
+    function switchFormSection (fromStep, toStep) {
+        const fromStepEl = document.querySelectorAll(`[data-step="${ fromStep }"]`)[0];
+        const toStepEl = document.querySelectorAll(`[data-step="${ toStep }"]`)[0];
+        fromStepEl.classList.add('d-none');
+        toStepEl.classList.remove('d-none');
+    }
+
+    function validateCurrentStep (step) {
+        let isValid = true;
+        const currentSection = document.querySelectorAll(`[data-step="${ step }"]`)[0];
+        currentSection.querySelectorAll('input[required], select[required]').forEach(function (input) {
+            if (!input.value.trim()) isValid = false;
+        });
+        return isValid;
+    }
+
+
     useSameUser.addEventListener('change', function () {
         const isChecked = this.checked;
         if (isChecked) {

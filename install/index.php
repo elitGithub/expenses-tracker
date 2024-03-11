@@ -92,11 +92,7 @@ $installer = new Installer($system);
                 </ol>
                 <button id="show-setup-form" class="btn btn-primary float-end">Proceed to Setup</button>
             </div>
-            <form action="index.php"
-                  method="post"
-                  id="expenses-tracker-setup-form"
-                  name="expenses-tracker-setup-form"
-                  class="install-form d-none" novalidate>
+            <form action="index.php" method="post" id="expenses-tracker-setup-form" name="expenses-tracker-setup-form" class="install-form d-none" novalidate>
                 <div class="form-header d-flex mb-4 justify-content-between">
                     <span class="stepIndicator">Database Setup</span>
                     <span class="stepIndicator">User System Setup</span>
@@ -104,42 +100,41 @@ $installer = new Installer($system);
                     <span class="stepIndicator">Admin user account</span>
                 </div>
                 <div class="step">
-                    <h3 class="mb-3"> Step 1/4: Database setup</h3>
-                    <div class="row mb-2">
-                        <label class="col-sm-3 col-form-label" for="sql_type">Server:</label>
-                        <div class="col-sm-9">
-                            <select name="sql_type" id="sql_type" class="form-select" required>
-                                <option selected disabled value="">Please choose your preferred database ...</option>
-                                <?= implode('', $system->getSupportedSafeDatabases(true)) ?>
-                            </select>
-                            <small class="form-text text-muted">Please select your preferred database type.</small>
+                    <h3 class="mb-3">Step 1/4: Database setup</h3>
+                    <!-- Basic Info Form -->
+                    <div data-step=1 id="basic-info-form">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 col-form-label" for="sql_type">Server:</label>
+                            <div class="col-sm-9">
+                                <select name="sql_type" id="sql_type" class="form-select" required>
+                                    <option selected disabled value="">Please choose your preferred database ...</option>
+                                    <?= implode('', $system->getSupportedSafeDatabases(true)) ?>
+                                </select>
+                                <small class="form-text text-muted">Please select your preferred database type.</small>
+                            </div>
                         </div>
-                    </div>
-
-                    <div id="dbdatafull" class="d-block">
                         <div class="row mb-2">
                             <label class="col-sm-3 col-form-label" for="sql_server">Host/Socket:</label>
                             <div class="col-sm-9">
-                                <input type="text" name="sql_server" id="sql_server" class="form-control"
-                                       placeholder="e.g. 127.0.0.1" required>
-                                <small class="form-text text-muted">
-                                    Please enter the host or path to the socket of your database server.
-                                </small>
+                                <input type="text" name="sql_server" id="sql_server" class="form-control" placeholder="e.g. 127.0.0.1" required>
+                                <small class="form-text text-muted">Please enter the host or path to the socket of your database server.</small>
                             </div>
                         </div>
                         <div class="row mb-2">
                             <label class="col-sm-3 col-form-label" for="sql_port">Port:</label>
                             <div class="col-sm-9">
-                                <input type="number" name="sql_port" id="sql_port" class="form-control"
-                                       value="" required>
+                                <input type="number" name="sql_port" id="sql_port" class="form-control" required>
                                 <small class="form-text text-muted">Please enter the port your database server.</small>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Connection Info Form -->
+                    <div data-step=2 class="d-none" id="connection-info-form">
                         <div class="row mb-2">
                             <div class="col-sm-9 offset-sm-3">
                                 <input type="checkbox" name="useSameUser" class="form-check-input" id="useSameUser">
-                                <label for="useSameUser" class="form-check-label">Use the same user to create the database and for system
-                                    operations.</label>
+                                <label for="useSameUser" class="form-check-label">Use the same user for database creation and system operations.</label>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -153,10 +148,8 @@ $installer = new Installer($system);
                             <label class="col-sm-3 col-form-label" for="root_password">Password for database creation:</label>
                             <div class="col-sm-9">
                                 <div class="input-group" id="show_root_password">
-                                    <input name="root_password" type="password" autocomplete="off" id="root_password"
-                                           class="form-control" required>
-                                    <span class="input-group-text cursor-pointer" id="toggleRootPassword"><i class="fa fa-eye"
-                                                                                                             id="showRootPassWord"></i></span>
+                                    <input name="root_password" type="password" autocomplete="off" id="root_password" class="form-control" required>
+                                    <span class="input-group-text cursor-pointer" id="toggleRootPassword"><i class="fa fa-eye" id="showRootPassWord"></i></span>
                                 </div>
                                 <small class="form-text text-muted">Please enter your root user password.</small>
                             </div>
@@ -165,19 +158,28 @@ $installer = new Installer($system);
                             <label class="col-sm-3 col-form-label" for="sql_user">Database User for system operations:</label>
                             <div class="col-sm-9">
                                 <input type="text" name="sql_user" id="sql_user" class="form-control" required>
-                                <small class="form-text text-muted">Please enter your database user.</small>
+                                <small class="form-text text-muted">Please enter your database user for system operations.</small>
                             </div>
                         </div>
                         <div class="row mb-2 sql_user_control">
                             <label class="col-sm-3 col-form-label" for="sql_password">Password for system operations:</label>
                             <div class="col-sm-9">
                                 <div class="input-group">
-                                    <input name="sql_password" type="password" autocomplete="off" id="sql_password"
-                                           class="form-control" required>
-                                    <span class="input-group-text cursor-pointer" id="toggleSqlPassword"><i class="fa fa-eye"
-                                                                                                            id="showSqlPassword"></i></span>
+                                    <input name="sql_password" type="password" autocomplete="off" id="sql_password" class="form-control" required>
+                                    <span class="input-group-text cursor-pointer" id="toggleSqlPassword"><i class="fa fa-eye" id="showSqlPassword"></i></span>
                                 </div>
-                                <small class="form-text text-muted">Please enter your database password.</small>
+                                <small class="form-text text-muted">Please enter your database password for system operations.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DB Type Form -->
+                    <div data-step=3 class="d-none" id="db-type-form">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">
+                                <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific table extensions.</small>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -186,41 +188,30 @@ $installer = new Installer($system);
                                 <label for="createMyOwnDb" class="form-check-label">I want to create my own db or I have an existing db</label>
                             </div>
                         </div>
-
-                        <div class="row mb-3 d-none create-my-own-db-control">
+                        <div id="dbsqlite" class="d-none">
+                            <div class="row mb-2">
+                                <label class="col-sm-3 col-form-label" for="sql_sqlitefile">SQLite database file:</label>
+                                <div class="col-sm-9">
+                                    <input type="text" name="sql_sqlitefile" id="sql_sqlitefile" class="form-control"
+                                           value="<?= dirname(__DIR__) ?>" required>
+                                    <small class="form-text text-muted">
+                                        Please enter the full path to your SQLite datafile which should be outside your document root.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
                             <label class="col-sm-3 col-form-label" for="sql_db">Database:</label>
                             <div class="col-sm-9">
-                                <input type="text" name="sql_db" id="sql_db" class="form-control" required>
-                                <small class="form-text text-muted">Please enter your existing database name.</small>
+                                <input type="text" name="sql_db" id="sql_db" class="form-control">
+                                <small class="form-text text-muted">Please enter your existing database name or the name for a new one.</small>
                             </div>
-                        </div>
-                    </div>
-
-                    <div id="dbsqlite" class="d-none">
-                        <div class="row mb-2">
-                            <label class="col-sm-3 col-form-label" for="sql_sqlitefile">SQLite database file:</label>
-                            <div class="col-sm-9">
-                                <input type="text" name="sql_sqlitefile" id="sql_sqlitefile" class="form-control"
-                                       value="<?= dirname(__DIR__) ?>" required>
-                                <small class="form-text text-muted">
-                                    Please enter the full path to your SQLite datafile which should be outside your document root.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-2">
-                        <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>
-                        <div class="col-sm-9">
-                            <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">
-                            <small class="form-text text-muted">
-                                Please enter a table prefix here if you want to specify Expense Tracker specific table extensions
-                            </small>
                         </div>
                     </div>
                     <button id="step-button" class="btn btn-success float-end mt-3">Next Step</button>
                 </div>
             </form>
+
         </div>
     </section>
 </main>
