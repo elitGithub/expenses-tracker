@@ -31,19 +31,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     stepButton.addEventListener('click', function (event) {
         event.preventDefault(); // Prevent form submission
+
         if (!validateCurrentStep(currentStep)) {
             alert('Please fill in all required fields.');
             return;
         }
 
+        // Save current form inputs to the databaseInfo object
+        const currentFormSection = document.querySelector(`[data-step="${currentStep}"]`);
+        const inputs = currentFormSection.querySelectorAll('input, select'); // Get all inputs and selects in the current section
+
+        inputs.forEach(input => {
+            const { name, value, type, checked } = input; // Destructure for easier access
+
+            // For checkboxes, use checked state; for others, use value
+            // This allows for flexibility if you add checkboxes later
+            const inputValue = type === 'checkbox' ? checked : value;
+
+            if (name && databaseInfo.hasOwnProperty(name)) {
+                databaseInfo[name] = inputValue;
+            }
+        });
+
         if (currentStep < 3) {
             switchFormSection(currentStep, currentStep + 1);
             currentStep++;
         } else {
-            // Placeholder for final form submission or next action
+            if (databaseInfo.useSameUser) {
+                databaseInfo.sql_user = databaseInfo.root_user;
+                databaseInfo.sql_password = databaseInfo.root_password;
+            }
             console.log('Final step - implement submission or next action here.');
+            console.log(databaseInfo); // For debugging, to see the filled object
         }
     });
+
 
     function switchFormSection (fromStep, toStep) {
         const fromStepEl = document.querySelectorAll(`[data-step="${ fromStep }"]`)[0];
@@ -52,12 +74,20 @@ document.addEventListener('DOMContentLoaded', () => {
         toStepEl.classList.remove('d-none');
     }
 
-    function validateCurrentStep (step) {
+    function validateCurrentStep(step) {
         let isValid = true;
-        const currentSection = document.querySelectorAll(`[data-step="${ step }"]`)[0];
-        currentSection.querySelectorAll('input[required], select[required]').forEach(function (input) {
-            if (!input.value.trim()) isValid = false;
+        const currentSection = document.querySelector(`[data-step="${step}"]`); // Simplified the selector here
+
+        currentSection.querySelectorAll('input[required], select[required]').forEach(function(input) {
+            // Check if the input itself or any of its parents have the 'd-none' class
+            let isHidden = input.classList.contains('d-none') || input.closest('.d-none');
+
+            // Only validate if the input is not hidden
+            if (!isHidden && !input.value.trim()) {
+                isValid = false;
+            }
         });
+
         return isValid;
     }
 

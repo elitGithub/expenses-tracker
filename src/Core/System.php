@@ -168,7 +168,7 @@ class System
 
     /**
      * Returns the locally supported databases.
-     *
+     * @param bool $returnAsHtml
      * @return array<string, string>
      */
     public function getSupportedSafeDatabases(bool $returnAsHtml = false): array
