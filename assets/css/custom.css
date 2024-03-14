@@ -410,6 +410,18 @@ p {
     align-items: center;
 }
 
+.form-footer.float-end {
+    justify-content: space-evenly;
+}
+
+.btn {
+ margin: 1rem;
+}
+
+.w-30 {
+    width: 30% !important;
+}
+
 /*==============================================
     UI ELEMENTS STYLES
     =============================================*/

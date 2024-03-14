@@ -92,7 +92,8 @@ $installer = new Installer($system);
                 </ol>
                 <button id="show-setup-form" class="btn btn-primary float-end">Proceed to Setup</button>
             </div>
-            <form action="index.php" method="post" id="expenses-tracker-setup-form" name="expenses-tracker-setup-form" class="install-form d-none" novalidate>
+            <form action="index.php" method="post" id="expenses-tracker-setup-form" name="expenses-tracker-setup-form" class="install-form d-none"
+                  novalidate>
                 <div class="form-header d-flex mb-4 justify-content-between">
                     <span class="stepIndicator">Database Setup</span>
                     <span class="stepIndicator">User System Setup</span>
@@ -133,7 +134,8 @@ $installer = new Installer($system);
                         <div class="row mb-2">
                             <div class="col-sm-9 offset-sm-3">
                                 <input type="checkbox" name="useSameUser" class="form-check-input" id="useSameUser">
-                                <label for="useSameUser" class="form-check-label">Use the same user for database creation and system operations.</label>
+                                <label for="useSameUser" class="form-check-label">Use the same user for database creation and system
+                                    operations.</label>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -148,7 +150,8 @@ $installer = new Installer($system);
                             <div class="col-sm-9">
                                 <div class="input-group" id="show_root_password">
                                     <input name="root_password" type="password" autocomplete="off" id="root_password" class="form-control" required>
-                                    <span class="input-group-text cursor-pointer" id="toggleRootPassword"><i class="fa fa-eye" id="showRootPassWord"></i></span>
+                                    <span class="input-group-text cursor-pointer" id="toggleRootPassword"><i class="fa fa-eye"
+                                                                                                             id="showRootPassWord"></i></span>
                                 </div>
                                 <small class="form-text text-muted">Please enter your root user password.</small>
                             </div>
@@ -165,7 +168,8 @@ $installer = new Installer($system);
                             <div class="col-sm-9">
                                 <div class="input-group">
                                     <input name="sql_password" type="password" autocomplete="off" id="sql_password" class="form-control" required>
-                                    <span class="input-group-text cursor-pointer" id="toggleSqlPassword"><i class="fa fa-eye" id="showSqlPassword"></i></span>
+                                    <span class="input-group-text cursor-pointer" id="toggleSqlPassword"><i class="fa fa-eye"
+                                                                                                            id="showSqlPassword"></i></span>
                                 </div>
                                 <small class="form-text text-muted">Please enter your database password for system operations.</small>
                             </div>
@@ -177,14 +181,16 @@ $installer = new Installer($system);
                         <div class="row mb-2">
                             <div class="col-sm-9 offset-sm-3">
                                 <input type="checkbox" name="createMyOwnDb" class="form-check-input" id="createMyOwnDb">
-                                <label for="createMyOwnDb" class="form-check-label">I want to create my own db or I have an existing db</label>
+                                <label for="createMyOwnDb" class="form-check-label">I want to create my own Database or I have an existing
+                                    Database</label>
                             </div>
                         </div>
                         <div class="row mb-2 d-none create-my-own-db-control">
                             <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>
                             <div class="col-sm-9">
                                 <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">
-                                <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific table extensions.</small>
+                                <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific
+                                    table extensions.</small>
                             </div>
                         </div>
                         <div id="dbsqlite" class="d-none">
@@ -207,9 +213,29 @@ $installer = new Installer($system);
                             </div>
                         </div>
                     </div>
-                    <button id="step-button" class="btn btn-success float-end mt-3">Next Step</button>
                 </div>
-                <div class="step d-none" id="step2" data-form-step="2"></div>
+                <div class="step d-none" id="step2" data-form-step="2">
+                    <div class="row mb-2">
+                        <div class="col-sm-9 offset-sm-3">
+                            <input type="checkbox" name="useMyOwnUserSystem" class="form-check-input" id="useMyOwnUserSystem">
+                            <label for="useMyOwnUserSystem" class="form-check-label">I have my own user system, no need for Expense Tracker's
+                                system.</label>
+                        </div>
+                    </div>
+                    <div class="row mb-2 create-my-own-user-control">
+                        <!--                        <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>-->
+                        <!--                        <div class="col-sm-9">-->
+                        <!--                            <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">-->
+                        <!--                            <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific table extensions.</small>-->
+                        <!--                    </div>-->
+                    </div>
+                </div>
+                <!-- start previous / next buttons -->
+                <div class="form-footer d-flex mt-5 float-end">
+                    <button class="btn btn-lg btn-danger w-30" type="button" id="prevBtn">Previous</button>
+                    <button class="btn btn-lg btn-success w-30" type="button" id="nextBtn">Next</button>
+                </div>
+                <!-- end previous / next buttons -->
             </form>
 
         </div>
@@ -232,5 +258,6 @@ try {
 </div>
 <script defer src="../assets/js/install.js"></script>
 <script defer src="../assets/js/install_step_one.js"></script>
+<script defer src="../assets/js/install_step_two.js"></script>
 </body>
 </html>

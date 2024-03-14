@@ -1,28 +1,90 @@
+const databaseInfo = {
+    sql_type: '',
+    sql_server: '',
+    sql_port: '',
+    root_user: '',
+    sql_user: '',
+    root_password: '',
+    sql_password: '',
+    sql_db: 'expense_tracker',
+    sqltblpre: '',
+    useSameUser: false
+};
+let formInnerStep = 1;
+let currentFormStep = 1;
+
 document.addEventListener('DOMContentLoaded', () => {
-    const formHeader = Array.from(document.getElementsByClassName('form-header'));
     const steps = Array.from(document.getElementsByClassName('stepIndicator'));
-    // Simple JavaScript to toggle form visibility
 
     document.getElementById('show-setup-form').addEventListener('click', function () {
         document.getElementById('expenses-tracker-setup-form').classList.remove('d-none');
         document.getElementById('pre-install-instructions').classList.add('d-none');
         steps[0].classList.add('active');
     });
+
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('nextBtn');
+
+
+    nextBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        if (!validateCurrentStep(formInnerStep)) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        // Save current form inputs to the databaseInfo object
+        const currentFormSection = document.querySelector(`[data-step="${formInnerStep}"]`);
+        const inputs = currentFormSection.querySelectorAll('input, select'); // Get all inputs and selects in the current section
+
+        inputs.forEach(input => {
+            const { name, value, type, checked } = input; // Destructure for easier access
+
+            // For checkboxes, use checked state; for others, use value
+            // This allows for flexibility if you add checkboxes later
+            const inputValue = type === 'checkbox' ? checked : value;
+
+            if (name && databaseInfo.hasOwnProperty(name)) {
+                databaseInfo[name] = inputValue || databaseInfo[name];
+            }
+        });
+
+        if (formInnerStep < 3) {
+            switchFormStep(formInnerStep, formInnerStep + 1);
+            formInnerStep++;
+        } else {
+            if (databaseInfo.useSameUser) {
+                databaseInfo.sql_user = databaseInfo.root_user;
+                databaseInfo.sql_password = databaseInfo.root_password;
+            }
+            console.log('Final step - implement submission or next action here.');
+            console.log(databaseInfo); // For debugging, to see the filled object
+            sessionStorage.setItem('databaseInfo', JSON.stringify(databaseInfo));
+            switchFormSection(currentFormStep, ++currentFormStep);
+            formInnerStep = 1;
+        }
+    });
+
 });
 
 
 function switchFormSection(currentStep, nextStep) {
-    const currentStepDiv = document.getElementById(`step${currentStep}`);
-    const nextStepDiv = document.getElementById(`step${nextStep}`);
+    const currentFormSectionStep = document.querySelector(`[data-form-step="${currentStep}"]`);
+    const nextFormStep = document.querySelector(`[data-form-step="${nextStep}"]`);
+    const steps = Array.from(document.getElementsByClassName('stepIndicator'));
+    const formHeader = Array.from(document.getElementsByClassName('form-header'));
+    formHeader.map(el => el.classList.remove('active'));
 
-    // Hide current step
-    if (currentStepDiv) {
-        currentStepDiv.classList.add('d-none');
+    if (currentFormSectionStep) {
+        steps[--currentStep].classList.remove('active')
+        currentFormSectionStep.classList.add('d-none');
+        steps[nextStep].classList.remove('active');
     }
 
-    // Show next step
-    if (nextStepDiv) {
-        nextStepDiv.classList.remove('d-none');
+    if (nextFormStep) {
+        nextFormStep.classList.remove('d-none');
+        steps[--nextStep].classList.add('active');
     }
 }
 

@@ -1,16 +1,3 @@
-const databaseInfo = {
-    sql_type: '',
-    sql_server: '',
-    sql_port: '',
-    root_user: '',
-    sql_user: '',
-    root_password: '',
-    sql_password: '',
-    sql_db: 'expense_tracker',
-    sqltblpre: '',
-    useSameUser: false
-};
-
 document.addEventListener('DOMContentLoaded', () => {
     const sqlTypeSelect = document.getElementById('sql_type');
     const rootPassword = document.getElementById('root_password');
@@ -24,56 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sqlPassword = document.getElementById('sql_password');
     const useSameUser = document.getElementById('useSameUser');
     const createMyOwnDb = document.getElementById('createMyOwnDb');
-
-
-    const stepButton = document.getElementById('step-button');
-
-    let currentStep = 1;
-    let currentFormSection = 1;
-
-    stepButton.addEventListener('click', function (event) {
-        event.preventDefault(); // Prevent form submission
-
-        if (!validateCurrentStep(currentStep)) {
-            alert('Please fill in all required fields.');
-            return;
-        }
-
-        // Save current form inputs to the databaseInfo object
-        const currentFormSection = document.querySelector(`[data-step="${currentStep}"]`);
-        const inputs = currentFormSection.querySelectorAll('input, select'); // Get all inputs and selects in the current section
-
-        inputs.forEach(input => {
-            const { name, value, type, checked } = input; // Destructure for easier access
-
-            // For checkboxes, use checked state; for others, use value
-            // This allows for flexibility if you add checkboxes later
-            const inputValue = type === 'checkbox' ? checked : value;
-
-            if (name && databaseInfo.hasOwnProperty(name)) {
-                databaseInfo[name] = inputValue || databaseInfo[name];
-            }
-        });
-
-        if (currentStep < 3) {
-            switchFormStep(currentStep, currentStep + 1);
-            currentStep++;
-        } else {
-            if (databaseInfo.useSameUser) {
-                databaseInfo.sql_user = databaseInfo.root_user;
-                databaseInfo.sql_password = databaseInfo.root_password;
-            }
-            console.log('Final step - implement submission or next action here.');
-            console.log(databaseInfo); // For debugging, to see the filled object
-            sessionStorage.setItem('databaseInfo', JSON.stringify(databaseInfo));
-            const currentFormStep = document.querySelector(`[data-form-step=${currentFormSection}]`);
-            const nextFormStep = document.querySelector(`[data-form-step=${++currentFormSection}]`);
-            console.log(currentFormStep);
-            console.log(nextFormStep);
-            // switchFormSection(currentFormStep);
-        }
-    });
-
 
     useSameUser.addEventListener('change', function () {
         const isChecked = this.checked;
