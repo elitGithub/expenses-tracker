@@ -96,10 +96,9 @@ $installer = new Installer($system);
                 <div class="form-header d-flex mb-4 justify-content-between">
                     <span class="stepIndicator">Database Setup</span>
                     <span class="stepIndicator">User System Setup</span>
-                    <span class="stepIndicator">Elasticsearch Setup</span>
                     <span class="stepIndicator">Admin user account</span>
                 </div>
-                <div class="step">
+                <div data-form-step=1 id="step1" class="step">
                     <h3 class="mb-3">Step 1/4: Database setup</h3>
                     <!-- Basic Info Form -->
                     <div data-step=1 id="basic-info-form">
@@ -176,16 +175,16 @@ $installer = new Installer($system);
                     <!-- DB Type Form -->
                     <div data-step=3 class="d-none" id="db-type-form">
                         <div class="row mb-2">
+                            <div class="col-sm-9 offset-sm-3">
+                                <input type="checkbox" name="createMyOwnDb" class="form-check-input" id="createMyOwnDb">
+                                <label for="createMyOwnDb" class="form-check-label">I want to create my own db or I have an existing db</label>
+                            </div>
+                        </div>
+                        <div class="row mb-2 d-none create-my-own-db-control">
                             <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>
                             <div class="col-sm-9">
                                 <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">
                                 <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific table extensions.</small>
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-sm-9 offset-sm-3">
-                                <input type="checkbox" name="createMyOwnDb" class="form-check-input" id="createMyOwnDb">
-                                <label for="createMyOwnDb" class="form-check-label">I want to create my own db or I have an existing db</label>
                             </div>
                         </div>
                         <div id="dbsqlite" class="d-none">
@@ -200,7 +199,7 @@ $installer = new Installer($system);
                                 </div>
                             </div>
                         </div>
-                        <div class="row mb-3">
+                        <div class="row mb-3 d-none create-my-own-db-control">
                             <label class="col-sm-3 col-form-label" for="sql_db">Database:</label>
                             <div class="col-sm-9">
                                 <input type="text" name="sql_db" id="sql_db" class="form-control">
@@ -210,6 +209,7 @@ $installer = new Installer($system);
                     </div>
                     <button id="step-button" class="btn btn-success float-end mt-3">Next Step</button>
                 </div>
+                <div class="step d-none" id="step2" data-form-step="2"></div>
             </form>
 
         </div>
