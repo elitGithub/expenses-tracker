@@ -49,14 +49,14 @@ $installer = new Installer($system);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="application-name" content="Expenses Tracker <?= System::getVersion() ?>">
-    <meta name="copyright" content="(c) 2024-<?= date('Y') ?> Eli Tokar">
+    <meta name="application-name" content="Expenses Tracker <?php echo System::getVersion() ?>">
+    <meta name="copyright" content="(c) 2024-<?php echo date('Y') ?> Eli Tokar">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="../assets/css/font-awesome-4.5.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="../assets/css/custom.css">
     <link rel="shortcut icon" href="../assets/img/favicon_1.ico">
-    <title>Expenses Tracker <?= System::getVersion() ?> Setup</title>
+    <title>Expenses Tracker <?php echo System::getVersion() ?> Setup</title>
 </head>
 <body>
 <nav class="p-3 text-bg-dark border-bottom">
@@ -108,7 +108,7 @@ $installer = new Installer($system);
                             <div class="col-sm-9">
                                 <select name="sql_type" id="sql_type" class="form-select" required>
                                     <option selected disabled value="">Please choose your preferred database ...</option>
-                                    <?= implode('', $system->getSupportedSafeDatabases(true)) ?>
+                                    <?php echo implode('', $system->getSupportedSafeDatabases(true)) ?>
                                 </select>
                                 <small class="form-text text-muted">Please select your preferred database type.</small>
                             </div>
@@ -198,7 +198,7 @@ $installer = new Installer($system);
                                 <label class="col-sm-3 col-form-label" for="sql_sqlitefile">SQLite database file:</label>
                                 <div class="col-sm-9">
                                     <input type="text" name="sql_sqlitefile" id="sql_sqlitefile" class="form-control"
-                                           value="<?= dirname(__DIR__) ?>" required>
+                                           value="<?php echo dirname(__DIR__) ?>" required>
                                     <small class="form-text text-muted">
                                         Please enter the full path to your SQLite datafile which should be outside your document root.
                                     </small>
@@ -215,11 +215,22 @@ $installer = new Installer($system);
                     </div>
                 </div>
                 <div class="step d-none" id="step2" data-form-step="2">
+                    <h3 class="mb-3">Step 2/4: User system setup</h3>
                     <div class="row mb-2">
                         <div class="col-sm-9 offset-sm-3">
                             <input type="checkbox" name="useMyOwnUserSystem" class="form-check-input" id="useMyOwnUserSystem">
                             <label for="useMyOwnUserSystem" class="form-check-label">I have my own user system, no need for Expense Tracker's
                                 system.</label>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label class="col-sm-3 col-form-label" for="sql_type">Server:</label>
+                        <div class="col-sm-9">
+                            <select name="sql_type" id="sql_type" class="form-select" required>
+                                <option selected disabled value="">Please choose your preferred database ...</option>
+                                <?php echo implode('', $system->getSupportedSafePermissionEngines(true)) ?>
+                            </select>
+                            <small class="form-text text-muted">Please select your preferred database type.</small>
                         </div>
                     </div>
                     <div class="row mb-2 create-my-own-user-control">
