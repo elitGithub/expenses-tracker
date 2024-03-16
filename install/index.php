@@ -234,17 +234,36 @@ $installer = new Installer($system);
                             <label class="col-sm-3 col-form-label" for="user_management">Server:</label>
                             <div class="col-sm-9">
                                 <select name="user_management" id="user_management" class="form-select" required>
-                                    <option selected disabled value="">Please choose your preferred database ...</option>
+                                    <option selected disabled value="">Please choose your preferred cache system ...</option>
                                     <?php echo implode('', $system->getSupportedSafePermissionEngines(true)) ?>
                                 </select>
-                                <small class="form-text text-muted">Please select your preferred database type.</small>
+                                <small class="form-text text-muted">Please select your preferred cache type.</small>
                             </div>
                         </div>
-                        <!--                        <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>-->
-                        <!--                        <div class="col-sm-9">-->
-                        <!--                            <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">-->
-                        <!--                            <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific table extensions.</small>-->
-                        <!--                    </div>-->
+                    </div>
+                    <div class="row mb-2 redis-control d-none">
+                        <label class="col-sm-3 col-form-label" for="redis_host">Redis Host:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="redis_host" id="redis_host" class="form-control" required>
+                            <small class="form-text text-muted">Please enter your redis host.</small>
+                        </div>
+                    </div>
+                    <div class="row mb-2 redis-control d-none">
+                        <label class="col-sm-3 col-form-label" for="redis_user">Redis Username:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="redis_user" id="redis_user" class="form-control" required>
+                            <small class="form-text text-muted">Please enter your redis user.</small>
+                        </div>
+                    </div>
+                    <div class="row mb-2 redis-control d-none">
+                        <label class="col-sm-3 col-form-label" for="redis_password">Password for database creation:</label>
+                        <div class="col-sm-9">
+                            <div class="input-group" id="show_redis_password">
+                                <input name="redis_password" type="password" autocomplete="off" id="redis_password" class="form-control">
+                                <span class="input-group-text cursor-pointer" id="toggleRedisPassword"><i class="fa fa-eye" id="showRedisPass"></i></span>
+                            </div>
+                            <small class="form-text text-muted">Please enter your redis password. Leave blank if your redis server has no password.</small>
+                        </div>
                     </div>
                 </div>
                 <!-- start previous / next buttons -->

@@ -15,22 +15,20 @@ let currentFormStep = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('show-setup-form').addEventListener('click', showForm);
-    document.getElementById('show-setup-form').addEventListener('keydown', (event) => {
-        console.log(event.key);
-        if (event.key === 'Enter') {
-            showForm();
-        }
-    });
     const nextBtn = document.getElementById('nextBtn');
     const prevBtn = document.getElementById('prevBtn');
 
     prevBtn.addEventListener('click', function (event) {
-        if (formInnerStep === 1) {
+        if (formInnerStep === 1 && currentFormStep === 1) {
             return;
         }
         event.preventDefault();
-        const currentFormSection = document.querySelector(`[data-step="${ formInnerStep }"]`);
-        const inputs = currentFormSection.querySelectorAll('input, select'); // Get all inputs and selects in the current section
+        if (currentFormStep > 1) {
+            switchFormSection(currentFormStep, --currentFormStep);
+            switchFormStep(formInnerStep, 1);
+            formInnerStep = 1;
+            return;
+        }
         switchFormStep(formInnerStep, formInnerStep - 1);
         --formInnerStep;
     });
