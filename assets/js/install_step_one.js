@@ -26,8 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const isChecked = this.checked;
       if (isChecked) {
         createMyOwnDbControl.map(el => el.classList.remove('d-none'));
+        document.getElementById('devMessageDb').classList.add('d-none');
       } else {
         createMyOwnDbControl.map(el => el.classList.add('d-none'));
+          document.getElementById('devMessageDb').classList.remove('d-none');
       }
     });
 

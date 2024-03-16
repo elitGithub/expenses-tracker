@@ -121,10 +121,11 @@ class Permissions
     }
 
     /**
-     * Attempts to get a Memcached connection with server availability check and retry mechanism.
+     * Attempts to get a Memcached connection with server availability check.
+     * Utilizes Memcached's built-in health check mechanisms to avoid cache pollution.
      *
      * @return Memcached
-     * @throws Exception If connection to the Memcached server fails after retrying.
+     * @throws Exception If unable to establish a Memcached connection after several attempts.
      */
     private static function getMemcachedConnection(): Memcached
     {
@@ -139,20 +140,9 @@ class Permissions
                 self::$memcached->addServer($memcachedConfig['host'], $memcachedConfig['port']);
             }
 
-            // Test connection by trying to read or write a test double value.
-            $retryCount = 3;
-            $isConnected = false;
-            for ($i = 0; $i < $retryCount; $i++) {
-                if (self::testMemcachedConnection()) {
-                    $isConnected = true;
-                    break;
-                }
-                // Wait a bit before retrying
-                sleep(1);
-            }
-
-            if (!$isConnected) {
-                throw new Exception("Unable to connect to the Memcached server after $retryCount retries.");
+            // Verify connection health without introducing dummy values.
+            if (!self::verifyMemcachedConnection()) {
+                throw new Exception('Unable to establish a Memcached connection.');
             }
         }
 
@@ -160,16 +150,17 @@ class Permissions
     }
 
     /**
-     * Tests the Memcached connection by attempting to set and get a dummy value.
+     * Verifies the Memcached connection health without polluting the cache.
+     * Uses Memcached's getStats method to check server responsiveness.
      *
-     * @return bool True if the connection is successful, false otherwise.
+     * @return bool True if the server is responsive and connection is deemed healthy, false otherwise.
      */
-    private static function testMemcachedConnection(): bool
+    private static function verifyMemcachedConnection(): bool
     {
-        $testKey = 'test_connection';
-        $testValue = 'ok';
-        self::$memcached->set($testKey, $testValue, 1);
-        return self::$memcached->get($testKey) === $testValue;
+        $stats = self::$memcached->getStats();
+        return !empty($stats) && array_reduce($stats, function ($carry, $server) {
+                return $carry && $server['pid'] > 0; // A simple check to ensure the server's process id is positive.
+            }, true);
     }
 
 

@@ -181,16 +181,22 @@ $installer = new Installer($system);
                         <div class="row mb-2">
                             <div class="col-sm-9 offset-sm-3">
                                 <input type="checkbox" name="createMyOwnDb" class="form-check-input" id="createMyOwnDb">
-                                <label for="createMyOwnDb" class="form-check-label">I want to create my own Database or I have an existing
-                                    Database</label>
+                                <label for="createMyOwnDb" class="form-check-label">I want to create my own Database or I have an existing Database</label>
+                            </div>
+                        </div>
+                        <div class="row mb-2 d-flex" id="devMessageDb">
+                            <div class="alert alert-success">
+                                Bear in mind that Expense Tracker aims to minimize stress on any existing Databases,
+                                and therefore aims to create its own database with its own internal process.
+                                Of course, you may use your own existing databases,
+                                but we recommend allowing our system to be independent of any additional systems.
                             </div>
                         </div>
                         <div class="row mb-2 d-none create-my-own-db-control">
                             <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>
                             <div class="col-sm-9">
                                 <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">
-                                <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific
-                                    table extensions.</small>
+                                <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific table extensions.</small>
                             </div>
                         </div>
                         <div id="dbsqlite" class="d-none">
@@ -223,17 +229,17 @@ $installer = new Installer($system);
                                 system.</label>
                         </div>
                     </div>
-                    <div class="row mb-2">
-                        <label class="col-sm-3 col-form-label" for="sql_type">Server:</label>
-                        <div class="col-sm-9">
-                            <select name="sql_type" id="sql_type" class="form-select" required>
-                                <option selected disabled value="">Please choose your preferred database ...</option>
-                                <?php echo implode('', $system->getSupportedSafePermissionEngines(true)) ?>
-                            </select>
-                            <small class="form-text text-muted">Please select your preferred database type.</small>
-                        </div>
-                    </div>
                     <div class="row mb-2 create-my-own-user-control">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 col-form-label" for="user_management">Server:</label>
+                            <div class="col-sm-9">
+                                <select name="user_management" id="user_management" class="form-select" required>
+                                    <option selected disabled value="">Please choose your preferred database ...</option>
+                                    <?php echo implode('', $system->getSupportedSafePermissionEngines(true)) ?>
+                                </select>
+                                <small class="form-text text-muted">Please select your preferred database type.</small>
+                            </div>
+                        </div>
                         <!--                        <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>-->
                         <!--                        <div class="col-sm-9">-->
                         <!--                            <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">-->

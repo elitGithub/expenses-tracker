@@ -46,7 +46,6 @@ function showForm() {
 
 function moveForward(event) {
     event.preventDefault();
-    console.log(formInnerStep);
     if (!validateCurrentStep(formInnerStep)) {
         alert('Please fill in all required fields.');
         return;
