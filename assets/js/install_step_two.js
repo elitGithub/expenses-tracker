@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const useMyOwnUserSystem = document.getElementById('useMyOwnUserSystem');
-    const createMyOwnUserManagementControl =  Array.from(document.getElementsByClassName('create-my-own-user-control'));
+    const createMyOwnUserManagementControl = Array.from(document.getElementsByClassName('create-my-own-user-control'));
     const useManagementSelect = document.getElementById('user_management');
     const redisControl = Array.from(document.getElementsByClassName('redis-control'));
     const defaultControl = Array.from(document.getElementsByClassName('default-control'));
@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     useManagementSelect.addEventListener('change', (event) => {
         const cacheType = event.target.value;
-        redisControl.map(el => el.classList.add('d-none'))
+        redisControl.map(el => el.classList.add('d-none'));
+        defaultControl.map(el => el.classList.add('d-none'));
         switch (cacheType) {
             case 'redis':
                 redisControl.map(el => el.classList.remove('d-none'));
