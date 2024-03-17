@@ -241,6 +241,13 @@ $installer = new Installer($system);
                             </div>
                         </div>
                     </div>
+                    <div class="row mb-2 default-control d-none">
+                        <div class="alert alert-warning">
+                            Please note that using the default file system will create a permissions file
+                            that will be loaded every time the user permissions need to be checked.
+                            While this is not an issue for minimal user number, it is recommended to use a caching engine for better scale.
+                        </div>
+                    </div>
                     <div class="row mb-2 redis-control d-none">
                         <label class="col-sm-3 col-form-label" for="redis_host">Redis Host:</label>
                         <div class="col-sm-9">

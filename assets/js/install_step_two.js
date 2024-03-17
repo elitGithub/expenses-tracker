@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const createMyOwnUserManagementControl =  Array.from(document.getElementsByClassName('create-my-own-user-control'));
     const useManagementSelect = document.getElementById('user_management');
     const redisControl = Array.from(document.getElementsByClassName('redis-control'));
+    const defaultControl = Array.from(document.getElementsByClassName('default-control'));
     const toggleRedisPassword = document.getElementById('toggleRedisPassword');
     const redisPassword = document.getElementById('redis_password');
     const showRedisPass = document.getElementById('showRedisPass');
@@ -21,7 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
         redisControl.map(el => el.classList.add('d-none'))
         switch (cacheType) {
             case 'redis':
-                redisControl.map(el => el.classList.remove('d-none'))
+                redisControl.map(el => el.classList.remove('d-none'));
+                break;
+            case 'default':
+                defaultControl.map(el => el.classList.remove('d-none'));
                 break;
             default:
                 break;

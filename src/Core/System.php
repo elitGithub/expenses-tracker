@@ -93,6 +93,10 @@ class System
     ];
 
     private array $supportedPermissionEngines = [
+        'default'     => [
+            self::VERSION_MINIMUM_PHP,
+            'Use the system default file system',
+        ],
         'redis'     => [
             self::VERSION_MINIMUM_PHP,
             'PHP Redis extension for working with Redis, a fast, in-memory data store. Excellent for caching user permissions for quick access.',
@@ -224,7 +228,7 @@ class System
     {
         $retVal = [];
         foreach ($this->getSupportedPermissionEngines() as $extension => $engine) {
-            if (extension_loaded($extension) && version_compare(PHP_VERSION, $engine[0]) >= 0) {
+            if ($extension === 'default' || (extension_loaded($extension) && version_compare(PHP_VERSION, $engine[0]) >= 0)) {
                 if ($returnAsHtml) {
                     $retVal[] = sprintf('<option value="%s">%s</option>', $extension, $engine[1]);
                 } else {
