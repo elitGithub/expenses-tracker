@@ -7,7 +7,7 @@ const databaseInfo = {
     root_password: '',
     sql_password: '',
     sql_db: 'expense_tracker',
-    sqltblpre: '',
+    table_prefix: 'expense_',
     useSameUser: false
 };
 let formInnerStep = 1;

@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const useMyOwnUserSystem = document.getElementById('useMyOwnUserSystem');
     const createMyOwnUserManagementControl =  Array.from(document.getElementsByClassName('create-my-own-user-control'));
     const useManagementSelect = document.getElementById('user_management');
+    const redisControl = Array.from(document.getElementsByClassName('redis-control'));
+    const toggleRedisPassword = document.getElementById('toggleRedisPassword');
+    const redisPassword = document.getElementById('redis_password');
+    const showRedisPass = document.getElementById('showRedisPass');
 
     useMyOwnUserSystem.addEventListener('change', function () {
         const isChecked = this.checked;
@@ -13,6 +17,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     useManagementSelect.addEventListener('change', (event) => {
-        console.log(event.target.value);
+        const cacheType = event.target.value;
+        redisControl.map(el => el.classList.add('d-none'))
+        switch (cacheType) {
+            case 'redis':
+                redisControl.map(el => el.classList.remove('d-none'))
+                break;
+            default:
+                break;
+
+        }
+    });
+
+    toggleRedisPassword.addEventListener('click', () => {
+        if (redisPassword.type === 'password') {
+            redisPassword.type = 'text';
+            showRedisPass.className = 'fa fa-eye-slash';
+        } else {
+            redisPassword.type = 'password';
+            showRedisPass.className = 'fa fa-eye';
+        }
     });
 });

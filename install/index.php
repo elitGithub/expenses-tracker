@@ -193,9 +193,9 @@ $installer = new Installer($system);
                             </div>
                         </div>
                         <div class="row mb-2 d-none create-my-own-db-control">
-                            <label class="col-sm-3 col-form-label" for="sqltblpre">Table prefix:</label>
+                            <label class="col-sm-3 col-form-label" for="table_prefix">Table prefix:</label>
                             <div class="col-sm-9">
-                                <input type="text" name="sqltblpre" id="sqltblpre" class="form-control">
+                                <input type="text" name="sqltblpre" id="table_prefix" class="form-control">
                                 <small class="form-text text-muted">Please enter a table prefix here if you want to specify Expense Tracker specific table extensions.</small>
                             </div>
                         </div>
@@ -256,7 +256,7 @@ $installer = new Installer($system);
                         </div>
                     </div>
                     <div class="row mb-2 redis-control d-none">
-                        <label class="col-sm-3 col-form-label" for="redis_password">Password for database creation:</label>
+                        <label class="col-sm-3 col-form-label" for="redis_password">Redis password:</label>
                         <div class="col-sm-9">
                             <div class="input-group" id="show_redis_password">
                                 <input name="redis_password" type="password" autocomplete="off" id="redis_password" class="form-control">
