@@ -10,6 +10,15 @@ const databaseInfo = {
     table_prefix: 'expense_',
     useSameUser: false
 };
+const cacheData = {
+    user_management: '',
+    redis_user: '',
+    redis_password: '',
+    redis_host: '',
+    memcache_host: '',
+    memcache_user: '',
+    memcache_port: '',
+};
 let formInnerStep = 1;
 let currentFormStep = 1;
 
@@ -63,6 +72,10 @@ function moveForward(event) {
         if (name && databaseInfo.hasOwnProperty(name)) {
             databaseInfo[name] = inputValue || databaseInfo[name];
         }
+
+        if (name && cacheData.hasOwnProperty(name)) {
+            cacheData[name] = inputValue || cacheData[name];
+        }
     });
 
     if (formInnerStep < 3) {
@@ -75,6 +88,7 @@ function moveForward(event) {
         }
         console.log('Final step - implement submission or next action here.');
         console.log(databaseInfo); // For debugging, to see the filled object
+        console.log(cacheData); // For debugging, to see the filled object
         sessionStorage.setItem('databaseInfo', JSON.stringify(databaseInfo));
         switchFormSection(currentFormStep, ++currentFormStep);
         formInnerStep = 1;
@@ -82,6 +96,8 @@ function moveForward(event) {
 }
 
 function switchFormSection(currentStep, nextStep) {
+    console.log(currentStep);
+    console.log(nextStep);
     const currentFormSectionStep = document.querySelector(`[data-form-step="${ currentStep }"]`);
     const nextFormStep = document.querySelector(`[data-form-step="${ nextStep }"]`);
     const steps = Array.from(document.getElementsByClassName('stepIndicator'));

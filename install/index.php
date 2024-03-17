@@ -100,7 +100,7 @@ $installer = new Installer($system);
                     <span class="stepIndicator">Admin user account</span>
                 </div>
                 <div data-form-step=1 id="step1" class="step">
-                    <h3 class="mb-3">Step 1/4: Database setup</h3>
+                    <h3 class="mb-3">Step 1/3: Database setup</h3>
                     <!-- Basic Info Form -->
                     <div data-step=1 id="basic-info-form">
                         <div class="row mb-2">
@@ -221,7 +221,7 @@ $installer = new Installer($system);
                     </div>
                 </div>
                 <div class="step d-none" id="step2" data-form-step="2">
-                    <h3 class="mb-3">Step 2/4: User system setup</h3>
+                    <h3 class="mb-3">Step 2/3: User system setup</h3>
                     <div class="row mb-2">
                         <div class="col-sm-9 offset-sm-3">
                             <input type="checkbox" name="useMyOwnUserSystem" class="form-check-input" id="useMyOwnUserSystem">
@@ -251,15 +251,16 @@ $installer = new Installer($system);
                     <div class="row mb-2 redis-control d-none">
                         <label class="col-sm-3 col-form-label" for="redis_host">Redis Host:</label>
                         <div class="col-sm-9">
-                            <input type="text" name="redis_host" id="redis_host" class="form-control" required>
+                            <input type="text" name="redis_host" placeholder="e.g. 127.0.0.1" id="redis_host" class="form-control" required>
                             <small class="form-text text-muted">Please enter your redis host.</small>
                         </div>
                     </div>
+
                     <div class="row mb-2 redis-control d-none">
-                        <label class="col-sm-3 col-form-label" for="redis_user">Redis Username:</label>
+                        <label class="col-sm-3 col-form-label" for="redis_user">Redis Port:</label>
                         <div class="col-sm-9">
-                            <input type="text" name="redis_user" id="redis_user" class="form-control" required>
-                            <small class="form-text text-muted">Please enter your redis user.</small>
+                            <input type="number" placeholder="6379" name="redis_user" id="redis_user" class="form-control" required>
+                            <small class="form-text text-muted">Please enter your redis port.</small>
                         </div>
                     </div>
                     <div class="row mb-2 redis-control d-none">
@@ -272,6 +273,32 @@ $installer = new Installer($system);
                             <small class="form-text text-muted">Please enter your redis password. Leave blank if your redis server has no password.</small>
                         </div>
                     </div>
+
+                    <div class="row mb-2 memcache-control d-none">
+                        <label class="col-sm-3 col-form-label" for="memcache_host">Memcache Host:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="memcache_host" id="memcache_host" class="form-control" required>
+                            <small class="form-text text-muted">Please enter your memcached host.</small>
+                        </div>
+                    </div>
+                    <div class="row mb-2 memcache-control d-none">
+                        <label class="col-sm-3 col-form-label" for="memcache_user">Memcache server prefix:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="memcache_user" id="memcache_user" class="form-control" required>
+                            <small class="form-text text-muted">Please enter a prefix for your memcached servers.</small>
+                        </div>
+                    </div>
+                    <div class="row mb-2 memcache-control d-none">
+                        <label class="col-sm-3 col-form-label" for="memcache_port">Memcache Port:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="memcache_port" id="memcache_port" class="form-control" required>
+                            <small class="form-text text-muted">Please enter your memcached port.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step d-none" id="step3"  data-form-step="3">
+                    <h3 class="mb-3">Step 3/3: Admin user setup</h3>
                 </div>
                 <!-- start previous / next buttons -->
                 <div class="form-footer d-flex mt-5 float-end">

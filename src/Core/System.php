@@ -113,6 +113,7 @@ class System
         ],
     ];
 
+    private UniqueIdsGenerator $uniqueIdsGenerator;
 
     /**
      * Array of missing PHP extensions.
@@ -120,6 +121,11 @@ class System
      * @var array<string>
      */
     private array $missingExtensions = [];
+
+    public function __construct() {
+        $this->uniqueIdsGenerator = new UniqueIdsGenerator();
+    }
+
 
     /**
      * Returns the current version of phpMyFAQ for installation and
@@ -131,6 +137,15 @@ class System
     {
         $version = sprintf('%d.%d.%d', self::VERSION_MAJOR, self::VERSION_MINOR, self::VERSION_PATCH_LEVEL);
         return $version . (self::isDevelopmentVersion() ? '-' . self::VERSION_PRE_RELEASE : '');
+    }
+
+    /**
+     * @return false|string
+     * @throws \Random\RandomException
+     */
+    public function getRandomString()
+    {
+        return $this->uniqueIdsGenerator->generateTrueRandomString();
     }
 
 

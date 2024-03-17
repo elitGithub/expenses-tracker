@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const useManagementSelect = document.getElementById('user_management');
     const redisControl = Array.from(document.getElementsByClassName('redis-control'));
     const defaultControl = Array.from(document.getElementsByClassName('default-control'));
+    const memcachedControl = Array.from(document.getElementsByClassName('memcache-control'));
     const toggleRedisPassword = document.getElementById('toggleRedisPassword');
     const redisPassword = document.getElementById('redis_password');
     const showRedisPass = document.getElementById('showRedisPass');
@@ -21,9 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const cacheType = event.target.value;
         redisControl.map(el => el.classList.add('d-none'));
         defaultControl.map(el => el.classList.add('d-none'));
+        memcachedControl.map(el => el.classList.add('d-none'));
+        console.log(cacheType);
         switch (cacheType) {
             case 'redis':
                 redisControl.map(el => el.classList.remove('d-none'));
+                break;
+
+            case 'memcached':
+                memcachedControl.map(el => el.classList.remove('d-none'));
                 break;
             case 'default':
                 defaultControl.map(el => el.classList.remove('d-none'));
