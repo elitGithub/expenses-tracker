@@ -35,12 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sqlTypeSelect.addEventListener('change', (ev) => {
         databaseInfo.sql_type = ev.target.value;
+        document.getElementById('sql_port').value = '';
         if (ev.target.value === 'sqlite3') {
             dbSqlLite.classList.remove('d-none');
             dbSqlLite.classList.add('d-block');
         } else {
             dbSqlLite.classList.remove('d-block');
             dbSqlLite.classList.add('d-none');
+        }
+
+        console.log(ev.target.value);
+        if (['mysqli', 'pdo'].includes(ev.target.value)) {
+            document.getElementById('sql_port').value = '3306';
         }
     });
 

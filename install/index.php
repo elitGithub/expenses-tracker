@@ -99,10 +99,10 @@ $installer = new Installer($system);
                     <span class="stepIndicator">User System Setup</span>
                     <span class="stepIndicator">Admin user account</span>
                 </div>
-                <div data-form-step=1 id="step1" class="step">
+                <div data-form-section=1 id="step1" class="step">
                     <h3 class="mb-3">Step 1/3: Database setup</h3>
                     <!-- Basic Info Form -->
-                    <div data-step=1 id="basic-info-form">
+                    <div data-step="1" id="basic-info-form">
                         <div class="row mb-2">
                             <label class="col-sm-3 col-form-label" for="sql_type">Server:</label>
                             <div class="col-sm-9">
@@ -130,7 +130,7 @@ $installer = new Installer($system);
                     </div>
 
                     <!-- Connection Info Form -->
-                    <div data-step=2 class="d-none" id="connection-info-form">
+                    <div data-step="2" class="d-none" id="connection-info-form">
                         <div class="row mb-2">
                             <div class="col-sm-9 offset-sm-3">
                                 <input type="checkbox" name="useSameUser" class="form-check-input" id="useSameUser">
@@ -177,7 +177,7 @@ $installer = new Installer($system);
                     </div>
 
                     <!-- DB Type Form -->
-                    <div data-step=3 class="d-none" id="db-type-form">
+                    <div data-step="3" class="d-none" id="db-type-form">
                         <div class="row mb-2">
                             <div class="col-sm-9 offset-sm-3">
                                 <input type="checkbox" name="createMyOwnDb" class="form-check-input" id="createMyOwnDb">
@@ -220,9 +220,9 @@ $installer = new Installer($system);
                         </div>
                     </div>
                 </div>
-                <div class="step d-none" id="step2" data-form-step="2">
+                <div data-form-section="2" id="step2" class="step d-none">
                     <h3 class="mb-3">Step 2/3: User system setup</h3>
-                    <div class="row mb-2">
+                    <div data-step="1" id="cache-system-form" class="row mb-2">
                         <div class="col-sm-9 offset-sm-3">
                             <input type="checkbox" name="useMyOwnUserSystem" class="form-check-input" id="useMyOwnUserSystem">
                             <label for="useMyOwnUserSystem" class="form-check-label">I have my own user system, no need for Expense Tracker's
@@ -257,9 +257,9 @@ $installer = new Installer($system);
                     </div>
 
                     <div class="row mb-2 redis-control d-none">
-                        <label class="col-sm-3 col-form-label" for="redis_user">Redis Port:</label>
+                        <label class="col-sm-3 col-form-label" for="redis_port">Redis Port:</label>
                         <div class="col-sm-9">
-                            <input type="number" placeholder="6379" name="redis_user" id="redis_user" class="form-control" required>
+                            <input type="number" placeholder="6379" value="6379" name="redis_port" id="redis_port" class="form-control" required>
                             <small class="form-text text-muted">Please enter your redis port.</small>
                         </div>
                     </div>
@@ -296,9 +296,9 @@ $installer = new Installer($system);
                         </div>
                     </div>
                 </div>
-
-                <div class="step d-none" id="step3"  data-form-step="3">
+                <div data-form-section="3" id="step3" class="step d-none">
                     <h3 class="mb-3">Step 3/3: Admin user setup</h3>
+                    <div data-step="1" id="Admin user form" class="row mb-2"></div>
                 </div>
                 <!-- start previous / next buttons -->
                 <div class="form-footer d-flex mt-5 float-end">

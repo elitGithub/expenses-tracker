@@ -66,7 +66,7 @@ class System
             self::VERSION_MINIMUM_PHP,
             'PHP mysqli extension for MySQL v5.7/ MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL. Suitable for relational data storage, including user permissions.',
         ],
-        'PDO'  => [
+        'pdo'  => [
             self::VERSION_MINIMUM_PHP,
             'PHP Data Objects (PDO) extension supports multiple databases (MySQL, PostgreSQL, SQLite, etc.). Versatile for any relational database management system.',
         ],

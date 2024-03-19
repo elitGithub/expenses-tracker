@@ -12,7 +12,7 @@ const databaseInfo = {
 };
 const cacheData = {
     user_management: '',
-    redis_user: '',
+    redis_port: 6379,
     redis_password: '',
     redis_host: '',
     memcache_host: '',
@@ -20,7 +20,7 @@ const cacheData = {
     memcache_port: '',
 };
 let formInnerStep = 1;
-let currentFormStep = 1;
+let currentFormSection = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('show-setup-form').addEventListener('click', showForm);
@@ -28,12 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevBtn = document.getElementById('prevBtn');
 
     prevBtn.addEventListener('click', function (event) {
-        if (formInnerStep === 1 && currentFormStep === 1) {
+        if (formInnerStep === 1 && currentFormSection === 1) {
             return;
         }
         event.preventDefault();
-        if (currentFormStep > 1) {
-            switchFormSection(currentFormStep, --currentFormStep);
+        if (currentFormSection > 1) {
+            switchFormSection(currentFormSection, --currentFormSection);
             switchFormStep(formInnerStep, 1);
             formInnerStep = 1;
             return;
@@ -60,8 +60,11 @@ function moveForward(event) {
 
     // Save current form inputs to the databaseInfo object
     const currentFormSection = document.querySelector(`[data-step="${ formInnerStep }"]`);
+    const currentFormSectionStep = document.querySelector(`[data-form-step="${ currentFormSection }"]`);
+    console.log(currentFormSectionStep);
     const inputs = currentFormSection.querySelectorAll('input, select'); // Get all inputs and selects in the current section
-
+    // const totalSteps = currentFormSectionStep.querySelectorAll('[data-step]');
+    // console.log(totalSteps);
     inputs.forEach(input => {
         const { name, value, type, checked } = input; // Destructure for easier access
 
