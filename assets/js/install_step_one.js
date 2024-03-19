@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             sqlUserControl.map(el => el.classList.remove('d-none'));
         }
-        databaseInfo.useSameUser = isChecked;
+        formState.databaseInfo.useSameUser = isChecked;
     });
 
     createMyOwnDb.addEventListener('change', function () {
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     sqlTypeSelect.addEventListener('change', (ev) => {
-        databaseInfo.sql_type = ev.target.value;
+        formState.databaseInfo.sql_type = ev.target.value;
         document.getElementById('sql_port').value = '';
         if (ev.target.value === 'sqlite3') {
             dbSqlLite.classList.remove('d-none');

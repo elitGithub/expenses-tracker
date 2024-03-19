@@ -1,129 +1,113 @@
-const databaseInfo = {
-    sql_type: '',
-    sql_server: '',
-    sql_port: '',
-    root_user: '',
-    sql_user: '',
-    root_password: '',
-    sql_password: '',
-    sql_db: 'expense_tracker',
-    table_prefix: 'expense_',
-    useSameUser: false
+const steps = Array.from(document.getElementsByClassName('stepIndicator'));
+let currentSection = 1;
+let currentStep = 1;
+// Initialize form state
+let formState = {
+    databaseInfo: {
+        sql_type: '',
+        sql_server: '',
+        sql_port: '',
+        root_user: '',
+        sql_user: '',
+        root_password: '',
+        sql_password: '',
+        sql_db: 'expense_tracker',
+        table_prefix: 'expense_',
+        useSameUser: false
+    },
+    cacheData: {
+        user_management: '',
+        redis_port: 6379,
+        redis_password: '',
+        redis_host: '',
+        memcache_host: '',
+        memcache_user: '',
+        memcache_port: '',
+    },
+    userdata: {}
 };
-const cacheData = {
-    user_management: '',
-    redis_port: 6379,
-    redis_password: '',
-    redis_host: '',
-    memcache_host: '',
-    memcache_user: '',
-    memcache_port: '',
-};
-let formInnerStep = 1;
-let currentFormSection = 1;
+document.getElementById('show-setup-form').addEventListener('click', showForm);
+function updateVisibility() {
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('show-setup-form').addEventListener('click', showForm);
-    const nextBtn = document.getElementById('nextBtn');
-    const prevBtn = document.getElementById('prevBtn');
-
-    prevBtn.addEventListener('click', function (event) {
-        if (formInnerStep === 1 && currentFormSection === 1) {
-            return;
-        }
-        event.preventDefault();
-        if (currentFormSection > 1) {
-            switchFormSection(currentFormSection, --currentFormSection);
-            switchFormStep(formInnerStep, 1);
-            formInnerStep = 1;
-            return;
-        }
-        switchFormStep(formInnerStep, formInnerStep - 1);
-        --formInnerStep;
+    console.log(currentSection);
+    document.querySelectorAll('[data-form-section]').forEach(section => {
+        const sectionNum = parseInt(section.getAttribute('data-form-section'), 10);
+        section.classList.toggle('d-none', sectionNum !== currentSection);
     });
-    nextBtn.addEventListener('click', moveForward);
-});
 
-function showForm() {
-    const steps = Array.from(document.getElementsByClassName('stepIndicator'));
-    document.getElementById('expenses-tracker-setup-form').classList.remove('d-none');
-    document.getElementById('pre-install-instructions').classList.add('d-none');
-    steps[0].classList.add('active');
+    document.querySelectorAll('[data-step]').forEach(step => {
+        const stepSection = parseInt(step.closest('[data-form-section]').getAttribute('data-form-section'), 10);
+        const stepNum = parseInt(step.getAttribute('data-step'), 10);
+        step.classList.toggle('d-none', stepSection !== currentSection || stepNum !== currentStep);
+    });
+
+    // Update button visibility
+    document.getElementById('prevBtn').classList.toggle('d-none', currentSection === 1 && currentStep === 1);
 }
 
-function moveForward(event) {
-    event.preventDefault();
-    if (!validateCurrentStep(formInnerStep)) {
-        alert('Please fill in all required fields.');
+function updateFormState() {
+    const currentInputs = document.querySelector(`[data-form-section="${currentSection}"] [data-step="${currentStep}"]`).querySelectorAll('input, select, textarea');
+    currentInputs.forEach(input => {
+        // Adjust this logic based on how your formState keys are structured and related to input names
+        formState[input.name] = input.value;
+    });
+}
+
+function nextStep() {
+    const nextSectionElement = document.querySelector(`[data-form-section="${currentSection + 1}"]`);
+    const currentSectionElement = document.querySelector(`[data-form-section="${currentSection}"]`);
+    const nextStepElement = currentSectionElement ? currentSectionElement.querySelector(`[data-step="${currentStep + 1}"]`) : null;
+
+    if (!validateCurrentStep(currentStep)) {
+        alert('Please fill all the required fields');
         return;
     }
 
-    // Save current form inputs to the databaseInfo object
-    const currentFormSection = document.querySelector(`[data-step="${ formInnerStep }"]`);
-    const currentFormSectionStep = document.querySelector(`[data-form-step="${ currentFormSection }"]`);
-    console.log(currentFormSectionStep);
-    const inputs = currentFormSection.querySelectorAll('input, select'); // Get all inputs and selects in the current section
-    // const totalSteps = currentFormSectionStep.querySelectorAll('[data-step]');
-    // console.log(totalSteps);
-    inputs.forEach(input => {
-        const { name, value, type, checked } = input; // Destructure for easier access
+    console.log(nextStepElement);
+    console.log(nextSectionElement);
 
-        // For checkboxes, use checked state; for others, use value
-        // This allows for flexibility if you add checkboxes later
-        const inputValue = type === 'checkbox' ? checked : value;
-
-        if (name && databaseInfo.hasOwnProperty(name)) {
-            databaseInfo[name] = inputValue || databaseInfo[name];
-        }
-
-        if (name && cacheData.hasOwnProperty(name)) {
-            cacheData[name] = inputValue || cacheData[name];
-        }
-    });
-
-    if (formInnerStep < 3) {
-        switchFormStep(formInnerStep, formInnerStep + 1);
-        formInnerStep++;
+    if (nextStepElement) {
+        currentStep++;
+    } else if (nextSectionElement) {
+        currentSection++;
+        console.log(steps);
+        steps.forEach((step, index) => step.classList.toggle('active', index !== currentSection));
+        currentStep = 1; // Reset to the first step of the new section
     } else {
-        if (databaseInfo.useSameUser) {
-            databaseInfo.sql_user = databaseInfo.root_user;
-            databaseInfo.sql_password = databaseInfo.root_password;
-        }
-        console.log('Final step - implement submission or next action here.');
-        console.log(databaseInfo); // For debugging, to see the filled object
-        console.log(cacheData); // For debugging, to see the filled object
-        sessionStorage.setItem('databaseInfo', JSON.stringify(databaseInfo));
-        switchFormSection(currentFormStep, ++currentFormStep);
-        formInnerStep = 1;
+        // Final submission or additional logic here
+        console.log('Final form state:', formState);
+        console.log('FINSALK');
+        return; // End the navigation if there are no more sections/steps
     }
+    updateVisibility();
 }
 
-function switchFormSection(currentStep, nextStep) {
-    console.log(currentStep);
-    console.log(nextStep);
-    const currentFormSectionStep = document.querySelector(`[data-form-step="${ currentStep }"]`);
-    const nextFormStep = document.querySelector(`[data-form-step="${ nextStep }"]`);
-    const steps = Array.from(document.getElementsByClassName('stepIndicator'));
-    const formHeader = Array.from(document.getElementsByClassName('form-header'));
-    formHeader.map(el => el.classList.remove('active'));
-
-    if (currentFormSectionStep) {
-        steps[--currentStep].classList.remove('active');
-        currentFormSectionStep.classList.add('d-none');
-        steps[nextStep].classList.remove('active');
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+    } else if (currentSection > 1) {
+        // Move to the previous section and find its last step
+        currentSection--;
+        const steps = document.querySelectorAll(`[data-form-section="${currentSection}"] [data-step]`);
+        currentStep = steps.length; // Assumes steps are sequentially ordered
     }
-
-    if (nextFormStep) {
-        nextFormStep.classList.remove('d-none');
-        steps[--nextStep].classList.add('active');
-    }
+    updateVisibility();
 }
 
-function switchFormStep(fromStep, toStep) {
-    const fromStepEl = document.querySelectorAll(`[data-step="${ fromStep }"]`)[0];
-    const toStepEl = document.querySelectorAll(`[data-step="${ toStep }"]`)[0];
-    fromStepEl.classList.add('d-none');
-    toStepEl.classList.remove('d-none');
+// Event listeners
+document.getElementById('nextBtn').addEventListener('click', () => {
+    updateFormState(); // Capture current form inputs
+    nextStep(); // Move forward
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+    prevStep(); // Move backward
+});
+
+function showForm() {
+    document.getElementById('expenses-tracker-setup-form').classList.remove('d-none');
+    document.getElementById('pre-install-instructions').classList.add('d-none');
+    steps[0].classList.add('active');
 }
 
 function validateCurrentStep(step) {
