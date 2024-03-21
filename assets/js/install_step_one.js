@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
             dbSqlLite.classList.add('d-none');
         }
 
-        console.log(ev.target.value);
         if (['mysqli', 'pdo'].includes(ev.target.value)) {
             document.getElementById('sql_port').value = '3306';
         }

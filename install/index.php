@@ -299,6 +299,23 @@ $installer = new Installer($system);
                 <div data-form-section="3" id="step3" class="step d-none">
                     <h3 class="mb-3">Step 3/3: Admin user setup</h3>
                     <div data-step="1" id="Admin user form" class="row mb-2"></div>
+                    <div class="row mb-2">
+                        <label class="col-sm-3 col-form-label" for="admin_user">System Admin User::</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="admin_user" id="admin_user" class="form-control" required>
+                            <small class="form-text text-muted">Please enter your login name.</small>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label class="col-sm-3 col-form-label" for="admin_password">Admin password:</label>
+                        <div class="col-sm-9">
+                            <div class="input-group" id="show_admin_password">
+                                <input name="admin_password" value="<?php echo (new \Core\UniqueIdsGenerator())->generateTrueRandomString(18) ?>" type="password" autocomplete="off" id="admin_password" class="form-control" required>
+                                <span class="input-group-text cursor-pointer" id="toggleAdminPassword"><i class="fa fa-eye"
+                                                                                                         id="showAdminPassword"></i></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- start previous / next buttons -->
                 <div class="form-footer d-flex mt-5 float-end">
@@ -329,5 +346,6 @@ try {
 <script defer src="../assets/js/install.js"></script>
 <script defer src="../assets/js/install_step_one.js"></script>
 <script defer src="../assets/js/install_step_two.js"></script>
+<script defer src="../assets/js/install_step_three.js"></script>
 </body>
 </html>
