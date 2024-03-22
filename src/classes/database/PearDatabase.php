@@ -39,7 +39,7 @@ class PearDatabase
      * @var mixed
      */
     public $dbType                 = null;
-    public $dbHostName             = null;
+    public ?string $dbHostName             = null;
     public $dbName                 = null;
     public $dbOptions              = null;
     public $userName               = null;
@@ -164,32 +164,56 @@ class PearDatabase
 
     // END
 
+    /**
+     * @return bool
+     */
     public function isMySQL(): bool
     {
         return (stripos($this->dbType, 'mysql') === 0);
     }
+
+    /**
+     * @return bool
+     */
 
     public function isOracle()
     {
         return $this->dbType === 'oci8';
     }
 
+    /**
+     * @return bool
+     */
     public function isPostgres(): bool
     {
         return $this->dbType === 'pgsql';
     }
 
-
+    /**
+     * @param $value
+     *
+     * @return void
+     */
     public function setDieOnError($value)
     {
         $this->dieOnError = $value;
     }
 
+    /**
+     * @param $type
+     *
+     * @return void
+     */
     public function setDatabaseType($type)
     {
         $this->dbType = $type;
     }
 
+    /**
+     * @param $name
+     *
+     * @return void
+     */
     public function setUserName($name)
     {
         $this->userName = $name;
@@ -1231,7 +1255,7 @@ class PearDatabase
     // Function to escape the special characters in database name based on database type.
     public function escapeDbName($dbName = '')
     {
-        if ($dbName == '') {
+        if ($dbName === '') {
             $dbName = $this->dbName;
         }
         if ($this->isMySql()) {
@@ -1240,7 +1264,7 @@ class PearDatabase
         return $dbName;
     }
 
-    public static function isTableExist($tableName): bool
+    public static function tableExists($tableName): bool
     {
         global $adb;
         $res = $adb->pquery(

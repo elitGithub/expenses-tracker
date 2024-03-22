@@ -5,7 +5,9 @@ declare(strict_types = 1);
 namespace Setup;
 
 use Core\System;
+use database\PearDatabase;
 use Exception;
+use Filter;
 
 class Installer extends Setup
 {
@@ -432,8 +434,10 @@ class Installer extends Setup
         ];
         $this->mainConfig = array_merge($this->mainConfig, $dynMainConfig);
     }
+
     /**
      * Check absolutely necessary stuff and die.
+     *
      * @throws Exception
      */
     public function checkBasicStuff(): void
@@ -471,6 +475,7 @@ class Installer extends Setup
             );
         }
     }
+
     public function checkFilesystemPermissions(): void
     {
         $instanceSetup = new Setup();
@@ -512,5 +517,460 @@ class Installer extends Setup
     public function checkMinimumPhpVersion(): bool
     {
         return version_compare(PHP_VERSION, System::VERSION_MINIMUM_PHP) >= 0;
+    }
+
+    /**
+     * @return array
+     */
+    public function checkNoncriticalSettings(): array
+    {
+        $potentialIssues = [];
+        if (!extension_loaded('gd')) {
+            $potentialIssues[] = "You don't have GD support enabled in your PHP installation. Please enable GD support in your php.ini file otherwise you can't use Captchas for spam protection.";
+        }
+        if (!function_exists('imagettftext')) {
+            $potentialIssues[] = "You don't have Freetype support enabled in the GD extension of your PHP installation. Please enable Freetype support in GD extension otherwise the Captchas for spam protection will be quite easy to break. ";
+        }
+        if (!extension_loaded('curl') || !extension_loaded('openssl')) {
+            $potentialIssues[] = "You don't have cURL and/or OpenSSL support enabled in your PHP installation. Please enable cURL and/or OpenSSL support in your php.ini file otherwise you can't use the Twitter support and/or Elasticsearch.";
+        }
+        if (!extension_loaded('fileinfo')) {
+            $potentialIssues[] = "You don't have Fileinfo support enabled in your PHP installation. Please enable Fileinfo support in your php.ini file otherwise you can't use our backup/restore functionality.";
+        }
+        if (!extension_loaded('sodium')) {
+            $potentialIssues[] = "You don't have Sodium support enabled in your PHP installation. Please enable Sodium support in your php.ini file otherwise you can't use our backup/restore functionality";
+        }
+        return $potentialIssues;
+    }
+
+    /**
+     * Starts the installation.
+     *
+     * @param array|null $setup
+     * @throws Exception
+     */
+    public function startInstall(array $setup = null): void
+    {
+        $dbConfig = [
+            'db_user' => '',
+            'db_pass' => '',
+            'db_host' => '',
+            'db_port' => 0,
+            'db_name' => '',
+            'db_type' => '',
+            'log_sql' => true,
+        ];
+        $query = $uninstall = [];
+
+        // Check the selected database:
+        if (!isset($setup['dbType'])) {
+            $dbConfig['db_type'] = Filter::filterInput(INPUT_POST, 'sql_type', FILTER_SANITIZE_SPECIAL_CHARS);
+            $dbConfig['db_type'] = trim((string) $dbConfig['db_type']);
+        } else {
+            $dbConfig['db_type'] = $setup['dbType'];
+        }
+
+        if (!is_string($dbConfig['dbType']) || strlen($dbConfig['dbType']) < 1) {
+            echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please select a database type.</p>\n";
+            die;
+        }
+
+        // Check table prefix
+        $tablePrefix = Filter::filterInput(INPUT_POST, 'table_prefix', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $dbConfig['db_host'] = Filter::filterInput(INPUT_POST, 'sql_server', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $dbConfig['db_user'] = Filter::filterInput(INPUT_POST, 'sql_user', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $dbConfig['db_pass'] = Filter::filterInput(INPUT_POST, 'sql_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        // root_user
+        $rootUser = Filter::filterInput(INPUT_POST, 'root_user', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $rootPassword = Filter::filterInput(INPUT_POST, 'root_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
+
+
+        if (is_null($dbConfig['db_pass']) && $dbConfig['db_type'] !== 'sqlite') {
+            // Password can be empty...
+            $dbConfig['db_pass'] = '';
+        }
+        // Check the database name
+        if (!isset($setup['db_type'])) {
+            $dbConfig['db_name'] = Filter::filterInput(INPUT_POST, 'sql_db', FILTER_SANITIZE_SPECIAL_CHARS);
+        } else {
+            $dbConfig['db_name'] = $setup['dbDatabaseName'];
+        }
+
+        if (!is_string($dbConfig['db_name']) || strlen($dbConfig['db_name']) < 1) {
+            $dbConfig['db_name'] = 'expense_tracker';
+        }
+
+
+        // Check database port
+        if (!isset($setup['db_type'])) {
+            $dbConfig['db_port'] = Filter::filterInput(INPUT_POST, 'sql_port', FILTER_VALIDATE_INT);
+        } else {
+            $dbConfig['db_port'] = $setup['dbPort'];
+        }
+
+        if ($dbConfig['db_type'] !== 'sqlite') {
+            $dbConfig['db_host'] = Filter::filterInput(
+                INPUT_POST,
+                'sql_sqlitefile',
+                FILTER_SANITIZE_SPECIAL_CHARS,
+                $setup['dbServer']
+            );
+            if (is_null($dbConfig['db_host'])) {
+                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add a SQLite database " .
+                     "filename.</p>\n";
+                die;
+            }
+        }
+
+        $adb = new PearDatabase($dbConfig['dbType'], $dbConfig['dbServer'], $dbConfig['dbDatabaseName'], $dbConfig['dbUser'], $dbConfig['dbPassword']);
+        /**
+         * POST data:
+         * 'user_management' => string 'redis' (length=5)
+         * 'redis_host' => string '127.0.0.1' (length=9)
+         * 'redis_port' => string '6379' (length=4)
+         * 'redis_password' => string '' (length=0)
+         * 'memcache_host' => string '' (length=0)
+         * 'memcache_user' => string '' (length=0)
+         * 'memcache_port' => string '' (length=0)
+         * 'admin_user' => string 'admin' (length=5)
+         * 'admin_password' => string '19710e74a1a5ef8dea' (length=18)
+         * 'password_retype' => string '19710e74a1a5ef8dea' (length=18)
+         * TODO: finish set up install.
+         */
+
+
+
+
+        // check database connection
+        try {
+            $adb->connect(true);
+        } catch (Exception $e) {
+            printf("<p class=\"alert alert-danger\"><strong>DB Error:</strong> %s</p>\n", $e->getMessage());
+            die;
+        }
+
+        $configuration = new Configuration($db);
+
+        //
+        // Check LDAP if enabled
+        //
+        $ldapEnabled = Filter::filterInput(INPUT_POST, 'ldap_enabled', FILTER_SANITIZE_SPECIAL_CHARS);
+        if (extension_loaded('ldap') && !is_null($ldapEnabled)) {
+            $ldapSetup = [];
+
+            // check LDAP entries
+            $ldapSetup['ldapServer'] = Filter::filterInput(INPUT_POST, 'ldap_server', FILTER_SANITIZE_SPECIAL_CHARS);
+            if (is_null($ldapSetup['ldapServer'])) {
+                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add a LDAP server.</p>\n";
+                System::renderFooter(true);
+            }
+
+            $ldapSetup['ldapPort'] = Filter::filterInput(INPUT_POST, 'ldap_port', FILTER_VALIDATE_INT);
+            if (is_null($ldapSetup['ldapPort'])) {
+                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add a LDAP port.</p>\n";
+                System::renderFooter(true);
+            }
+
+            $ldapSetup['ldapBase'] = Filter::filterInput(INPUT_POST, 'ldap_base', FILTER_SANITIZE_SPECIAL_CHARS);
+            if (is_null($ldapSetup['ldapBase'])) {
+                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add a LDAP base search DN.</p>\n";
+                System::renderFooter(true);
+            }
+
+            // LDAP User and LDAP password are optional
+            $ldapSetup['ldapUser'] = Filter::filterInput(INPUT_POST, 'ldap_user', FILTER_SANITIZE_SPECIAL_CHARS);
+            $ldapSetup['ldapPassword'] = Filter::filterInput(
+                INPUT_POST,
+                'ldap_password',
+                FILTER_SANITIZE_SPECIAL_CHARS
+            );
+
+            // set LDAP Config to prevent DB query
+            foreach ($this->mainConfig as $configKey => $configValue) {
+                if (str_contains($configKey, 'ldap.')) {
+                    $configuration->set($configKey, $configValue);
+                }
+            }
+
+            // check LDAP connection
+            $ldap = new Ldap($configuration);
+            $ldap->connect(
+                $ldapSetup['ldapServer'],
+                $ldapSetup['ldapPort'],
+                $ldapSetup['ldapBase'],
+                $ldapSetup['ldapUser'],
+                $ldapSetup['ldapPassword']
+            );
+
+            if (!$ldap) {
+                echo '<p class="alert alert-danger"><strong>LDAP Error:</strong> ' . $ldap->error() . "</p>\n";
+                System::renderFooter(true);
+            }
+        }
+
+        //
+        // Check Elasticsearch if enabled
+        //
+        $esEnabled = Filter::filterInput(INPUT_POST, 'elasticsearch_enabled', FILTER_SANITIZE_SPECIAL_CHARS);
+        if (!is_null($esEnabled)) {
+            $esSetup = [];
+            $esHostFilter = [
+                'elasticsearch_server' => [
+                    'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                    'flags' => FILTER_REQUIRE_ARRAY
+                ]
+            ];
+
+            // ES hosts
+            $esHosts = Filter::filterInputArray(INPUT_POST, $esHostFilter);
+            if (is_null($esHosts)) {
+                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add at least one Elasticsearch " .
+                     "host.</p>\n";
+                System::renderFooter(true);
+            }
+
+            $esSetup['hosts'] = $esHosts['elasticsearch_server'];
+
+            // ES Index name
+            $esSetup['index'] = Filter::filterInput(INPUT_POST, 'elasticsearch_index', FILTER_SANITIZE_SPECIAL_CHARS);
+            if (is_null($esSetup['index'])) {
+                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add an Elasticsearch index " .
+                     "name.</p>\n";
+                System::renderFooter(true);
+            }
+
+            $psr4Loader = new ClassLoader();
+            $psr4Loader->addPsr4('Elasticsearch\\', PMF_SRC_DIR . '/libs/elasticsearch/src/Elasticsearch');
+            $psr4Loader->addPsr4('GuzzleHttp\\Ring\\', PMF_SRC_DIR . '/libs/guzzlehttp/ringphp/src');
+            $psr4Loader->addPsr4('Monolog\\', PMF_SRC_DIR . '/libs/monolog/src/Monolog');
+            $psr4Loader->addPsr4('Psr\\', PMF_SRC_DIR . '/libs/psr/log/Psr');
+            $psr4Loader->addPsr4('React\\Promise\\', PMF_SRC_DIR . '/libs/react/promise/src');
+            $psr4Loader->register();
+
+            // check LDAP connection
+            $esHosts = array_values($esHosts['elasticsearch_server']);
+            $esClient = ClientBuilder::create()->setHosts($esHosts)->build();
+
+            if (!$esClient) {
+                echo '<p class="alert alert-danger"><strong>Elasticsearch Error:</strong> No connection.</p>';
+                System::renderFooter(true);
+            }
+        } else {
+            $esSetup = [];
+        }
+
+        // check login name
+        if (!isset($setup['loginname'])) {
+            $loginName = Filter::filterInput(INPUT_POST, 'loginname', FILTER_SANITIZE_SPECIAL_CHARS);
+        } else {
+            $loginName = $setup['loginname'];
+        }
+        if (is_null($loginName)) {
+            echo '<p class="alert alert-danger"><strong>Error:</strong> Please add a login name for your account.</p>';
+            System::renderFooter(true);
+        }
+
+        // check user entries
+        if (!isset($setup['password'])) {
+            $password = Filter::filterInput(INPUT_POST, 'password', FILTER_SANITIZE_SPECIAL_CHARS);
+        } else {
+            $password = $setup['password'];
+        }
+        if (is_null($password)) {
+            echo '<p class="alert alert-danger"><strong>Error:</strong> Please add a password for your account.</p>';
+            System::renderFooter(true);
+        }
+
+        if (!isset($setup['password_retyped'])) {
+            $passwordRetyped = Filter::filterInput(INPUT_POST, 'password_retyped', FILTER_SANITIZE_SPECIAL_CHARS);
+        } else {
+            $passwordRetyped = $setup['password_retyped'];
+        }
+
+        if (is_null($passwordRetyped)) {
+            echo '<p class="alert alert-danger"><strong>Error:</strong> Please add a retyped password.</p>';
+            System::renderFooter(true);
+        }
+
+        if (strlen((string) $password) <= 7 || strlen((string) $passwordRetyped) <= 7) {
+            echo '<p class="alert alert-danger"><strong>Error:</strong> Your password and retyped password are too ' .
+                 'short. Please set your password and your retyped password with a minimum of 8 characters.</p>';
+            System::renderFooter(true);
+        }
+
+        if ($password != $passwordRetyped) {
+            echo '<p class="alert alert-danger"><strong>Error:</strong> Your password and retyped password are not ' .
+                 'equal. Please check your password and your retyped password.</p>';
+            System::renderFooter(true);
+        }
+
+        $language = Filter::filterInput(INPUT_POST, 'language', FILTER_SANITIZE_SPECIAL_CHARS, 'en');
+        $realname = Filter::filterInput(INPUT_POST, 'realname', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $email = Filter::filterInput(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL, '');
+        $permLevel = Filter::filterInput(INPUT_POST, 'permLevel', FILTER_SANITIZE_SPECIAL_CHARS, 'basic');
+
+        $rootDir = $setup['rootDir'] ?? PMF_ROOT_DIR;
+
+        $instanceSetup = new Setup();
+        $instanceSetup->setRootDir($rootDir);
+
+        // Write the DB variables in database.php
+        if (!$instanceSetup->createDatabaseFile($dbSetup)) {
+            echo '<p class="alert alert-danger"><strong>Error:</strong> Setup cannot write to ./config/database.php.' .
+                 '</p>';
+            $this->system->cleanFailedInstallationFiles();
+            System::renderFooter(true);
+        }
+
+        // check LDAP is enabled
+        if (extension_loaded('ldap') && !is_null($ldapEnabled) && count($ldapSetup)) {
+            if (!$instanceSetup->createLdapFile($ldapSetup, '')) {
+                echo '<p class="alert alert-danger"><strong>Error:</strong> Setup cannot write to ./config/ldap.php.' .
+                     '</p>';
+                $this->system->cleanFailedInstallationFiles();
+                System::renderFooter(true);
+            }
+        }
+
+        // check if Elasticsearch is enabled
+        if (!is_null($esEnabled) && count($esSetup)) {
+            if (!$instanceSetup->createElasticsearchFile($esSetup, '')) {
+                echo '<p class="alert alert-danger"><strong>Error:</strong> Setup cannot write to ' .
+                     './config/elasticsearch.php.</p>';
+                $this->system->cleanFailedInstallationFiles();
+                System::renderFooter(true);
+            }
+        }
+
+        // connect to the database using config/database.php
+        $dbConfig = new DatabaseConfiguration($rootDir . '/config/database.php');
+        try {
+            $db = Database::factory($dbSetup['dbType']);
+        } catch (Exception $exception) {
+            printf("<p class=\"alert alert-danger\"><strong>DB Error:</strong> %s</p>\n", $exception->getMessage());
+            $this->system->cleanFailedInstallationFiles();
+            System::renderFooter(true);
+        }
+
+        $db->connect(
+            $dbConfig->getServer(),
+            $dbConfig->getUser(),
+            $dbConfig->getPassword(),
+            $dbConfig->getDatabase(),
+            $dbConfig->getPort()
+        );
+
+        if (!$db) {
+            printf("<p class=\"alert alert-danger\"><strong>DB Error:</strong> %s</p>\n", $db->error());
+            $this->system->cleanFailedInstallationFiles();
+            System::renderFooter(true);
+        }
+
+        try {
+            $databaseInstaller = InstanceDatabase::factory($configuration, $dbSetup['dbType']);
+            $databaseInstaller->createTables($dbSetup['dbPrefix']);
+        } catch (Exception $exception) {
+            printf("<p class=\"alert alert-danger\"><strong>DB Error:</strong> %s</p>\n", $exception->getMessage());
+            $this->system->cleanFailedInstallationFiles();
+            System::renderFooter(true);
+        }
+
+        $stopWords = new Stopwords($configuration);
+        $stopWords->executeInsertQueries($dbSetup['dbPrefix']);
+
+        $this->system->setDatabase($db);
+
+        // Erase any table before starting creating the required ones
+        if (!System::isSqlite($dbSetup['dbType'])) {
+            $this->system->dropTables($uninstall);
+        }
+
+        // Start creating the required tables
+        $count = 0;
+        foreach ($query as $executeQuery) {
+            $result = @$db->query($executeQuery);
+            if (!$result) {
+                echo '<p class="alert alert-danger"><strong>Error:</strong> Please install your version of phpMyFAQ
+                    once again or send us a <a href=\"https://www.phpmyfaq.de\" target=\"_blank\">bug report</a>.</p>';
+                printf('<p class="alert alert-danger"><strong>DB error:</strong> %s</p>', $db->error());
+                printf('<code>%s</code>', htmlentities($executeQuery));
+                $this->system->dropTables($uninstall);
+                $this->system->cleanFailedInstallationFiles();
+                System::renderFooter(true);
+            }
+            usleep(1000);
+            ++$count;
+            if (!($count % 10)) {
+                echo '| ';
+            }
+        }
+
+        $link = new Link('', $configuration);
+
+        // add main configuration, add personal settings
+        $this->mainConfig['main.metaPublisher'] = $realname;
+        $this->mainConfig['main.administrationMail'] = $email;
+        $this->mainConfig['main.language'] = $language;
+        $this->mainConfig['security.permLevel'] = $permLevel;
+
+        foreach ($this->mainConfig as $name => $value) {
+            $configuration->add($name, $value);
+        }
+
+        $configuration->update(['main.referenceURL' => $link->getSystemUri('/setup/index.php')]);
+        $configuration->add('security.salt', md5($configuration->getDefaultUrl()));
+
+        // add an admin account and rights
+        $admin = new User($configuration);
+        if (!$admin->createUser($loginName, $password, '', 1)) {
+            printf(
+                '<p class="alert alert-danger"><strong>Fatal installation error:</strong><br>' .
+                "Couldn't create the admin user: %s</p>\n",
+                $admin->error()
+            );
+            $this->system->cleanFailedInstallationFiles();
+            System::renderFooter(true);
+        }
+        $admin->setStatus('protected');
+        $adminData = [
+            'display_name' => $realname,
+            'email' => $email,
+        ];
+        $admin->setUserData($adminData);
+        $admin->setSuperAdmin(true);
+
+        // add default rights
+        foreach ($this->mainRights as $right) {
+            $admin->perm->grantUserRight(1, $admin->perm->addRight($right));
+        }
+
+        // Add an anonymous user account
+        $instanceSetup->createAnonymousUser($configuration);
+
+        // Add primary instance
+        $instanceData = new InstanceEntity();
+        $instanceData
+            ->setUrl($link->getSystemUri($_SERVER['SCRIPT_NAME']))
+            ->setInstance($link->getSystemRelativeUri('setup/index.php'))
+            ->setComment('phpMyFAQ ' . System::getVersion());
+        $faqInstance = new Instance($configuration);
+        $faqInstance->addInstance($instanceData);
+
+        $faqInstanceMaster = new Master($configuration);
+        $faqInstanceMaster->createMaster($faqInstance);
+
+        // connect to Elasticsearch if enabled
+        if (!is_null($esEnabled) && is_file($rootDir . '/config/elasticsearch.php')) {
+            $esConfig = new ElasticsearchConfiguration($rootDir . '/config/elasticsearch.php');
+
+            $configuration->setElasticsearchConfig($esConfig);
+
+            $esClient = ClientBuilder::create()->setHosts($esConfig->getHosts())->build();
+
+            $configuration->setElasticsearch($esClient);
+
+            $faqInstanceElasticsearch = new Elasticsearch($configuration);
+            $faqInstanceElasticsearch->createIndex();
+        }
     }
 }

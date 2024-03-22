@@ -41,22 +41,31 @@ class UniqueIdsGenerator
      * @param  int  $length
      *
      * @return false|string
-     * @throws \Random\RandomException
      */
     public function generateTrueRandomString(int $length = 13)
     {
         if (class_exists('\Random\Randomizer')) {
-            // Use the new Random\Randomizer class from PHP 8.2 and later
-            $randomizer = new \Random\Randomizer();
-            $bytes = $randomizer->getBytes((int)ceil($length / 2));
-            return substr(bin2hex($bytes), 0, $length);
+            try {
+                // Use the new Random\Randomizer class from PHP 8.2 and later
+                $randomizer = new \Random\Randomizer();
+                $bytes = $randomizer->getBytes((int)ceil($length / 2));
+                return substr(bin2hex($bytes), 0, $length);
+            } catch (\Throwable $exception) {
+                // Continue trying to use other methods.
+            }
+
         }
 
         // Fallback to random_bytes if available, for PHP 7.0 and later
-        if (function_exists('random_bytes')) {
-            $bytes = random_bytes((int)ceil($length / 2));
-            return substr(bin2hex($bytes), 0, $length);
+        try {
+            if (function_exists('random_bytes')) {
+                $bytes = random_bytes((int)ceil($length / 2));
+                return substr(bin2hex($bytes), 0, $length);
+            }
+        } catch (\Throwable $exception) {
+            // Continue trying to use other methods.
         }
+
 
         // Further fallback to openssl_random_pseudo_bytes if available
         if (function_exists('openssl_random_pseudo_bytes')) {

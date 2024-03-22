@@ -1,3 +1,4 @@
+const form =  document.getElementById('expenses-tracker-setup-form');
 const steps = Array.from(document.getElementsByClassName('stepIndicator'));
 let currentSection = 1;
 let currentStep = 1;
@@ -12,6 +13,7 @@ let formState = {
         root_password: '',
         sql_password: '',
         sql_db: 'expense_tracker',
+        createMyOwnDb: 'off',
         table_prefix: 'expense_',
         useSameUser: false
     },
@@ -77,6 +79,7 @@ function nextStep() {
         // Final submission or additional logic here
         console.log('Final form state:', formState);
         console.log('FINSALK');
+        form.submit();
         return; // End the navigation if there are no more sections/steps
     }
     updateVisibility();
@@ -105,7 +108,7 @@ document.getElementById('prevBtn').addEventListener('click', () => {
 });
 
 function showForm() {
-    document.getElementById('expenses-tracker-setup-form').classList.remove('d-none');
+    form.classList.remove('d-none');
     document.getElementById('pre-install-instructions').classList.add('d-none');
     steps[0].classList.add('active');
 }
