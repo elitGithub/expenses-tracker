@@ -36,7 +36,6 @@ if (DEBUG) {
 
 session_name('expenses-tracker-setup');
 session_start();
-$db = PearDatabase::getInstance();
 
 $system = new System();
 $installer = new Installer($system);
@@ -324,10 +323,17 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                         <h3 class="mb-3">Step 3/3: Admin user setup</h3>
                         <div data-step="1" id="Admin user form" class="row mb-2">
                             <div class="row mb-2">
-                                <label class="col-sm-3 col-form-label" for="admin_user">System Admin User::</label>
+                                <label class="col-sm-3 col-form-label" for="admin_user">System Admin User:</label>
                                 <div class="col-sm-9">
                                     <input type="text" name="admin_user" id="admin_user" class="form-control" required>
                                     <small class="form-text text-muted">Please enter your login name.</small>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <label class="col-sm-3 col-form-label" for="admin_email">System Admin Email:</label>
+                                <div class="col-sm-9">
+                                    <input type="email" name="admin_email" id="admin_email" class="form-control" required>
+                                    <small class="form-text text-muted">Please enter your email.</small>
                                 </div>
                             </div>
                             <?php

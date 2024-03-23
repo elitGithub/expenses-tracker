@@ -11,6 +11,7 @@ use database\Helpers\PerformancePrefs;
 use database\Helpers\PreparedQMark2SqlValue;
 use Exception;
 use Log\DatabaseLogger;
+use Monolog\Logger;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -22,6 +23,7 @@ if (!defined('DS')) {
 include_once('config.performance.php');
 
 require_once PROJECT_ROOT . '/src/classes/database/adodb/adodb.inc.php';
+require_once PROJECT_ROOT . '/src/classes/database/adodb/adodb-exceptions.inc.php';
 
 /**
  * Database wrapper classes for ADODB connection handling.
@@ -80,8 +82,8 @@ class PearDatabase implements LoggerAwareInterface
      */
     public function __construct($dbtype = '', $host = '', $dbname = '', $username = '', $passwd = '')
     {
-        $this->setLogger(new DatabaseLogger('query_errors'));
-        $this->logsqltm = new DatabaseLogger('sql_time_log');
+        $this->setLogger(new DatabaseLogger('query_errors', Logger::WARNING));
+        $this->logsqltm = new DatabaseLogger('sql_time_log', Logger::WARNING);
         $this->resetSettings($dbtype, $host, $dbname, $username, $passwd);
 
         // Initialize performance parameters
@@ -503,6 +505,8 @@ class PearDatabase implements LoggerAwareInterface
             try {
                 $tmpRes = $this->database->Execute($sql, $params);
             } catch (Throwable $e) {
+                var_dump($params);
+                var_dump($e);
                 $this->checkError($e->getMessage() . ' ' . $msg . ' Query Failed:' . $sql . '::', $dieOnError, $sql);
                 return false;
             }
@@ -879,7 +883,14 @@ class PearDatabase implements LoggerAwareInterface
     }
     ## Code-Contribution given by weigelt@metux.de - Ends
 
-    /* ADODB newly added. replacement for mysql_result() */
+    /**
+     * @param $result
+     * @param int|string $row
+     * @param int|string $col
+     *
+     * @return array|mixed|string|string[]|null
+     * @throws \Exception
+     */
     public function query_result(&$result, $row, $col = 0)
     {
         if (!is_object($result)) {

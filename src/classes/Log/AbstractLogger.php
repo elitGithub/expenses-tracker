@@ -20,9 +20,9 @@ abstract class AbstractLogger implements LoggerInterface
     /**
      * @param  string  $logName
      */
-    public function __construct(string $logName)
+    public function __construct(string $logName, $logLevel = Logger::DEBUG)
     {
-        $this->logger = new Logger($logName, [new FileLogger(EXTR_ROOT_DIR . '/config/logs/')]);
+        $this->logger = new Logger($logName, [new FileLogger(EXTR_ROOT_DIR . '/config/logs/', $logLevel)]);
     }
 
     /**

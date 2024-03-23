@@ -18,7 +18,8 @@ class DatabaseCreator
      * @param  string                  $dbName
      * @param  bool                    $create
      */
-    public function __construct(PearDatabase $database, string $dbName, bool $create = true) {
+    public function __construct(PearDatabase $database, string $dbName, bool $create = true)
+    {
         $this->database = $database;
         $this->dbName = $dbName;
         $this->create = $create;

@@ -2,8 +2,9 @@
 
 declare(strict_types = 1);
 
-
 require_once './config/config.php';
+require_once 'functions.php';
+
 spl_autoload_register(function ($className) {
     $baseDir = EXTR_SRC_DIR; // Adjust the base directory as needed
 
@@ -18,6 +19,11 @@ spl_autoload_register(function ($className) {
     }
 });
 
+/**
+ * @param $dir
+ *
+ * @return array
+ */
 function scanDirectoryForClassesUsingIterator($dir): array
 {
     $directory = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
@@ -35,6 +41,12 @@ function scanDirectoryForClassesUsingIterator($dir): array
     return $classesMap;
 }
 
+/**
+ * @param $className
+ * @param $classesMap
+ *
+ * @return mixed|null
+ */
 function getClassPathUsingIterator($className, $classesMap) {
     // Split class name into parts to handle namespace if needed
     $classNameParts = explode('\\', $className);
