@@ -1670,7 +1670,7 @@ if (!defined('_ADODB_LAYER')) {
 						$countElements = array_map('count', $inputarr);
 						if (1 != count(array_unique($countElements))) {
 							$this->outp_throw(
-								"[bulk execute] Input array has different number of params  [" . print_r($countElements, true) . "].",
+								'[bulk execute] Input array has different number of params  [' . print_r($countElements, true) . "].",
 								'Execute'
 							);
 							return false;
@@ -1682,7 +1682,7 @@ if (!defined('_ADODB_LAYER')) {
 					$element0 = reset($inputarr);
 					if ($nparams != count($element0)) {
 						$this->outp_throw(
-							"Input array has " . count($element0) .
+							'Input array has ' . count($element0) .
 							" params, does not match query: '" . htmlspecialchars($sql) . "'",
 							'Execute'
 						);

@@ -12,12 +12,11 @@
 namespace Monolog;
 
 use DateTimeZone;
+use InvalidArgumentException;
 use Monolog\Handler\HandlerInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel;
 use Throwable;
-use Stringable;
 
 /**
  * Monolog log channel
@@ -203,6 +202,9 @@ class Logger implements LoggerInterface, ResettableInterface
         }
     }
 
+    /**
+     * @return string
+     */
     public function getName(): string
     {
         return $this->name;

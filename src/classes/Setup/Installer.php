@@ -8,6 +8,7 @@ use Core\System;
 use database\PearDatabase;
 use Exception;
 use Filter;
+use Log\InstallLog;
 
 class Installer extends Setup
 {
@@ -416,6 +417,10 @@ class Installer extends Setup
         'api.enableAccess'   => 'true',
         'api.apiClientToken' => '',
     ];
+    /**
+     * @var \Log\InstallLog
+     */
+    protected InstallLog $logger;
 
     /**
      * Constructor.
@@ -426,6 +431,7 @@ class Installer extends Setup
     {
         parent::__construct();
         $this->system = $system;
+        $this->logger = new InstallLog('install');
         $dynMainConfig = [
             'main.currentVersion'    => System::getVersion(),
             'main.currentApiVersion' => System::getApiVersion(),
@@ -551,6 +557,7 @@ class Installer extends Setup
      */
     public function startInstall(array $setup = null): void
     {
+        global $dbConfig;
         $dbConfig = [
             'db_user' => '',
             'db_pass' => '',
@@ -560,7 +567,8 @@ class Installer extends Setup
             'db_type' => '',
             'log_sql' => true,
         ];
-        $query = $uninstall = [];
+
+        var_dump($_POST);
 
         // Check the selected database:
         if (!isset($setup['dbType'])) {
@@ -570,9 +578,10 @@ class Installer extends Setup
             $dbConfig['db_type'] = $setup['dbType'];
         }
 
-        if (!is_string($dbConfig['dbType']) || strlen($dbConfig['dbType']) < 1) {
-            echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please select a database type.</p>\n";
-            die;
+        if (!is_string($dbConfig['db_type']) || strlen($dbConfig['db_type']) < 1) {
+            throw new Exception('Please select a database type.');
+//            echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please select a database type.</p>\n";
+//            die;
         }
 
         // Check table prefix
@@ -583,10 +592,10 @@ class Installer extends Setup
         // root_user
         $rootUser = Filter::filterInput(INPUT_POST, 'root_user', FILTER_SANITIZE_SPECIAL_CHARS, '');
         $rootPassword = Filter::filterInput(INPUT_POST, 'root_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
-
+        $createMyOwnDb = Filter::filterInput(INPUT_POST, 'createMyOwnDb', FILTER_VALIDATE_BOOLEAN, false);
 
         if (is_null($dbConfig['db_pass']) && $dbConfig['db_type'] !== 'sqlite') {
-            // Password can be empty...
+            // The Password can be empty...
             $dbConfig['db_pass'] = '';
         }
         // Check the database name
@@ -608,212 +617,38 @@ class Installer extends Setup
             $dbConfig['db_port'] = $setup['dbPort'];
         }
 
-        if ($dbConfig['db_type'] !== 'sqlite') {
+        if ($dbConfig['db_type'] === 'sqlite') {
             $dbConfig['db_host'] = Filter::filterInput(
                 INPUT_POST,
                 'sql_sqlitefile',
                 FILTER_SANITIZE_SPECIAL_CHARS,
-                $setup['dbServer']
+                $setup['dbServer'] ?? $dbConfig['db_host']
             );
             if (is_null($dbConfig['db_host'])) {
-                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add a SQLite database " .
-                     "filename.</p>\n";
-                die;
+                throw new Exception('Please add a SQLite database filename.');
             }
         }
 
-        $adb = new PearDatabase($dbConfig['dbType'], $dbConfig['dbServer'], $dbConfig['dbDatabaseName'], $dbConfig['dbUser'], $dbConfig['dbPassword']);
-        /**
-         * POST data:
-         * 'user_management' => string 'redis' (length=5)
-         * 'redis_host' => string '127.0.0.1' (length=9)
-         * 'redis_port' => string '6379' (length=4)
-         * 'redis_password' => string '' (length=0)
-         * 'memcache_host' => string '' (length=0)
-         * 'memcache_user' => string '' (length=0)
-         * 'memcache_port' => string '' (length=0)
-         * 'admin_user' => string 'admin' (length=5)
-         * 'admin_password' => string '19710e74a1a5ef8dea' (length=18)
-         * 'password_retype' => string '19710e74a1a5ef8dea' (length=18)
-         * TODO: finish set up install.
-         */
-
-
-
-
+        $adb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'], $dbConfig['db_pass']);
+        $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword);
         // check database connection
         try {
             $adb->connect(true);
-        } catch (Exception $e) {
-            printf("<p class=\"alert alert-danger\"><strong>DB Error:</strong> %s</p>\n", $e->getMessage());
-            die;
+            $masterDb->connect(true);
+        } catch (\Throwable $exception) {
+            var_dump($exception);
+            throw new Exception($exception->getMessage());
         }
 
-        $configuration = new Configuration($db);
 
-        //
-        // Check LDAP if enabled
-        //
-        $ldapEnabled = Filter::filterInput(INPUT_POST, 'ldap_enabled', FILTER_SANITIZE_SPECIAL_CHARS);
-        if (extension_loaded('ldap') && !is_null($ldapEnabled)) {
-            $ldapSetup = [];
+        $dbCreator = new DatabaseCreator($masterDb, $dbConfig['db_name'], !$createMyOwnDb);
 
-            // check LDAP entries
-            $ldapSetup['ldapServer'] = Filter::filterInput(INPUT_POST, 'ldap_server', FILTER_SANITIZE_SPECIAL_CHARS);
-            if (is_null($ldapSetup['ldapServer'])) {
-                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add a LDAP server.</p>\n";
-                System::renderFooter(true);
-            }
-
-            $ldapSetup['ldapPort'] = Filter::filterInput(INPUT_POST, 'ldap_port', FILTER_VALIDATE_INT);
-            if (is_null($ldapSetup['ldapPort'])) {
-                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add a LDAP port.</p>\n";
-                System::renderFooter(true);
-            }
-
-            $ldapSetup['ldapBase'] = Filter::filterInput(INPUT_POST, 'ldap_base', FILTER_SANITIZE_SPECIAL_CHARS);
-            if (is_null($ldapSetup['ldapBase'])) {
-                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add a LDAP base search DN.</p>\n";
-                System::renderFooter(true);
-            }
-
-            // LDAP User and LDAP password are optional
-            $ldapSetup['ldapUser'] = Filter::filterInput(INPUT_POST, 'ldap_user', FILTER_SANITIZE_SPECIAL_CHARS);
-            $ldapSetup['ldapPassword'] = Filter::filterInput(
-                INPUT_POST,
-                'ldap_password',
-                FILTER_SANITIZE_SPECIAL_CHARS
-            );
-
-            // set LDAP Config to prevent DB query
-            foreach ($this->mainConfig as $configKey => $configValue) {
-                if (str_contains($configKey, 'ldap.')) {
-                    $configuration->set($configKey, $configValue);
-                }
-            }
-
-            // check LDAP connection
-            $ldap = new Ldap($configuration);
-            $ldap->connect(
-                $ldapSetup['ldapServer'],
-                $ldapSetup['ldapPort'],
-                $ldapSetup['ldapBase'],
-                $ldapSetup['ldapUser'],
-                $ldapSetup['ldapPassword']
-            );
-
-            if (!$ldap) {
-                echo '<p class="alert alert-danger"><strong>LDAP Error:</strong> ' . $ldap->error() . "</p>\n";
-                System::renderFooter(true);
-            }
+        $dbCreated = $dbCreator->createDatabase();
+        if (!$dbCreated) {
+            throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
-
-        //
-        // Check Elasticsearch if enabled
-        //
-        $esEnabled = Filter::filterInput(INPUT_POST, 'elasticsearch_enabled', FILTER_SANITIZE_SPECIAL_CHARS);
-        if (!is_null($esEnabled)) {
-            $esSetup = [];
-            $esHostFilter = [
-                'elasticsearch_server' => [
-                    'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                    'flags' => FILTER_REQUIRE_ARRAY
-                ]
-            ];
-
-            // ES hosts
-            $esHosts = Filter::filterInputArray(INPUT_POST, $esHostFilter);
-            if (is_null($esHosts)) {
-                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add at least one Elasticsearch " .
-                     "host.</p>\n";
-                System::renderFooter(true);
-            }
-
-            $esSetup['hosts'] = $esHosts['elasticsearch_server'];
-
-            // ES Index name
-            $esSetup['index'] = Filter::filterInput(INPUT_POST, 'elasticsearch_index', FILTER_SANITIZE_SPECIAL_CHARS);
-            if (is_null($esSetup['index'])) {
-                echo "<p class=\"alert alert-danger\"><strong>Error:</strong> Please add an Elasticsearch index " .
-                     "name.</p>\n";
-                System::renderFooter(true);
-            }
-
-            $psr4Loader = new ClassLoader();
-            $psr4Loader->addPsr4('Elasticsearch\\', PMF_SRC_DIR . '/libs/elasticsearch/src/Elasticsearch');
-            $psr4Loader->addPsr4('GuzzleHttp\\Ring\\', PMF_SRC_DIR . '/libs/guzzlehttp/ringphp/src');
-            $psr4Loader->addPsr4('Monolog\\', PMF_SRC_DIR . '/libs/monolog/src/Monolog');
-            $psr4Loader->addPsr4('Psr\\', PMF_SRC_DIR . '/libs/psr/log/Psr');
-            $psr4Loader->addPsr4('React\\Promise\\', PMF_SRC_DIR . '/libs/react/promise/src');
-            $psr4Loader->register();
-
-            // check LDAP connection
-            $esHosts = array_values($esHosts['elasticsearch_server']);
-            $esClient = ClientBuilder::create()->setHosts($esHosts)->build();
-
-            if (!$esClient) {
-                echo '<p class="alert alert-danger"><strong>Elasticsearch Error:</strong> No connection.</p>';
-                System::renderFooter(true);
-            }
-        } else {
-            $esSetup = [];
-        }
-
-        // check login name
-        if (!isset($setup['loginname'])) {
-            $loginName = Filter::filterInput(INPUT_POST, 'loginname', FILTER_SANITIZE_SPECIAL_CHARS);
-        } else {
-            $loginName = $setup['loginname'];
-        }
-        if (is_null($loginName)) {
-            echo '<p class="alert alert-danger"><strong>Error:</strong> Please add a login name for your account.</p>';
-            System::renderFooter(true);
-        }
-
-        // check user entries
-        if (!isset($setup['password'])) {
-            $password = Filter::filterInput(INPUT_POST, 'password', FILTER_SANITIZE_SPECIAL_CHARS);
-        } else {
-            $password = $setup['password'];
-        }
-        if (is_null($password)) {
-            echo '<p class="alert alert-danger"><strong>Error:</strong> Please add a password for your account.</p>';
-            System::renderFooter(true);
-        }
-
-        if (!isset($setup['password_retyped'])) {
-            $passwordRetyped = Filter::filterInput(INPUT_POST, 'password_retyped', FILTER_SANITIZE_SPECIAL_CHARS);
-        } else {
-            $passwordRetyped = $setup['password_retyped'];
-        }
-
-        if (is_null($passwordRetyped)) {
-            echo '<p class="alert alert-danger"><strong>Error:</strong> Please add a retyped password.</p>';
-            System::renderFooter(true);
-        }
-
-        if (strlen((string) $password) <= 7 || strlen((string) $passwordRetyped) <= 7) {
-            echo '<p class="alert alert-danger"><strong>Error:</strong> Your password and retyped password are too ' .
-                 'short. Please set your password and your retyped password with a minimum of 8 characters.</p>';
-            System::renderFooter(true);
-        }
-
-        if ($password != $passwordRetyped) {
-            echo '<p class="alert alert-danger"><strong>Error:</strong> Your password and retyped password are not ' .
-                 'equal. Please check your password and your retyped password.</p>';
-            System::renderFooter(true);
-        }
-
-        $language = Filter::filterInput(INPUT_POST, 'language', FILTER_SANITIZE_SPECIAL_CHARS, 'en');
-        $realname = Filter::filterInput(INPUT_POST, 'realname', FILTER_SANITIZE_SPECIAL_CHARS, '');
-        $email = Filter::filterInput(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL, '');
-        $permLevel = Filter::filterInput(INPUT_POST, 'permLevel', FILTER_SANITIZE_SPECIAL_CHARS, 'basic');
-
-        $rootDir = $setup['rootDir'] ?? PMF_ROOT_DIR;
-
-        $instanceSetup = new Setup();
-        $instanceSetup->setRootDir($rootDir);
-
+var_dump($dbCreated);
+        die();
         // Write the DB variables in database.php
         if (!$instanceSetup->createDatabaseFile($dbSetup)) {
             echo '<p class="alert alert-danger"><strong>Error:</strong> Setup cannot write to ./config/database.php.' .

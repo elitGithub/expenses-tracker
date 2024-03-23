@@ -1,5 +1,6 @@
 const form =  document.getElementById('expenses-tracker-setup-form');
 const steps = Array.from(document.getElementsByClassName('stepIndicator'));
+const goBackInstall = document.getElementById('goBackInstall');
 let currentSection = 1;
 let currentStep = 1;
 // Initialize form state
@@ -28,6 +29,13 @@ let formState = {
     },
     userdata: {}
 };
+
+goBackInstall.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    window.history.back();
+});
+
+
 document.getElementById('show-setup-form').addEventListener('click', showForm);
 function updateVisibility() {
 

@@ -4,12 +4,15 @@ declare(strict_types = 1);
 
 namespace database;
 
+use ADOConnection;
 use adoSchema;
 use database\Helpers\PearDatabaseCache;
 use database\Helpers\PerformancePrefs;
 use database\Helpers\PreparedQMark2SqlValue;
 use Exception;
 use Log\DatabaseLogger;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 if (!defined('DS')) {
@@ -23,13 +26,9 @@ require_once PROJECT_ROOT . '/src/classes/database/adodb/adodb.inc.php';
 /**
  * Database wrapper classes for ADODB connection handling.
  */
-class PearDatabase
+class PearDatabase implements LoggerAwareInterface
 {
-
-    /**
-     * @var mixed
-     */
-    public $database = null;
+    public ?ADOConnection $database = null;
 
     /**
      * @var bool
@@ -38,18 +37,18 @@ class PearDatabase
     /**
      * @var mixed
      */
-    public $dbType                 = null;
+    public         $dbType                 = null;
     public ?string $dbHostName             = null;
-    public $dbName                 = null;
-    public $dbOptions              = null;
-    public $userName               = null;
-    public $userPassword           = null;
-    public $query_time             = 0;
-    public $lastmysqlrow           = -1;
-    public $enableSQLlog           = false;
-    public $continueInstallOnError = true;
+    public         $dbName                 = null;
+    public         $dbOptions              = null;
+    public         $userName               = null;
+    public         $userPassword           = null;
+    public         $query_time             = 0;
+    public         $lastmysqlrow           = -1;
+    public         $enableSQLlog           = false;
+    public         $continueInstallOnError = true;
 
-    public $log;
+    public LoggerInterface $log;
     public $logsqltm;
     // If you want to avoid executing PreparedStatement, set this to true
     // PreparedStatement will be converted to normal SQL statement for execution
@@ -81,7 +80,7 @@ class PearDatabase
      */
     public function __construct($dbtype = '', $host = '', $dbname = '', $username = '', $passwd = '')
     {
-        $this->log = new DatabaseLogger('query_errors');
+        $this->setLogger(new DatabaseLogger('query_errors'));
         $this->logsqltm = new DatabaseLogger('sql_time_log');
         $this->resetSettings($dbtype, $host, $dbname, $username, $passwd);
 
@@ -100,6 +99,19 @@ class PearDatabase
         }
         // END
     }
+
+    /**
+     * Sets a logger instance on the object.
+     *
+     * @param  LoggerInterface  $logger
+     *
+     * @return void
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->log = $logger;
+    }
+
     /**
      * API's to control cache behavior
      *
@@ -427,7 +439,7 @@ class PearDatabase
         for ($index = 0; $index < count($vals); $index++) {
             // Package import pushes data after XML parsing, so type-cast it
             if (is_a($vals[$index], 'SimpleXMLElement')) {
-                $vals[$index] = (string)$vals[$index];
+                $vals[$index] = (string) $vals[$index];
             }
             if (is_string($vals[$index])) {
                 if ($vals[$index] == '') {
@@ -444,9 +456,9 @@ class PearDatabase
     }
 
     /**
-     * @param $sql
-     * @param  array  $params
-     * @param  bool  $dieOnError
+     * @param          $sql
+     * @param  array   $params
+     * @param  bool    $dieOnError
      * @param  string  $msg
      *
      * @return mixed
@@ -908,7 +920,7 @@ class PearDatabase
      * as with the other methods.
      *
      * @param  mixed &$result  The query result to fetch from.
-     * @param  int  $row  The row number to fetch. It's default value is 0
+     * @param  int    $row  The row number to fetch. It's default value is 0
      *
      * @return array|mixed
      * @throws Exception

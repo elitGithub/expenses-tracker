@@ -4,11 +4,13 @@ namespace database\Helpers;
 
 use Exception;
 use Log\DatabaseLogger;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Cache Class for PearDatabase
  */
-class PearDatabaseCache
+class PearDatabaseCache implements LoggerAwareInterface
 {
     public array $_queryResultCache = [];
     public       $_parent;
@@ -26,8 +28,12 @@ class PearDatabaseCache
     public function __construct ($parent)
     {
         $this->_parent = $parent;
-        $this->log = new DatabaseLogger('query_errors');
+        $this->setLogger(new DatabaseLogger('query_errors'));
         $this->_CACHE_RESULT_ROW_LIMIT = PerformancePrefs::getInteger('CACHE_RESULT_ROW_LIMIT', 100);
+    }
+
+    public function setLogger(LoggerInterface $logger) {
+        $this->log = $logger;
     }
 
     /**

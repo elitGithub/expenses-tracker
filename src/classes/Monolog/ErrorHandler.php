@@ -26,7 +26,7 @@ use Psr\Log\LogLevel;
 class ErrorHandler
 {
     /** @var LoggerInterface */
-    private $logger;
+    private LoggerInterface $logger;
 
     /** @var ?callable */
     private $previousExceptionHandler = null;
@@ -47,7 +47,7 @@ class ErrorHandler
     /** @var ?string */
     private $reservedMemory = null;
     /** @var ?array{type: int, message: string, file: string, line: int, trace: mixed} */
-    private $lastFatalData = null;
+    private ?array $lastFatalData = null;
     /** @var int[] */
     private static $fatalErrors = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
 

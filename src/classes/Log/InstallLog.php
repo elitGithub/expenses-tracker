@@ -3,17 +3,17 @@
 declare(strict_types = 1);
 
 namespace Log;
-
 /**
- * Logger for the Database classes
+ *
  */
-class DatabaseLogger extends AbstractLogger
+class InstallLog extends AbstractLogger
 {
 
     /**
+     * Logs with an arbitrary level.
      *
-     * @param              $level
-     * @param              $message
+     * @param  mixed       $level
+     * @param  string      $message
      * @param  array       $context
      * @param  array|null  $trace
      *
@@ -26,12 +26,8 @@ class DatabaseLogger extends AbstractLogger
         }
         $context = array_merge($context, $trace);
         $this->logger->log($level, $message, $context);
-        echo($message);
-        echo '<pre>';
-        echo(json_encode($context, JSON_PRETTY_PRINT));
-        echo '</pre>';
+        var_dump($message);
+        var_dump($context);
         error_log($message);
     }
-
-
 }
