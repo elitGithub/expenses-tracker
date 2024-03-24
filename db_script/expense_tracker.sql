@@ -18,10 +18,10 @@ SET time_zone = "+00:00";
 --
 CREATE TABLE IF NOT EXISTS `expense_category`
 (
-    `expense_category_id`   int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `expense_category_name` varchar(200)     NOT NULL,
-    `amount`                decimal(10, 2)   NOT NULL DEFAULT '0',
-    `created_at`            date             NOT NULL,
+    `expense_category_id`   INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `expense_category_name` VARCHAR(200)     NOT NULL,
+    `amount`                DECIMAL(10, 2)   NOT NULL DEFAULT '0.00',
+    `created_at`            DATE             NOT NULL,
     PRIMARY KEY (`expense_category_id`),
     UNIQUE KEY `expense_category_name_UNIQUE` (`expense_category_name`)
 ) ENGINE = InnoDB
@@ -31,20 +31,19 @@ CREATE TABLE IF NOT EXISTS `expense_category`
 --
 -- Table structure for table `expense_tbl`
 --
-
 CREATE TABLE IF NOT EXISTS `expenses`
 (
-    `expense_id`          INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `expense_category_id` INT(11) UNSIGNED NOT NULL,
-    `expense_description` VARCHAR(200)     NOT NULL,
-    `expense_date`        DATE             NOT NULL,
-    `created_at`          DATE             NOT NULL,
-    `deleted`             INT(1) UNSIGNED  NOT NULL,
-    `amount_spent`        DECIMAL(10, 2)   NOT NULL, -- Assuming amount_spent should be a decimal for accuracy
+    `expense_id`          INT(11) UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `expense_category_id` INT(11) UNSIGNED    NOT NULL,
+    `expense_description` VARCHAR(200)        NOT NULL,
+    `expense_date`        DATE                NOT NULL,
+    `created_at`          DATE                NOT NULL,
+    `deleted`             TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
+    `amount_spent`        DECIMAL(10, 2)      NOT NULL,
     PRIMARY KEY (`expense_id`),
     KEY `FK_expense_category_id` (`expense_category_id`),
-    CONSTRAINT `FK_expense_category` FOREIGN KEY (`expense_category_id`) REFERENCES `expense_category` (`expense_category_id`)
-) ENGINE = INNODB
+    CONSTRAINT `FK_expense_category` FOREIGN KEY (`expense_category_id`) REFERENCES `expense_category` (`expense_category_id`) ON DELETE CASCADE
+) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `users`
@@ -55,15 +54,17 @@ CREATE TABLE IF NOT EXISTS `users`
     `first_name`     VARCHAR(200)     NOT NULL,
     `last_name`      VARCHAR(200)     NOT NULL,
     `created_by`     INT(11) UNSIGNED NOT NULL,
-    `active`         TINYINT(1)       NOT NULL DEFAULT 1,
+    `active`         TINYINT(1)       NOT NULL DEFAULT '1',
     `last_update_at` DATE             NOT NULL,
     `created_at`     DATE             NOT NULL,
+    `deleted_at`     DATETIME                  DEFAULT NULL, -- Soft delete column added
     PRIMARY KEY (`user_id`),
     UNIQUE INDEX `idx_email` (`email`),
+    UNIQUE INDEX `idx_user_name` (`user_name`),              -- Ensure user_name is unique
     INDEX `idx_created_by` (`created_by`),
-    INDEX `idx_created_at` (`created_at`),
-    INDEX `idx_active` (`active`)
-) ENGINE = INNODB
+    INDEX `idx_active` (`active`),
+    INDEX `idx_deleted_at` (`deleted_at`)                    -- Index for efficient querying on soft-deleted status
+) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
 
@@ -99,17 +100,24 @@ CREATE TABLE IF NOT EXISTS `actions`
 
 CREATE TABLE IF NOT EXISTS `roles`
 (
-    `role_id`    BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `action_label` VARCHAR(200)    NOT NULL,
-    `action_key`   BIGINT UNSIGNED NOT NULL,
-    `action`       VARCHAR(200)    NOT NULL,
-
+    `role_id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `role_name` VARCHAR(200)    NOT NULL,
     PRIMARY KEY (`role_id`),
-    INDEX `idx_action_label_action_key` (`action_label`, `action_key`),
-    INDEX `idx_action` (`action`)
-) ENGINE = INNODB
+    UNIQUE INDEX `idx_role_name` (`role_name`) -- Ensured role_name is unique
+) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `user_to_role`
+(
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `role_id` BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`user_id`, `role_id`), -- Corrected to composite PK for many-to-many relationship
+    INDEX `idx_user_id` (`user_id`),
+    INDEX `idx_role_id` (`role_id`),    -- Corrected index name
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 
 /*!40101 SET CHARACTER_SET_CLIENT = @OLD_CHARACTER_SET_CLIENT */;

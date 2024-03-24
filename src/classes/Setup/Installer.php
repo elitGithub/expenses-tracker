@@ -367,6 +367,6 @@ class Installer extends Setup
             $memcacheConnect->addServer($memcachedConfig['host'], $memcachedConfig['port']);
         }
 
-        $this->system->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
+        $this->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
     }
 }

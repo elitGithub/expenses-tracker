@@ -1,5 +1,5 @@
 1. Form styling: make prettier
-2. Remove bootstrap 3.3.7 - upgrade to some modern css lib (or styling)
+2. Remove bootstrap 3.3.7 - upgrade to some modern css lib (or styling) (currently installed 5)
 3. Install Form: UX: improve form with progress bar and display
 4. Install Form: UI: fix ui bugs.
 
@@ -7,5 +7,5 @@
 ----
 
 Backend:
-1. Finish admin user set up
+1. Finish admin user set up ----- DONE
 2. Finish the installation set up.

@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const useSameUser = document.getElementById('useSameUser');
     const createMyOwnDb = document.getElementById('createMyOwnDb');
 
-    useSameUser.addEventListener('change', function () {
+    useSameUser?.addEventListener('change', function () {
         const isChecked = this.checked;
         if (isChecked) {
             sqlUserControl.map(el => el.classList.add('d-none'));
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formState.databaseInfo.useSameUser = isChecked;
     });
 
-    createMyOwnDb.addEventListener('change', function () {
+    createMyOwnDb?.addEventListener('change', function () {
         const isChecked = this.checked;
       if (isChecked) {
         createMyOwnDbControl.map(el => el.classList.remove('d-none'));
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    sqlTypeSelect.addEventListener('change', (ev) => {
+    sqlTypeSelect?.addEventListener('change', (ev) => {
         formState.databaseInfo.sql_type = ev.target.value;
         document.getElementById('sql_port').value = '';
         if (ev.target.value === 'sqlite3') {
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    toggleSqlPassword.addEventListener('click', () => {
+    toggleSqlPassword?.addEventListener('click', () => {
         if (sqlPassword.type === 'password') {
             sqlPassword.type = 'text';
             showSqlPassword.className = 'fa fa-eye-slash';
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    toggleRootPassword.addEventListener('click', () => {
+    toggleRootPassword?.addEventListener('click', () => {
         if (rootPassword.type === 'password') {
             rootPassword.type = 'text';
             showRootPassWord.className = 'fa fa-eye-slash';

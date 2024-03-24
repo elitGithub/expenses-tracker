@@ -4,6 +4,9 @@ declare(strict_types = 1);
 
 namespace Setup;
 
+/**
+ *
+ */
 class Setup
 {
     private string $rootDir;
@@ -62,25 +65,42 @@ class Setup
     }
 
     /**
-     * Creates the file /config/database.php.
+     * @param  array  $dbConfig
+     * @param  array  $permissionsConfig
+     * @param  array  $redisConfig
+     * @param  array  $memcachedConfig
      *
-     * @param  int[]|string[] $data   Array with database credentials
-     * @param  string         $folder Folder
+     * @return void
      */
-    public function createDatabaseFile(array $data, string $folder = '/config')
+    public function createConfigFiles(array $dbConfig = [], array $permissionsConfig = [], array $redisConfig = [], array $memcachedConfig = [])
     {
-        return file_put_contents(
-            $this->rootDir . $folder . '/database.php',
-            "<?php\n" .
-            "\$DB['server'] = '" . $data['dbServer'] . "';\n" .
-            "\$DB['port'] = '" . $data['dbPort'] . "';\n" .
-            "\$DB['user'] = '" . $data['dbUser'] . "';\n" .
-            "\$DB['password'] = '" . $data['dbPassword'] . "';\n" .
-            "\$DB['db'] = '" . $data['dbDatabaseName'] . "';\n" .
-            "\$DB['prefix'] = '" . $data['dbPrefix'] . "';\n" .
-            "\$DB['type'] = '" . $data['dbType'] . "';",
-            LOCK_EX
-        );
+        $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
+        require_once $primaryConfigFile;
+
+        $dbConfigFile = EXTR_ROOT_DIR . '/config/database.php';
+        $userManagementFile = EXTR_ROOT_DIR . '/config/cache_config.php';
+        $dbConfigData = '<?php 
+                              ' . var_export($dbConfig, true) . ';';
+
+        file_put_contents($dbConfigFile, $dbConfigData);
+        file_put_contents($primaryConfigFile, "require_once('$dbConfigFile');\n", FILE_APPEND);
+
+        if (count($redisConfig)) {
+            $redisConfigData = '<?php 
+                                      ' . var_export($redisConfig, true) . ';';
+            file_put_contents($userManagementFile, $redisConfigData);
+        }
+
+        if (count($memcachedConfig)) {
+            $memcachedConfigData = '<?php ' . var_export($memcachedConfig, true) . ';';
+            file_put_contents($userManagementFile, $memcachedConfigData);
+        }
+
+        file_put_contents($primaryConfigFile, "require_once('$userManagementFile');\n", FILE_APPEND);
     }
 
+    public function createPermissionsFile(array $permissions)
+    {
+
+    }
 }

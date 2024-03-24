@@ -3,7 +3,7 @@ const toggleRetypePassword = document.getElementById('toggleRetypePassword');
 const showAdminPassword = document.getElementById('showAdminPassword');
 const adminPassword = document.getElementById('admin_password');
 const passwordRetype = document.getElementById('password_retype');
-toggleAdminPassword.addEventListener('click', () => {
+toggleAdminPassword?.addEventListener('click', () => {
     if (adminPassword.type === 'password') {
         adminPassword.type = 'text';
         showAdminPassword.className = 'fa fa-eye-slash';
@@ -12,7 +12,7 @@ toggleAdminPassword.addEventListener('click', () => {
         showAdminPassword.className = 'fa fa-eye';
     }
 });
-toggleRetypePassword.addEventListener('click', () => {
+toggleRetypePassword?.addEventListener('click', () => {
     if (adminPassword.type === 'password') {
         passwordRetype.type = 'text';
         showRetypePassword.className = 'fa fa-eye-slash';

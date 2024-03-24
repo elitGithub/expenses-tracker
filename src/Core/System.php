@@ -271,39 +271,4 @@ class System
     {
         return $this->supportedPermissionEngines;
     }
-
-    /**
-     * @param  array  $dbConfig
-     * @param  array  $permissionsConfig
-     * @param  array  $redisConfig
-     * @param  array  $memcachedConfig
-     *
-     * @return void
-     */
-    public function createConfigFiles(array $dbConfig = [], array $permissionsConfig = [], array $redisConfig = [], array $memcachedConfig = [])
-    {
-        $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
-        require_once $primaryConfigFile;
-
-        $dbConfigFile = EXTR_ROOT_DIR . '/config/database.php';
-        $userManagementFile = EXTR_ROOT_DIR . '/config/cache_config.php';
-        $dbConfigData = '<?php 
-                              ' . var_export($dbConfig, true) . ';';
-
-        file_put_contents($dbConfigFile, $dbConfigData);
-        file_put_contents($primaryConfigFile, "require_once('$dbConfigFile');\n", FILE_APPEND);
-
-        if (count($redisConfig)) {
-            $redisConfigData = '<?php 
-                                      ' . var_export($redisConfig, true) . ';';
-            file_put_contents($userManagementFile, $redisConfigData);
-        }
-
-        if (count($memcachedConfig)) {
-            $memcachedConfigData = '<?php ' . var_export($memcachedConfig, true) . ';';
-            file_put_contents($userManagementFile, $memcachedConfigData);
-        }
-
-        file_put_contents($primaryConfigFile, "require_once('$userManagementFile');\n", FILE_APPEND);
-    }
 }
