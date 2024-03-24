@@ -5,11 +5,18 @@ declare(strict_types = 1);
 namespace Setup;
 
 use Core\System;
+use Core\UniqueIdsGenerator;
 use database\PearDatabase;
 use Exception;
 use Filter;
 use Log\InstallLog;
+use Memcached;
+use Redis;
+use Throwable;
 
+/**
+ *
+ */
 class Installer extends Setup
 {
 
@@ -86,7 +93,7 @@ class Installer extends Setup
         $dynMainConfig = [
             'main.currentVersion'    => System::getVersion(),
             'main.currentApiVersion' => System::getApiVersion(),
-            'main.phpMyFAQToken'     => bin2hex(random_bytes(16)),
+            'main.appKey'            => (new UniqueIdsGenerator())->generateTrueRandomString(16),
             'spam.enableCaptchaCode' => (extension_loaded('gd') ? 'true' : 'false'),
         ];
         $this->mainConfig = array_merge($this->mainConfig, $dynMainConfig);
@@ -133,6 +140,9 @@ class Installer extends Setup
         }
     }
 
+    /**
+     * @return void
+     */
     public function checkFilesystemPermissions(): void
     {
         $instanceSetup = new Setup();
@@ -156,7 +166,7 @@ class Installer extends Setup
                 (1 < $numDirs) ? 'are' : 'is'
             );
             foreach ($failedDirs as $failedDir) {
-                echo "<li>{$failedDir}</li>\n";
+                echo "<li>$failedDir</li>\n";
             }
 
             printf(
@@ -209,7 +219,7 @@ class Installer extends Setup
      */
     public function startInstall(array $setup = null): void
     {
-        global $dbConfig;
+        global $dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig;
         $dbConfig = [
             'db_user' => '',
             'db_pass' => '',
@@ -226,8 +236,8 @@ class Installer extends Setup
             'history_table_name'          => '',
         ];
 
-        var_dump($_POST);
-
+        $redisConfig = [];
+        $memcachedConfig = [];
         // Check the selected database:
         if (!isset($setup['dbType'])) {
             $dbConfig['db_type'] = Filter::filterInput(INPUT_POST, 'sql_type', FILTER_SANITIZE_SPECIAL_CHARS);
@@ -289,8 +299,8 @@ class Installer extends Setup
         // check database connection
         try {
             $masterDb->connect(true);
-        } catch (\Throwable $exception) {
-            var_dump($exception);
+        } catch (Throwable $exception) {
+            $this->logger->critical('Exception trying to connect to Master DB', ['exception' => $exception]);
             throw new Exception($exception->getMessage());
         }
 
@@ -299,13 +309,14 @@ class Installer extends Setup
 
         $dbCreated = $dbCreator->createDatabase();
         if (!$dbCreated) {
+            $this->logger->critical('Exception trying to create database');
             throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
 
         $tablesFactory = new TableFactory($systemSettings, $tablePrefix);
         $queries = $tablesFactory->getQueries();
         $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $rootUser, $rootPassword);
-        var_dump($systemSettings);
+
         foreach ($queries as $query) {
             $masterDb->preparedQuery($query, [], true);
         }
@@ -320,174 +331,42 @@ class Installer extends Setup
         if ($masterDb->query_result($result, 0, 'exists')) {
             $sqlGrantPrivileges = "GRANT SELECT, INSERT, UPDATE, DELETE ON `{$dbConfig['db_name']}`.* TO '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}';";
             $result = $masterDb->preparedQuery($sqlGrantPrivileges, [], true);
-            $masterDb->preparedQuery('FLUSH PRIVILEGES;', []);
+            $masterDb->preparedQuery('FLUSH PRIVILEGES;');
         }
         $adb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'], $dbConfig['db_pass']);
         try {
             $adb->connect(true);
-        } catch (\Throwable $exception) {
-            echo '329';
-            var_dump($exception);
+        } catch (Throwable $exception) {
             throw new Exception($exception->getMessage());
         }
-        die();
-        // Write the DB variables in database.php
-        if (!$instanceSetup->createDatabaseFile($dbSetup)) {
-            echo '<p class="alert alert-danger"><strong>Error:</strong> Setup cannot write to ./config/database.php.' .
-                 '</p>';
-            $this->system->cleanFailedInstallationFiles();
-            System::renderFooter(true);
+
+        $permissionsConfig['writing_key'] = (new UniqueIdsGenerator())->generateTrueRandomString(18);
+        $permissionsConfig['backend'] = Filter::filterInput(INPUT_POST, 'user_management', FILTER_SANITIZE_SPECIAL_CHARS);
+        if ($permissionsConfig['backend'] === 'redis') {
+            $redisPass = Filter::filterInput(INPUT_POST, 'redis_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
+            $redisConfig = [
+                'host'           => Filter::filterInput(INPUT_POST, 'redis_host', FILTER_SANITIZE_SPECIAL_CHARS, ''),
+                'readTimeout'    => 2.5,
+                'connectTimeout' => 2.5,
+                'auth'           => $redisPass,
+                'port'           => Filter::filterInput(INPUT_POST, 'redis_port', FILTER_VALIDATE_INT),
+                'persistent'     => true,
+            ];
+            $redis = new Redis($redisConfig);
+            $redis->connect($redisConfig['host']);
         }
 
-        // check LDAP is enabled
-        if (extension_loaded('ldap') && !is_null($ldapEnabled) && count($ldapSetup)) {
-            if (!$instanceSetup->createLdapFile($ldapSetup, '')) {
-                echo '<p class="alert alert-danger"><strong>Error:</strong> Setup cannot write to ./config/ldap.php.' .
-                     '</p>';
-                $this->system->cleanFailedInstallationFiles();
-                System::renderFooter(true);
-            }
+        if ($permissionsConfig['backend'] === 'memcached') {
+            $memcachedConfig = [
+                'host'         => Filter::filterInput(INPUT_POST, 'memcache_host', FILTER_SANITIZE_SPECIAL_CHARS, ''),
+                'persist_name' => Filter::filterInput(INPUT_POST, 'memcache_user', FILTER_SANITIZE_SPECIAL_CHARS, ''),
+                'port'         => Filter::filterInput(INPUT_POST, 'memcache_port', FILTER_VALIDATE_INT),
+            ];
+            $memcacheConnect = new Memcached($memcachedConfig['persist_name']);
+            $memcacheConnect->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
+            $memcacheConnect->addServer($memcachedConfig['host'], $memcachedConfig['port']);
         }
 
-        // check if Elasticsearch is enabled
-        if (!is_null($esEnabled) && count($esSetup)) {
-            if (!$instanceSetup->createElasticsearchFile($esSetup, '')) {
-                echo '<p class="alert alert-danger"><strong>Error:</strong> Setup cannot write to ' .
-                     './config/elasticsearch.php.</p>';
-                $this->system->cleanFailedInstallationFiles();
-                System::renderFooter(true);
-            }
-        }
-
-        // connect to the database using config/database.php
-        $dbConfig = new DatabaseConfiguration($rootDir . '/config/database.php');
-        try {
-            $db = Database::factory($dbSetup['dbType']);
-        } catch (Exception $exception) {
-            printf("<p class=\"alert alert-danger\"><strong>DB Error:</strong> %s</p>\n", $exception->getMessage());
-            $this->system->cleanFailedInstallationFiles();
-            System::renderFooter(true);
-        }
-
-        $db->connect(
-            $dbConfig->getServer(),
-            $dbConfig->getUser(),
-            $dbConfig->getPassword(),
-            $dbConfig->getDatabase(),
-            $dbConfig->getPort()
-        );
-
-        if (!$db) {
-            printf("<p class=\"alert alert-danger\"><strong>DB Error:</strong> %s</p>\n", $db->error());
-            $this->system->cleanFailedInstallationFiles();
-            System::renderFooter(true);
-        }
-
-        try {
-            $databaseInstaller = InstanceDatabase::factory($configuration, $dbSetup['dbType']);
-            $databaseInstaller->createTables($dbSetup['dbPrefix']);
-        } catch (Exception $exception) {
-            printf("<p class=\"alert alert-danger\"><strong>DB Error:</strong> %s</p>\n", $exception->getMessage());
-            $this->system->cleanFailedInstallationFiles();
-            System::renderFooter(true);
-        }
-
-        $stopWords = new Stopwords($configuration);
-        $stopWords->executeInsertQueries($dbSetup['dbPrefix']);
-
-        $this->system->setDatabase($db);
-
-        // Erase any table before starting creating the required ones
-        if (!System::isSqlite($dbSetup['dbType'])) {
-            $this->system->dropTables($uninstall);
-        }
-
-        // Start creating the required tables
-        $count = 0;
-        foreach ($query as $executeQuery) {
-            $result = @$db->query($executeQuery);
-            if (!$result) {
-                echo '<p class="alert alert-danger"><strong>Error:</strong> Please install your version of phpMyFAQ
-                    once again or send us a <a href=\"https://www.phpmyfaq.de\" target=\"_blank\">bug report</a>.</p>';
-                printf('<p class="alert alert-danger"><strong>DB error:</strong> %s</p>', $db->error());
-                printf('<code>%s</code>', htmlentities($executeQuery));
-                $this->system->dropTables($uninstall);
-                $this->system->cleanFailedInstallationFiles();
-                System::renderFooter(true);
-            }
-            usleep(1000);
-            ++$count;
-            if (!($count % 10)) {
-                echo '| ';
-            }
-        }
-
-        $link = new Link('', $configuration);
-
-        // add main configuration, add personal settings
-        $this->mainConfig['main.metaPublisher'] = $realname;
-        $this->mainConfig['main.administrationMail'] = $email;
-        $this->mainConfig['main.language'] = $language;
-        $this->mainConfig['security.permLevel'] = $permLevel;
-
-        foreach ($this->mainConfig as $name => $value) {
-            $configuration->add($name, $value);
-        }
-
-        $configuration->update(['main.referenceURL' => $link->getSystemUri('/setup/index.php')]);
-        $configuration->add('security.salt', md5($configuration->getDefaultUrl()));
-
-        // add an admin account and rights
-        $admin = new User($configuration);
-        if (!$admin->createUser($loginName, $password, '', 1)) {
-            printf(
-                '<p class="alert alert-danger"><strong>Fatal installation error:</strong><br>' .
-                "Couldn't create the admin user: %s</p>\n",
-                $admin->error()
-            );
-            $this->system->cleanFailedInstallationFiles();
-            System::renderFooter(true);
-        }
-        $admin->setStatus('protected');
-        $adminData = [
-            'display_name' => $realname,
-            'email'        => $email,
-        ];
-        $admin->setUserData($adminData);
-        $admin->setSuperAdmin(true);
-
-        // add default rights
-        foreach ($this->mainRights as $right) {
-            $admin->perm->grantUserRight(1, $admin->perm->addRight($right));
-        }
-
-        // Add an anonymous user account
-        $instanceSetup->createAnonymousUser($configuration);
-
-        // Add primary instance
-        $instanceData = new InstanceEntity();
-        $instanceData
-            ->setUrl($link->getSystemUri($_SERVER['SCRIPT_NAME']))
-            ->setInstance($link->getSystemRelativeUri('setup/index.php'))
-            ->setComment('phpMyFAQ ' . System::getVersion());
-        $faqInstance = new Instance($configuration);
-        $faqInstance->addInstance($instanceData);
-
-        $faqInstanceMaster = new Master($configuration);
-        $faqInstanceMaster->createMaster($faqInstance);
-
-        // connect to Elasticsearch if enabled
-        if (!is_null($esEnabled) && is_file($rootDir . '/config/elasticsearch.php')) {
-            $esConfig = new ElasticsearchConfiguration($rootDir . '/config/elasticsearch.php');
-
-            $configuration->setElasticsearchConfig($esConfig);
-
-            $esClient = ClientBuilder::create()->setHosts($esConfig->getHosts())->build();
-
-            $configuration->setElasticsearch($esClient);
-
-            $faqInstanceElasticsearch = new Elasticsearch($configuration);
-            $faqInstanceElasticsearch->createIndex();
-        }
+        $this->system->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
     }
 }

@@ -69,18 +69,44 @@ CREATE TABLE IF NOT EXISTS `users`
 
 CREATE TABLE IF NOT EXISTS `history`
 (
-    `history_id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `entity_type`  VARCHAR(200)    NOT NULL,
-    `entity_id`    BIGINT UNSIGNED NOT NULL,
-    `action`       VARCHAR(200)    NOT NULL,
-    `who`          BIGINT UNSIGNED NOT NULL,
-    `change_data`  JSON            NULL,
-    `when`         DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `history_id`  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `entity_type` VARCHAR(200)    NOT NULL,
+    `entity_id`   BIGINT UNSIGNED NOT NULL,
+    `action`      VARCHAR(200)    NOT NULL,
+    `who`         BIGINT UNSIGNED NOT NULL,
+    `change_data` JSON            NULL,
+    `when`        DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     PRIMARY KEY (`history_id`),
     INDEX `idx_entity_type_entity_id` (`entity_type`, `entity_id`), -- Composite index for entity-based querying
     INDEX `idx_when` (`when`),
     INDEX `idx_action` (`action`),
-    FOREIGN KEY (`who`) REFERENCES `users`(`user_id`) -- Assuming a users table exists
+    FOREIGN KEY (`who`) REFERENCES `users` (`user_id`)              -- Assuming a users table exists
+) ENGINE = INNODB
+  DEFAULT CHARSET = utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `actions`
+(
+    `action_id`    BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `action_label` VARCHAR(200)    NOT NULL,
+    `action_key`   BIGINT UNSIGNED NOT NULL,
+    `action`       VARCHAR(200)    NOT NULL,
+
+    PRIMARY KEY (`action_id`),
+    INDEX `idx_action_label_action_key` (`action_label`, `action_key`),
+    INDEX `idx_action` (`action`)
+) ENGINE = INNODB
+  DEFAULT CHARSET = utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `roles`
+(
+    `role_id`    BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `action_label` VARCHAR(200)    NOT NULL,
+    `action_key`   BIGINT UNSIGNED NOT NULL,
+    `action`       VARCHAR(200)    NOT NULL,
+
+    PRIMARY KEY (`role_id`),
+    INDEX `idx_action_label_action_key` (`action_label`, `action_key`),
+    INDEX `idx_action` (`action`)
 ) ENGINE = INNODB
   DEFAULT CHARSET = utf8mb4;
 

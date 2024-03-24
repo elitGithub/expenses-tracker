@@ -12,4 +12,6 @@ $dbConfigOption = [
 ];
 
 $default_charset = 'utf-8';
-
+//
+//require_once('/var/www/expenses-tracker/config/database.php');
+//require_once('/var/www/expenses-tracker/config/cache_config.php');

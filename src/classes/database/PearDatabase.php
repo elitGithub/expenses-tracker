@@ -505,9 +505,7 @@ class PearDatabase implements LoggerAwareInterface
             try {
                 $tmpRes = $this->database->Execute($sql, $params);
             } catch (Throwable $e) {
-                var_dump($params);
-                var_dump($e);
-                $this->checkError($e->getMessage() . ' ' . $msg . ' Query Failed:' . $sql . '::', $dieOnError, $sql);
+                $this->checkError($e->getMessage() . ' ' . $msg . ' Query Failed:' . $this->convert2Sql($sql, $params) . '::', $dieOnError, $sql);
                 return false;
             }
         }
@@ -517,7 +515,7 @@ class PearDatabase implements LoggerAwareInterface
 
         $this->lastmysqlrow = -1;
         if (!$result) {
-            $this->checkError($msg . ' Query Failed:' . $sql . '::', $dieOnError, $sql);
+            $this->checkError($msg . ' Query Failed:' . $this->convert2Sql($sql, $params) . '::', $dieOnError, $sql);
         }
 
         // Performance Tuning: Cache the query result

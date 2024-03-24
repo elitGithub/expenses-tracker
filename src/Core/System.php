@@ -66,7 +66,7 @@ class System
             self::VERSION_MINIMUM_PHP,
             'PHP mysqli extension for MySQL v5.7/ MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL. Suitable for relational data storage, including user permissions.',
         ],
-        'pdo'  => [
+        'pdo'     => [
             self::VERSION_MINIMUM_PHP,
             'PHP Data Objects (PDO) extension supports multiple databases (MySQL, PostgreSQL, SQLite, etc.). Versatile for any relational database management system.',
         ],
@@ -93,7 +93,7 @@ class System
     ];
 
     private array $supportedPermissionEngines = [
-        'default'     => [
+        'default'   => [
             self::VERSION_MINIMUM_PHP,
             'Use the system default file system',
         ],
@@ -101,12 +101,10 @@ class System
             self::VERSION_MINIMUM_PHP,
             'PHP Redis extension for working with Redis, a fast, in-memory data store. Excellent for caching user permissions for quick access.',
         ],
-        // Adding Memcached
         'memcached' => [
             self::VERSION_MINIMUM_PHP,
             'PHP memcached extension for interfacing with Memcached, an in-memory key-value store. Good for caching frequently accessed data like user permissions.',
         ],
-        // Adding APCu
         'apcu'      => [
             self::VERSION_MINIMUM_PHP,
             'PHP APCu extension provides user cache for variables stored in memory. Suitable for caching small datasets like user permissions without distributed caching.',
@@ -122,7 +120,8 @@ class System
      */
     private array $missingExtensions = [];
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->uniqueIdsGenerator = new UniqueIdsGenerator();
     }
 
@@ -141,7 +140,6 @@ class System
 
     /**
      * @return false|string
-     * @throws \Random\RandomException
      */
     public function getRandomString()
     {
@@ -235,6 +233,7 @@ class System
 
     /**
      * Returns loaded in-memory engines
+     *
      * @param  bool  $returnAsHtml
      * *
      * * @return array<string, string>
@@ -271,5 +270,40 @@ class System
     public function getSupportedPermissionEngines(): array
     {
         return $this->supportedPermissionEngines;
+    }
+
+    /**
+     * @param  array  $dbConfig
+     * @param  array  $permissionsConfig
+     * @param  array  $redisConfig
+     * @param  array  $memcachedConfig
+     *
+     * @return void
+     */
+    public function createConfigFiles(array $dbConfig = [], array $permissionsConfig = [], array $redisConfig = [], array $memcachedConfig = [])
+    {
+        $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
+        require_once $primaryConfigFile;
+
+        $dbConfigFile = EXTR_ROOT_DIR . '/config/database.php';
+        $userManagementFile = EXTR_ROOT_DIR . '/config/cache_config.php';
+        $dbConfigData = '<?php 
+                              ' . var_export($dbConfig, true) . ';';
+
+        file_put_contents($dbConfigFile, $dbConfigData);
+        file_put_contents($primaryConfigFile, "require_once('$dbConfigFile');\n", FILE_APPEND);
+
+        if (count($redisConfig)) {
+            $redisConfigData = '<?php 
+                                      ' . var_export($redisConfig, true) . ';';
+            file_put_contents($userManagementFile, $redisConfigData);
+        }
+
+        if (count($memcachedConfig)) {
+            $memcachedConfigData = '<?php ' . var_export($memcachedConfig, true) . ';';
+            file_put_contents($userManagementFile, $memcachedConfigData);
+        }
+
+        file_put_contents($primaryConfigFile, "require_once('$userManagementFile');\n", FILE_APPEND);
     }
 }

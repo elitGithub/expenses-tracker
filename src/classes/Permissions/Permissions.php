@@ -15,7 +15,6 @@ class Permissions
 {
     protected static Memcached $memcached;
     protected static Redis $redis;
-    protected static bool $apcuEnabled = false;
 
     public function __construct() {
         if (!file_exists(EXTR_ROOT_DIR . '/config/user/permissions.php')) {
@@ -53,7 +52,7 @@ class Permissions
                 return $memcached->set($key, $data);
 
             case 'apcu':
-                if (!self::$apcuEnabled) {
+                if (!self::isAPCUEnabled()) {
                     throw new Exception('APCu is not enabled or available.');
                 }
                 return apcu_store($key, $data);
@@ -86,7 +85,7 @@ class Permissions
                 return $memcached->get($key) ?: null;
 
             case 'apcu':
-                if (!self::$apcuEnabled) {
+                if (!self::isAPCUEnabled()) {
                     throw new Exception('APCu is not enabled or available.');
                 }
                 $success = false;
@@ -112,12 +111,13 @@ class Permissions
         return self::$redis;
     }
 
+
     /**
-     * @return void
+     * @return bool
      */
-    private static function isAPCUEnabled()
+    private static function isAPCUEnabled(): bool
     {
-        self::$apcuEnabled = extension_loaded('apcu');
+        return extension_loaded('apcu');
     }
 
     /**
