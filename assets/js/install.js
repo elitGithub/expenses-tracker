@@ -30,7 +30,7 @@ let formState = {
     userdata: {}
 };
 
-goBackInstall.addEventListener('click', (ev) => {
+goBackInstall?.addEventListener('click', (ev) => {
     ev.preventDefault();
     window.history.back();
 });
@@ -117,6 +117,7 @@ document.getElementById('prevBtn').addEventListener('click', () => {
 
 function showForm() {
     form.classList.remove('d-none');
+    console.log(form);
     document.getElementById('pre-install-instructions').classList.add('d-none');
     steps[0].classList.add('active');
 }
