@@ -4,6 +4,17 @@ declare(strict_types = 1);
 
 namespace Permissions;
 
+if (!file_exists(EXTR_ROOT_DIR . '/config/user/permissions.php')) {
+    throw new Exception('Missing user configuration, please install the system first!');
+}
+
+require_once EXTR_ROOT_DIR . '/config/user/permissions.php';
+global $permissionsConfig;
+if (!isset($permissionsConfig['backend'])) {
+    throw new Exception('No backend specified in permissions configuration.');
+}
+
+use database\PearDatabase;
 use Exception;
 use Memcached;
 use Redis;
@@ -15,18 +26,63 @@ class Permissions
 {
     protected static Memcached $memcached;
     protected static Redis $redis;
+    protected ?PearDatabase $adb = null;
 
-    public function __construct() {
-        if (!file_exists(EXTR_ROOT_DIR . '/config/user/permissions.php')) {
-            throw new Exception('Missing user configuration, please install the system first!');
-        }
+    /**
+     * Array with user rights.
+     *
+     * @var array<array>
+     */
+    protected static array $mainRights = [
+        [
+            'name'        => 'add_user',
+            'description' => 'Right to add user accounts',
+        ],
+        [
+            'name'        => 'edit_user',
+            'description' => 'Right to edit user accounts',
+        ],
+        [
+            'name'        => 'delete_user',
+            'description' => 'Right to delete user accounts',
+        ],
+        [
+            'name'        => 'viewlog',
+            'description' => 'Right to view logfiles',
+        ],
+        [
+            'name'        => 'adminlog',
+            'description' => 'Right to view admin log',
+        ],
+        [
+            'name'        => 'passwd',
+            'description' => 'Right to change passwords',
+        ],
+        [
+            'name'        => 'editconfig',
+            'description' => 'Right to edit configuration',
+        ],
+        [
+            'name'        => 'viewadminlink',
+            'description' => 'Right to see the link to the admin section',
+        ],
+        [
+            'name'        => 'reports',
+            'description' => 'Right to generate reports',
+        ],
+        [
+            'name'        => 'export',
+            'description' => 'Right to export',
+        ],
+    ];
 
-        require_once EXTR_ROOT_DIR . '/config/user/permissions.php'; // TODO: permissions file, which also defines if this system should check for permissions internally or use something external.
-        global $permissionsConfig;
-        if (!isset($permissionsConfig['backend'])) {
-            throw new Exception('No backend specified in permissions configuration.');
-        }
-    }
+
+    protected static array $baseRoles = [
+        'administrator',
+        'manager',
+        'supervisor',
+        'user',
+    ];
 
 
     /**
@@ -94,6 +150,34 @@ class Permissions
 
             default:
                 throw new Exception('Unsupported backend specified.');
+        }
+    }
+
+    /**
+     * @param  \database\PearDatabase  $adb
+     * @param                          $tableName
+     *
+     * @return void
+     */
+    public static function populateActionsTable(PearDatabase $adb, $tableName)
+    {
+        $key = 1;
+        foreach (static::$mainRights as $mainRight) {
+            $adb->pquery("INSERT INTO `$tableName` (`action_label`, `action_key`, `action`) VALUES (?, ?, ?);", [$mainRight['description'], $key, $mainRight['name']]);
+            ++$key;
+        }
+    }
+
+    /**
+     * @param  \database\PearDatabase  $adb
+     * @param                          $tableName
+     *
+     * @return void
+     */
+    public static function populateRolesTable(PearDatabase $adb, $tableName)
+    {
+        foreach (static::$baseRoles as $role) {
+            $adb->pquery("INSERT INTO `$tableName` (`role_name`) VALUES (?);", [$role]);
         }
     }
 

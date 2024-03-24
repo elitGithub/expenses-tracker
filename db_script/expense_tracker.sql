@@ -119,6 +119,21 @@ CREATE TABLE IF NOT EXISTS `user_to_role`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `role_permissions`
+(
+    `role_id`     BIGINT UNSIGNED NOT NULL,
+    `action_id`   BIGINT UNSIGNED NOT NULL,
+    `is_enabled`  TINYINT(1) NOT NULL DEFAULT 1,
+
+    PRIMARY KEY (`role_id`, `action_id`),
+    FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`action_id`) REFERENCES `actions` (`action_id`) ON DELETE CASCADE,
+    INDEX `idx_role_id` (`role_id`),
+    INDEX `idx_action_id` (`action_id`),
+    INDEX `idx_is_enabled` (`is_enabled`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+
 
 /*!40101 SET CHARACTER_SET_CLIENT = @OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS = @OLD_CHARACTER_SET_RESULTS */;

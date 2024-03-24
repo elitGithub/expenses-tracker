@@ -25,7 +25,7 @@ let formState = {
         redis_host: '',
         memcache_host: '',
         memcache_user: '',
-        memcache_port: '',
+        memcache_port: 11211,
     },
     userdata: {}
 };

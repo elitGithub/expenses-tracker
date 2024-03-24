@@ -112,7 +112,10 @@ class System
     ];
 
     private UniqueIdsGenerator $uniqueIdsGenerator;
-
+    /**
+     * Configuration array.
+     */
+    protected array $mainConfig = [];
     /**
      * Array of missing PHP extensions.
      *
@@ -123,6 +126,11 @@ class System
     public function __construct()
     {
         $this->uniqueIdsGenerator = new UniqueIdsGenerator();
+        $this->mainConfig = [
+            'currentVersion'    => System::getVersion(),
+            'appKey'            => $this->getRandomString(16),
+            'enableCaptchaCode' => (extension_loaded('gd') ? 'true' : 'false'),
+        ];
     }
 
 
@@ -139,11 +147,22 @@ class System
     }
 
     /**
+     * @return array
+     */
+    public function getMainConfig(): array
+    {
+        return $this->mainConfig;
+    }
+
+
+    /**
+     * @param  int  $length
+     *
      * @return false|string
      */
-    public function getRandomString()
+    public function getRandomString(int $length = 13)
     {
-        return $this->uniqueIdsGenerator->generateTrueRandomString();
+        return $this->uniqueIdsGenerator->generateTrueRandomString($length);
     }
 
 

@@ -337,7 +337,7 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                                 </div>
                             </div>
                             <?php
-                            $suggestedPassword = (new \Core\UniqueIdsGenerator())->generateTrueRandomString(18) ?>
+                            $suggestedPassword = $system->getRandomString(18) ?>
                             <div class="row mb-2">
                                 <label class="col-sm-3 col-form-label" for="admin_password">Your password:</label>
                                 <div class="col-sm-9">

@@ -10,12 +10,15 @@ namespace Setup;
 class TableFactory
 {
     private array $queries        = [];
-    private array $tableNames     = [];
     private array $systemSettings = [
         'expense_category_table_name' => '',
         'expenses_table_name'         => '',
         'users_table_name'            => '',
         'history_table_name'          => '',
+        'actions_table_name'          => '',
+        'roles_table_name'            => '',
+        'role_permissions_table_name' => '',
+        'user_to_role_table_name'     => '',
     ];
 
     // Define SQL template with placeholders for table prefixes
@@ -128,6 +131,22 @@ CREATE TABLE IF NOT EXISTS `%suser_to_role`
     FOREIGN KEY (`role_id`) REFERENCES `%sroles` (`role_id`) ON DELETE CASCADE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
+
+
+CREATE TABLE IF NOT EXISTS `%srole_permissions`
+(
+    `role_id`     BIGINT UNSIGNED NOT NULL,
+    `action_id`   BIGINT UNSIGNED NOT NULL,
+    `is_enabled`  TINYINT(1) NOT NULL DEFAULT 1,
+
+    PRIMARY KEY (`role_id`, `action_id`),
+    FOREIGN KEY (`role_id`) REFERENCES `%sroles` (`role_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`action_id`) REFERENCES `%sactions` (`action_id`) ON DELETE CASCADE,
+    INDEX `idx_role_id` (`role_id`),
+    INDEX `idx_action_id` (`action_id`),
+    INDEX `idx_is_enabled` (`is_enabled`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
 SQL;
 
     /**
@@ -148,7 +167,7 @@ SQL;
     private function generateQueries($prefix)
     {
         $this->queries = explode(";\n",
-                                 trim(sprintf($this->sqlTemplate, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix)));
+                                 trim(sprintf($this->sqlTemplate, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix)));
         $this->queries = array_filter($this->queries, function ($value) { return !is_null($value) && $value !== ''; });
 
         $this->extractTableNames($prefix); // Extract and store table names and update settings
@@ -163,9 +182,6 @@ SQL;
     {
         foreach ($this->queries as $query) {
             if (preg_match('/CREATE TABLE IF NOT EXISTS `(' . $prefix . '[a-zA-Z_]+)`/', $query, $matches)) {
-                // Store the extracted table name
-                $this->tableNames[] = $matches[1];
-
                 // Determine the corresponding setting key based on the table name
                 $tableNameWithoutPrefix = str_replace($prefix, '', $matches[1]);
                 $settingKey = array_search($tableNameWithoutPrefix, [
@@ -191,13 +207,4 @@ SQL;
         return $this->queries;
     }
 
-    /**
-     * Returns the list of table names generated.
-     *
-     * @return array
-     */
-    public function getTableNames(): array
-    {
-        return $this->tableNames;
-    }
 }

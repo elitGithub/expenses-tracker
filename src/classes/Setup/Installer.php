@@ -5,12 +5,12 @@ declare(strict_types = 1);
 namespace Setup;
 
 use Core\System;
-use Core\UniqueIdsGenerator;
 use database\PearDatabase;
 use Exception;
 use Filter;
 use Log\InstallLog;
 use Memcached;
+use Permissions\Permissions;
 use Redis;
 use Throwable;
 
@@ -20,61 +20,9 @@ use Throwable;
 class Installer extends Setup
 {
 
-    protected System $system;
-    /**
-     * Array with user rights.
-     *
-     * @var array<array>
-     */
-    protected array $mainRights = [
-        [
-            'name'        => 'add_user',
-            'description' => 'Right to add user accounts',
-        ],
-        [
-            'name'        => 'edit_user',
-            'description' => 'Right to edit user accounts',
-        ],
-        [
-            'name'        => 'delete_user',
-            'description' => 'Right to delete user accounts',
-        ],
-        [
-            'name'        => 'viewlog',
-            'description' => 'Right to view logfiles',
-        ],
-        [
-            'name'        => 'adminlog',
-            'description' => 'Right to view admin log',
-        ],
-        [
-            'name'        => 'passwd',
-            'description' => 'Right to change passwords',
-        ],
-        [
-            'name'        => 'editconfig',
-            'description' => 'Right to edit configuration',
-        ],
-        [
-            'name'        => 'viewadminlink',
-            'description' => 'Right to see the link to the admin section',
-        ],
-        [
-            'name'        => 'reports',
-            'description' => 'Right to generate reports',
-        ],
-        [
-            'name'        => 'export',
-            'description' => 'Right to export',
-        ],
-    ];
+    protected System        $system;
+    protected ?PearDatabase $adb = null;
 
-    /**
-     * Configuration array.
-     */
-    protected array $mainConfig = [
-
-    ];
     /**
      * @var \Log\InstallLog
      */
@@ -90,13 +38,6 @@ class Installer extends Setup
         parent::__construct();
         $this->system = $system;
         $this->logger = new InstallLog('install');
-        $dynMainConfig = [
-            'main.currentVersion'    => System::getVersion(),
-            'main.currentApiVersion' => System::getApiVersion(),
-            'main.appKey'            => (new UniqueIdsGenerator())->generateTrueRandomString(16),
-            'spam.enableCaptchaCode' => (extension_loaded('gd') ? 'true' : 'false'),
-        ];
-        $this->mainConfig = array_merge($this->mainConfig, $dynMainConfig);
     }
 
     /**
@@ -234,6 +175,10 @@ class Installer extends Setup
             'expenses_table_name'         => '',
             'users_table_name'            => '',
             'history_table_name'          => '',
+            'actions_table_name'          => '',
+            'roles_table_name'            => '',
+            'role_permissions_table_name' => '',
+            'user_to_role_table_name'     => '',
         ];
 
         $redisConfig = [];
@@ -333,14 +278,14 @@ class Installer extends Setup
             $result = $masterDb->preparedQuery($sqlGrantPrivileges, [], true);
             $masterDb->preparedQuery('FLUSH PRIVILEGES;');
         }
-        $adb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'], $dbConfig['db_pass']);
+        $this->adb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'], $dbConfig['db_pass']);
         try {
-            $adb->connect(true);
+            $this->adb->connect(true);
         } catch (Throwable $exception) {
             throw new Exception($exception->getMessage());
         }
 
-        $permissionsConfig['writing_key'] = (new UniqueIdsGenerator())->generateTrueRandomString(18);
+        $permissionsConfig['writing_key'] = $this->system->getRandomString(18);
         $permissionsConfig['backend'] = Filter::filterInput(INPUT_POST, 'user_management', FILTER_SANITIZE_SPECIAL_CHARS);
         if ($permissionsConfig['backend'] === 'redis') {
             $redisPass = Filter::filterInput(INPUT_POST, 'redis_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
@@ -349,7 +294,7 @@ class Installer extends Setup
                 'readTimeout'    => 2.5,
                 'connectTimeout' => 2.5,
                 'auth'           => $redisPass,
-                'port'           => Filter::filterInput(INPUT_POST, 'redis_port', FILTER_VALIDATE_INT),
+                'port'           => Filter::filterInput(INPUT_POST, 'redis_port', FILTER_VALIDATE_INT, 6379),
                 'persistent'     => true,
             ];
             $redis = new Redis($redisConfig);
@@ -360,13 +305,67 @@ class Installer extends Setup
             $memcachedConfig = [
                 'host'         => Filter::filterInput(INPUT_POST, 'memcache_host', FILTER_SANITIZE_SPECIAL_CHARS, ''),
                 'persist_name' => Filter::filterInput(INPUT_POST, 'memcache_user', FILTER_SANITIZE_SPECIAL_CHARS, ''),
-                'port'         => Filter::filterInput(INPUT_POST, 'memcache_port', FILTER_VALIDATE_INT),
+                'port'         => Filter::filterInput(INPUT_POST, 'memcache_port', FILTER_VALIDATE_INT, 11211),
             ];
             $memcacheConnect = new Memcached($memcachedConfig['persist_name']);
             $memcacheConnect->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
             $memcacheConnect->addServer($memcachedConfig['host'], $memcachedConfig['port']);
         }
 
+        $dbConfig['tables'] = $systemSettings;
         $this->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
+    }
+
+    /**
+     * @param  array  $dbConfig
+     * @param  array  $permissionsConfig
+     * @param  array  $redisConfig
+     * @param  array  $memcachedConfig
+     *
+     * @return void
+     */
+    public function createConfigFiles(array $dbConfig = [], array $permissionsConfig = [], array $redisConfig = [], array $memcachedConfig = [])
+    {
+        $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
+        require_once $primaryConfigFile;
+
+        $dbConfigFile = EXTR_ROOT_DIR . '/config/database.php';
+        $userManagementFile = EXTR_ROOT_DIR . '/config/user/permissions.php';
+        $dbConfigData = '<?php
+                              ' . var_export($dbConfig, true) . ';';
+
+        file_put_contents($dbConfigFile, $dbConfigData);
+        file_put_contents($primaryConfigFile, "require_once('$dbConfigFile');\n", FILE_APPEND);
+
+        if ($permissionsConfig['backend'] === 'redis') {
+            $redisConfigData = '<?php
+                                      ' . var_export($redisConfig, true) . ';';
+            file_put_contents($userManagementFile, $redisConfigData);
+        }
+
+        if ($permissionsConfig['backend'] === 'memcached') {
+            $memcachedConfigData = '<?php
+                                       ' . var_export($memcachedConfig, true) . ';';
+            file_put_contents($userManagementFile, $memcachedConfigData);
+        }
+
+        file_put_contents($primaryConfigFile, "require_once('$userManagementFile');\n", FILE_APPEND);
+
+        $mainConfig = $this->system->getMainConfig();
+
+        file_put_contents($primaryConfigFile, '$app_unique_key=' . $mainConfig['appKey'] . ';' . PHP_EOL, FILE_APPEND);
+        file_put_contents($primaryConfigFile, '$systemVersion=' . $mainConfig['currentVersion'] . ';' . PHP_EOL, FILE_APPEND);
+        file_put_contents($primaryConfigFile, '$enableCaptchaCode=' . $mainConfig['enableCaptchaCode'] . ';' . PHP_EOL, FILE_APPEND);
+    }
+
+    public function createPermissionsFile(array $permissions)
+    {
+        $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
+        require_once $primaryConfigFile;
+        global $dbConfig;
+        Permissions::populateActionsTable($this->adb, $dbConfig['tables']['actions_table_name']);
+        Permissions::populateRolesTable($this->adb, $dbConfig['tables']['roles_table_name']);
+
+        $permissionsFile = EXTR_ROOT_DIR . '/config/user/permissions.php';
     }
 }
