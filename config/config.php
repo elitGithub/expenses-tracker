@@ -12,3 +12,7 @@ $dbConfigOption = [
 ];
 
 $default_charset = 'utf-8';
+
+if (is_file('installation_includes.php')) {
+    require_once 'installation_includes.php';
+}

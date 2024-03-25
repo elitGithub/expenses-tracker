@@ -334,8 +334,10 @@ class Installer extends Setup
         $dbConfigData = '<?php
                               ' . var_export($dbConfig, true) . ';';
 
+
+        $includesFile = EXTR_ROOT_DIR . '/config/installation_includes.php';
         file_put_contents($dbConfigFile, $dbConfigData);
-        file_put_contents($primaryConfigFile, "require_once('$dbConfigFile');\n", FILE_APPEND);
+        file_put_contents($includesFile, "require_once('$dbConfigFile');\n", FILE_APPEND);
 
         if ($permissionsConfig['backend'] === 'redis') {
             $redisConfigData = '<?php
@@ -349,13 +351,13 @@ class Installer extends Setup
             file_put_contents($userManagementFile, $memcachedConfigData);
         }
 
-        file_put_contents($primaryConfigFile, "require_once('$userManagementFile');\n", FILE_APPEND);
+        file_put_contents($includesFile, "require_once('$userManagementFile');\n", FILE_APPEND);
 
         $mainConfig = $this->system->getMainConfig();
 
-        file_put_contents($primaryConfigFile, '$app_unique_key=' . $mainConfig['appKey'] . ';' . PHP_EOL, FILE_APPEND);
-        file_put_contents($primaryConfigFile, '$systemVersion=' . $mainConfig['currentVersion'] . ';' . PHP_EOL, FILE_APPEND);
-        file_put_contents($primaryConfigFile, '$enableCaptchaCode=' . $mainConfig['enableCaptchaCode'] . ';' . PHP_EOL, FILE_APPEND);
+        file_put_contents($includesFile, '$app_unique_key=' . $mainConfig['appKey'] . ';' . PHP_EOL, FILE_APPEND);
+        file_put_contents($includesFile, '$systemVersion=' . $mainConfig['currentVersion'] . ';' . PHP_EOL, FILE_APPEND);
+        file_put_contents($includesFile, '$enableCaptchaCode=' . $mainConfig['enableCaptchaCode'] . ';' . PHP_EOL, FILE_APPEND);
     }
 
     public function createPermissionsFile(array $permissions)

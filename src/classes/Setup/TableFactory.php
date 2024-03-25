@@ -21,7 +21,9 @@ class TableFactory
         'user_to_role_table_name'     => '',
     ];
 
-    // Define SQL template with placeholders for table prefixes
+    /**
+     * @var string
+     */
     private string $sqlTemplate = <<<SQL
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -64,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `%sexpenses` (
 
 CREATE TABLE IF NOT EXISTS `%susers`
 (
-    `user_id`        INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `email`          VARCHAR(200)     NOT NULL,
     `user_name`      VARCHAR(200)     NOT NULL,
     `first_name`     VARCHAR(200)     NOT NULL,
@@ -166,9 +168,11 @@ SQL;
      */
     private function generateQueries($prefix)
     {
-        $this->queries = explode(";\n",
-                                 trim(sprintf($this->sqlTemplate, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix)));
-        $this->queries = array_filter($this->queries, function ($value) { return !is_null($value) && $value !== ''; });
+        $sqlFormatted = sprintf($this->sqlTemplate, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix);
+        $sqlNormalized = str_replace("\r\n", "\n", $sqlFormatted); // Normalize newline characters
+
+        $this->queries = explode(";\n",$sqlNormalized);
+        $this->queries = array_filter($this->queries, fn($value) => !is_null($value) && $value !== '');
 
         $this->extractTableNames($prefix); // Extract and store table names and update settings
     }
@@ -189,6 +193,10 @@ SQL;
                     'expenses_table_name'         => 'expenses',
                     'users_table_name'            => 'users',
                     'history_table_name'          => 'history',
+                    'actions_table_name'          => 'actions',
+                    'roles_table_name'            => 'roles',
+                    'user_to_role_table_name'     => 'user_to_role',
+                    'role_permissions_table_name' => 'role_permissions',
                 ],                         true);
 
                 if ($settingKey !== false) {

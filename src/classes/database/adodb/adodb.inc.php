@@ -1142,19 +1142,19 @@ if (!defined('_ADODB_LAYER')) {
 				return $this->Connect($argHostname, $argUsername, $argPassword, $argDatabaseName);
 			}
 
-			if ($argHostname != "") {
+			if ($argHostname != '') {
 				$this->host = $argHostname;
 			}
 			// Overwrites $this->host and $this->port if a port is specified.
 			$this->parseHostNameAndPort();
 
-			if ($argUsername != "") {
+			if ($argUsername != '') {
 				$this->user = $argUsername;
 			}
-			if ($argPassword != "") {
+			if ($argPassword != '') {
 				$this->password = 'not stored';
 			}
-			if ($argDatabaseName != "") {
+			if ($argDatabaseName != '') {
 				$this->database = $argDatabaseName;
 			}
 
@@ -1168,11 +1168,10 @@ if (!defined('_ADODB_LAYER')) {
 				if (empty($err)) {
 					$err = "Connection error to server '$argHostname' with user '$argUsername'";
 				}
-				$ret = false;
 			} else {
 				$err = "Missing extension for " . $this->dataProvider;
-				$ret = false;
 			}
+			$ret = false;
 			if ($fn = $this->raiseErrorFn) {
 				$fn($this->databaseType, 'PCONNECT', $this->ErrorNo(), $err, $this->host, $this->database, $this);
 			}

@@ -18,6 +18,7 @@ use database\PearDatabase;
 use Exception;
 use Memcached;
 use Redis;
+use User;
 
 /**
  * Permissions Manager system, using various systems for fast in memory access.
@@ -82,6 +83,13 @@ class Permissions
         'manager',
         'supervisor',
         'user',
+    ];
+
+    protected static array $permissions = [
+        'administrator' => ['manager', 'supervisor', 'user'],
+        'manager' => ['supervisor', 'user'],
+        'supervisor' => ['user'],
+        'user' => [],
     ];
 
 
@@ -193,6 +201,22 @@ class Permissions
         }
 
         return self::$redis;
+    }
+
+    /**
+     * @param $userRole
+     * @param $targetRole
+     *
+     * @return bool
+     */
+    public static function isPermittedView($userRole, $targetRole): bool
+    {
+        return in_array($targetRole, self::$permissions[$userRole] ?? []);
+    }
+
+    public static function isPermittedAction($action, User $user)
+    {
+        
     }
 
 
