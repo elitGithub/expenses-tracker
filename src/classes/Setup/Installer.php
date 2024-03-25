@@ -297,8 +297,12 @@ class Installer extends Setup
                 'port'           => Filter::filterInput(INPUT_POST, 'redis_port', FILTER_VALIDATE_INT, 6379),
                 'persistent'     => true,
             ];
-            $redis = new Redis($redisConfig);
-            $redis->connect($redisConfig['host']);
+
+            $redis = new Redis();
+            $redis->connect($redisConfig['host'], $redisConfig['port']);
+            if (!empty($redisConfig['auth'])) {
+                $redis->auth($redisConfig['auth']);
+            }
         }
 
         if ($permissionsConfig['backend'] === 'memcached') {
@@ -332,17 +336,18 @@ class Installer extends Setup
         $dbConfigFile = EXTR_ROOT_DIR . '/config/database.php';
         $userManagementFile = EXTR_ROOT_DIR . '/config/user/permissions.php';
         $dbConfigData = '<?php
-                              ' . var_export($dbConfig, true) . ';';
+                              $dbConfig=' . var_export($dbConfig, true) . ';';
 
 
         $includesFile = EXTR_ROOT_DIR . '/config/installation_includes.php';
         file_put_contents($dbConfigFile, $dbConfigData);
-        file_put_contents($includesFile, "require_once('$dbConfigFile');\n", FILE_APPEND);
+        file_put_contents($includesFile, '<?php
+                                                    ' . "require_once('$dbConfigFile');\n", FILE_APPEND);
 
         if ($permissionsConfig['backend'] === 'redis') {
             $redisConfigData = '<?php
-                                      ' . var_export($redisConfig, true) . ';';
-            file_put_contents($userManagementFile, $redisConfigData);
+                                      ' . '$redisConfig=' . var_export($redisConfig, true) . ';';
+            file_put_contents($userManagementFile,  $redisConfigData);
         }
 
         if ($permissionsConfig['backend'] === 'memcached') {
@@ -355,8 +360,8 @@ class Installer extends Setup
 
         $mainConfig = $this->system->getMainConfig();
 
-        file_put_contents($includesFile, '$app_unique_key=' . $mainConfig['appKey'] . ';' . PHP_EOL, FILE_APPEND);
-        file_put_contents($includesFile, '$systemVersion=' . $mainConfig['currentVersion'] . ';' . PHP_EOL, FILE_APPEND);
+        file_put_contents($includesFile, '$app_unique_key="' . $mainConfig['appKey'] . '";' . PHP_EOL, FILE_APPEND);
+        file_put_contents($includesFile, '$systemVersion="' . $mainConfig['currentVersion'] . '";' . PHP_EOL, FILE_APPEND);
         file_put_contents($includesFile, '$enableCaptchaCode=' . $mainConfig['enableCaptchaCode'] . ';' . PHP_EOL, FILE_APPEND);
     }
 
