@@ -378,7 +378,7 @@ $installer = new Installer($system);
                         </div>
                         <!-- start previous / next buttons -->
                         <div class="form-footer d-flex mt-5 float-end">
-                            <button class="btn btn-lg btn-danger w-30" type="button" id="prevBtn">Previous</button>
+                            <button class="btn btn-lg btn-danger w-30 d-none" type="button" id="prevBtn">Previous</button>
                             <button class="btn btn-lg btn-success w-30" type="button" id="nextBtn">Next</button>
                         </div>
                         <!-- end previous / next buttons -->

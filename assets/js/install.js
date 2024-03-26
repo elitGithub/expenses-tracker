@@ -95,14 +95,16 @@ function nextStep() {
 }
 
 function prevStep() {
-    if (currentStep > 1) {
-        currentStep--;
-    } else if (currentSection > 1) {
+    if (currentSection > 1) {
         // Move to the previous section and find its last step
         currentSection--;
         const steps = document.querySelectorAll(`[data-form-section="${currentSection}"] [data-step]`);
         currentStep = steps.length; // Assumes steps are sequentially ordered
+
+        return updateVisibility();
     }
+
+    currentStep--;
     updateVisibility();
 }
 
