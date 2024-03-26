@@ -132,15 +132,23 @@ $installer = new Installer($system);
                                 <div class="row mb-2">
                                     <label class="col-sm-3 col-form-label" for="sql_server">Host/Socket:</label>
                                     <div class="col-sm-9">
-                                        <input type="text" name="sql_server" id="sql_server" class="form-control" placeholder="e.g. 127.0.0.1" required>
-                                        <small class="form-text text-muted">Please enter the host or path to the socket of your database server.</small>
+                                        <input type="text" name="sql_server" id="sql_server" class="form-control" placeholder="e.g. 127.0.0.1" data-default-value="127.0.0.1">
+                                        <small class="form-text text-muted">
+                                            Please enter the host or path to the socket of your database server.
+                                            <br>
+                                            Leave blank for 127.0.0.1
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <label class="col-sm-3 col-form-label" for="sql_port">Port:</label>
                                     <div class="col-sm-9">
-                                        <input type="number" name="sql_port" id="sql_port" class="form-control" required>
-                                        <small class="form-text text-muted">Please enter the port your database server.</small>
+                                        <input type="number" name="sql_port" id="sql_port" class="form-control" placeholder="e.g. 3306" data-default-value="3306">
+                                        <small class="form-text text-muted">
+                                            Please enter the port your database server.
+                                            <br>
+                                            Leave blank for 3306
+                                        </small>
                                     </div>
                                 </div>
                             </div>

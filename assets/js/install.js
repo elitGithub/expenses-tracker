@@ -1,4 +1,4 @@
-const form =  document.getElementById('expenses-tracker-setup-form');
+const form = document.getElementById('expenses-tracker-setup-form');
 const steps = Array.from(document.getElementsByClassName('stepIndicator'));
 const goBackInstall = document.getElementById('goBackInstall');
 let currentSection = 1;
@@ -59,7 +59,8 @@ function updateFormState() {
     const currentInputs = document.querySelector(`[data-form-section="${currentSection}"] [data-step="${currentStep}"]`).querySelectorAll('input, select, textarea');
     currentInputs.forEach(input => {
         // Adjust this logic based on how your formState keys are structured and related to input names
-        formState[input.name] = input.value;
+        // check if the input has data-default-* attribute and set the value to that, otherwise set it to empty value
+        formState[input.name] = input.getAttribute('data-default-value') || input.value;
     });
 }
 
@@ -124,7 +125,7 @@ function showForm() {
 
 function validateCurrentStep(step) {
     let isValid = true;
-    const currentSection = document.querySelector(`[data-step="${ step }"]`); // Simplified the selector here
+    const currentSection = document.querySelector(`[data-step="${step}"]`); // Simplified the selector here
 
     currentSection.querySelectorAll('input[required], select[required]').forEach(function (input) {
         // Check if the input itself or any of its parents have the 'd-none' class
