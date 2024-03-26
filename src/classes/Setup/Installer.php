@@ -267,13 +267,13 @@ class Installer extends Setup
         }
 
         // Now that we have tables, let's check for the user:
-        $sqlCreateUser = "CREATE USER IF NOT EXISTS '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}' IDENTIFIED BY '{$dbConfig['db_pass']}';";
-        $masterDb->preparedQuery($sqlCreateUser, [], true);
-
         $userQuery = 'SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = ?) AS "exists";';
         $result = $masterDb->preparedQuery($userQuery, [$dbConfig['db_user']], true);
 
-        if ($masterDb->query_result($result, 0, 'exists')) {
+        // If the user already exists, we don't need to create it.
+        if (!$masterDb->query_result($result, 0, 'exists')) {
+            $sqlCreateUser = "CREATE USER IF NOT EXISTS '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}' IDENTIFIED BY '{$dbConfig['db_pass']}';";
+            $masterDb->preparedQuery($sqlCreateUser, [], true);
             $sqlGrantPrivileges = "GRANT SELECT, INSERT, UPDATE, DELETE ON `{$dbConfig['db_name']}`.* TO '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}';";
             $result = $masterDb->preparedQuery($sqlGrantPrivileges, [], true);
             $masterDb->preparedQuery('FLUSH PRIVILEGES;');
