@@ -17,7 +17,7 @@ class System
     /**
      * Minor version.
      */
-    private const VERSION_MINOR = 1;
+    private const VERSION_MINOR = 0;
 
     /**
      * Patch level.
@@ -64,31 +64,31 @@ class System
     private array $supportedDatabases = [
         'mysqli'  => [
             self::VERSION_MINIMUM_PHP,
-            'PHP mysqli extension for MySQL v5.7/ MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL. Suitable for relational data storage, including user permissions.',
+            'PHP mysqli extension for MySQL v5.7/ MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL.',
         ],
         'pdo'     => [
             self::VERSION_MINIMUM_PHP,
-            'PHP Data Objects (PDO) extension supports multiple databases (MySQL, PostgreSQL, SQLite, etc.). Versatile for any relational database management system.',
+            'PHP Data Objects (PDO) extension for MySQL v5.7/ MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL.',
         ],
         'pgsql'   => [
             self::VERSION_MINIMUM_PHP,
-            'PHP extension for PostgreSQL v10 or later. Ideal for applications requiring advanced database features.',
+            'PHP extension for PostgreSQL v10 or later.',
         ],
         'sqlite3' => [
             self::VERSION_MINIMUM_PHP,
-            'PHP extension for SQLite 3. Lightweight, suitable for smaller projects or as a development database.',
+            'PHP extension for SQLite 3.',
         ],
         'sqlsrv'  => [
             self::VERSION_MINIMUM_PHP,
-            'PHP extension for Microsoft SQL Server 2016 or later. Suitable for applications integrated into Microsoft ecosystems.',
+            'PHP extension for Microsoft SQL Server 2016 or later.',
         ],
         'oci8'    => [
             self::VERSION_MINIMUM_PHP,
-            'PHP extension for Oracle Database v21c or later. Powerful for enterprise-level applications requiring Oracle DB.',
+            'PHP extension for Oracle Database v21c or later.',
         ],
         'ibm_db2' => [
             self::VERSION_MINIMUM_PHP,
-            'PHP extension for IBM DB2 v7.1 or later. Suitable for enterprise applications that rely on IBM databases.',
+            'PHP extension for IBM DB2 v7.1 or later.',
         ],
     ];
 

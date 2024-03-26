@@ -26,15 +26,15 @@ use User;
 class Permissions
 {
     protected static Memcached $memcached;
-    protected static Redis $redis;
-    protected ?PearDatabase $adb = null;
+    protected static Redis     $redis;
+    protected ?PearDatabase    $adb = null;
 
     /**
      * Array with user rights.
      *
      * @var array<array>
      */
-    protected static array $mainRights = [
+    protected static array $actions = [
         [
             'name'        => 'add_user',
             'description' => 'Right to add user accounts',
@@ -85,13 +85,20 @@ class Permissions
         'user',
     ];
 
-    protected static array $permissions = [
+    protected static array $hierarchyTree = [
         'administrator' => ['manager', 'supervisor', 'user'],
-        'manager' => ['supervisor', 'user'],
-        'supervisor' => ['user'],
-        'user' => [],
+        'manager'       => ['supervisor', 'user'],
+        'supervisor'    => ['user'],
+        'user'          => [],
     ];
 
+
+    public static function writeUser($userId, $data)
+    {
+        global $permissionsConfig;
+        $key = $permissionsConfig['writing_key'] . $userId;
+        self::write($key, $data);
+    }
 
     /**
      * Write data to the configured backend.
@@ -102,9 +109,9 @@ class Permissions
      * @return bool
      * @throws Exception
      */
-    public static function write($userId, $data): bool {
+    public static function write($key, $data): bool
+    {
         global $permissionsConfig;
-        $key = $permissionsConfig['writing_key'] . $userId;
 
         switch ($permissionsConfig['backend']) {
             case 'redis':
@@ -121,6 +128,8 @@ class Permissions
                 }
                 return apcu_store($key, $data);
 
+            case 'default':
+                return true;
             default:
                 throw new Exception('Unsupported backend specified.');
         }
@@ -134,7 +143,8 @@ class Permissions
      * @return mixed The data read from the storage, or null if not found.
      * @throws Exception
      */
-    public static function read($userId) {
+    public static function read($userId)
+    {
         global $permissionsConfig;
         $key = $permissionsConfig['writing_key'] . $userId;
 
@@ -170,8 +180,9 @@ class Permissions
     public static function populateActionsTable(PearDatabase $adb, $tableName)
     {
         $key = 1;
-        foreach (static::$mainRights as $mainRight) {
-            $adb->pquery("INSERT INTO `$tableName` (`action_label`, `action_key`, `action`) VALUES (?, ?, ?);", [$mainRight['description'], $key, $mainRight['name']]);
+        foreach (static::$actions as $mainRight) {
+            $adb->pquery("INSERT INTO `$tableName` (`action_label`, `action_key`, `action`) VALUES (?, ?, ?);",
+                         [$mainRight['description'], $key, $mainRight['name']]);
             ++$key;
         }
     }
@@ -187,6 +198,44 @@ class Permissions
         foreach (static::$baseRoles as $role) {
             $adb->pquery("INSERT INTO `$tableName` (`role_name`) VALUES (?);", [$role]);
         }
+    }
+
+    /**
+     * @param  \database\PearDatabase  $adb
+     * @param  string                  $rolesTable
+     * @param  string                  $actionsTable
+     * @param  string                  $rolePermissionsTable
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public static function createRolePermissions(PearDatabase $adb, string $rolesTable, string $actionsTable, string $rolePermissionsTable)
+    {
+        $getRoleIdQuery = "SELECT `role_id` FROM `$rolesTable` WHERE `role_name` = ?";
+        $getActionIdQuery = "SELECT `action_id` FROM `$actionsTable` WHERE `action` = ?";
+        $insertQuery = "INSERT INTO `$rolePermissionsTable` (`role_id`, `action_id`, `is_enabled`) VALUES (?, ?, ?)";
+        foreach (static::$baseRoles as $role) {
+            $getRoleIsResult = $adb->pquery($getRoleIdQuery, [$role]);
+            $roleId = $adb->query_result($getRoleIsResult, 0, 'role_id');
+            foreach (self::$actions as $action) {
+                $getActionIdResult = $adb->pquery($getActionIdQuery, [$action['name']]);
+                $actionId = $adb->query_result($getActionIdResult, 0, 'action_id');
+                $isEnabled = (int) ((int) $roleId !== 4);
+                $adb->preparedQuery($insertQuery, [$roleId, $actionId, $isEnabled]);
+            }
+        }
+    }
+
+    public static function createPermissionsFile(PearDatabase $adb, string $rolePermissionsTable)
+    {
+        $rolePermRes = $adb->preparedQuery("SELECT * FROM $rolePermissionsTable;", []);
+        $rolePermissionsArray = [];
+        while ($row = $adb->fetchByAssoc($rolePermRes)) {
+            $rolePermissionsArray[] = $row;
+        }
+
+        self::write('permissions_data', $rolePermissionsArray);
+        file_put_contents(EXTR_ROOT_DIR . '/config/user/default_permissions.php', '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true));
     }
 
     /**
@@ -211,12 +260,12 @@ class Permissions
      */
     public static function isPermittedView($userRole, $targetRole): bool
     {
-        return in_array($targetRole, self::$permissions[$userRole] ?? []);
+        return in_array($targetRole, self::$hierarchyTree[$userRole] ?? []);
     }
 
     public static function isPermittedAction($action, User $user)
     {
-        
+        require_once EXTR_ROOT_DIR . '/config/user/permissions.php';
     }
 
 
@@ -268,7 +317,7 @@ class Permissions
         $stats = self::$memcached->getStats();
         return !empty($stats) && array_reduce($stats, function ($carry, $server) {
                 return $carry && $server['pid'] > 0; // A simple check to ensure the server's process id is positive.
-            }, true);
+            },                                true);
     }
 
 

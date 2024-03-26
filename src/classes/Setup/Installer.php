@@ -318,6 +318,7 @@ class Installer extends Setup
 
         $dbConfig['tables'] = $systemSettings;
         $this->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
+        $this->createPermissionsFile();
     }
 
     /**
@@ -365,13 +366,25 @@ class Installer extends Setup
         file_put_contents($includesFile, '$enableCaptchaCode=' . $mainConfig['enableCaptchaCode'] . ';' . PHP_EOL, FILE_APPEND);
     }
 
-    public function createPermissionsFile(array $permissions)
+    public function createPermissionsFile()
     {
         $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
         require_once $primaryConfigFile;
         global $dbConfig;
         Permissions::populateActionsTable($this->adb, $dbConfig['tables']['actions_table_name']);
         Permissions::populateRolesTable($this->adb, $dbConfig['tables']['roles_table_name']);
+        /**
+         * 'expense_category_table_name' => '',
+         * 'expenses_table_name'         => '',
+         * 'users_table_name'            => '',
+         * 'history_table_name'          => '',
+         * 'actions_table_name'          => '',
+         * 'roles_table_name'            => '',
+         * 'role_permissions_table_name' => '',
+         * 'user_to_role_table_name'     => '',
+         */
+        Permissions::createRolePermissions($this->adb, $dbConfig['tables']['roles_table_name'], $dbConfig['tables']['actions_table_name'], $dbConfig['tables']['role_permissions_table_name']);
+        Permissions::createPermissionsFile($this->adb, $dbConfig['tables']['roles_table_name']);
 
         $permissionsFile = EXTR_ROOT_DIR . '/config/user/permissions.php';
     }
