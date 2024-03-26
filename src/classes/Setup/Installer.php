@@ -10,6 +10,7 @@ use Exception;
 use Filter;
 use Log\InstallLog;
 use Memcached;
+use Models\UserModel;
 use Permissions\Permissions;
 use Redis;
 use Throwable;
@@ -170,7 +171,7 @@ class Installer extends Setup
             'db_type' => '',
             'log_sql' => true,
         ];
-        $systemSettings = [
+        $tablesSettings = [
             'expense_category_table_name' => '',
             'expenses_table_name'         => '',
             'users_table_name'            => '',
@@ -197,7 +198,7 @@ class Installer extends Setup
 
         // Check table prefix
         $tablePrefix = Filter::filterInput(INPUT_POST, 'table_prefix', FILTER_SANITIZE_SPECIAL_CHARS, '');
-        $dbConfig['db_host'] = Filter::filterInput(INPUT_POST, 'sql_server', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $dbConfig['db_host'] = Filter::filterInput(INPUT_POST, 'sql_server', FILTER_SANITIZE_SPECIAL_CHARS, '127.0.0.1');
         $dbConfig['db_user'] = Filter::filterInput(INPUT_POST, 'sql_user', FILTER_SANITIZE_SPECIAL_CHARS, '');
         $dbConfig['db_pass'] = Filter::filterInput(INPUT_POST, 'sql_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
         // root_user
@@ -223,7 +224,7 @@ class Installer extends Setup
 
         // Check database port
         if (!isset($setup['db_type'])) {
-            $dbConfig['db_port'] = Filter::filterInput(INPUT_POST, 'sql_port', FILTER_VALIDATE_INT);
+            $dbConfig['db_port'] = Filter::filterInput(INPUT_POST, 'sql_port', FILTER_VALIDATE_INT, 3306);
         } else {
             $dbConfig['db_port'] = $setup['dbPort'];
         }
@@ -240,12 +241,15 @@ class Installer extends Setup
             }
         }
 
+        if (!$dbConfig['db_host']) {
+            $dbConfig['db_host'] = '127.0.0.1'; // Default SQL server
+        }
         $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword);
         // check database connection
         try {
             $masterDb->connect(true);
         } catch (Throwable $exception) {
-            $this->logger->critical('Exception trying to connect to Master DB', ['exception' => $exception]);
+            $this->logger->critical('Exception trying to connect to DB', ['exception' => $exception]);
             throw new Exception($exception->getMessage());
         }
 
@@ -258,7 +262,7 @@ class Installer extends Setup
             throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
 
-        $tablesFactory = new TableFactory($systemSettings, $tablePrefix);
+        $tablesFactory = new TableFactory($tablesSettings, $tablePrefix);
         $queries = $tablesFactory->getQueries();
         $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $rootUser, $rootPassword);
 
@@ -290,7 +294,7 @@ class Installer extends Setup
         if ($permissionsConfig['backend'] === 'redis') {
             $redisPass = Filter::filterInput(INPUT_POST, 'redis_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
             $redisConfig = [
-                'host'           => Filter::filterInput(INPUT_POST, 'redis_host', FILTER_SANITIZE_SPECIAL_CHARS, ''),
+                'host'           => Filter::filterInput(INPUT_POST, 'redis_host', FILTER_SANITIZE_SPECIAL_CHARS, '127.0.0.1'),
                 'readTimeout'    => 2.5,
                 'connectTimeout' => 2.5,
                 'auth'           => $redisPass,
@@ -307,8 +311,8 @@ class Installer extends Setup
 
         if ($permissionsConfig['backend'] === 'memcached') {
             $memcachedConfig = [
-                'host'         => Filter::filterInput(INPUT_POST, 'memcache_host', FILTER_SANITIZE_SPECIAL_CHARS, ''),
-                'persist_name' => Filter::filterInput(INPUT_POST, 'memcache_user', FILTER_SANITIZE_SPECIAL_CHARS, ''),
+                'host'         => Filter::filterInput(INPUT_POST, 'memcache_host', FILTER_SANITIZE_SPECIAL_CHARS, '127.0.0.1'),
+                'persist_name' => Filter::filterInput(INPUT_POST, 'memcache_user', FILTER_SANITIZE_SPECIAL_CHARS, 'expense_tracker_cache'),
                 'port'         => Filter::filterInput(INPUT_POST, 'memcache_port', FILTER_VALIDATE_INT, 11211),
             ];
             $memcacheConnect = new Memcached($memcachedConfig['persist_name']);
@@ -316,9 +320,17 @@ class Installer extends Setup
             $memcacheConnect->addServer($memcachedConfig['host'], $memcachedConfig['port']);
         }
 
-        $dbConfig['tables'] = $systemSettings;
+        $dbConfig['tables'] = $tablesSettings;
         $this->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
-        $this->createPermissionsFile();
+        $this->installPermissions();
+        $userModel = new UserModel();
+        $createdAdmin = $userModel->createNew('system@exepnsetracker.com', 'expense_tracker_system', 'Expense Tracker', 'Admin', 1, 1);
+        if (!$createdAdmin) {
+            throw new Exception('Failed to create the system admin user!');
+        }
+
+
+
     }
 
     /**
@@ -342,18 +354,15 @@ class Installer extends Setup
 
         $includesFile = EXTR_ROOT_DIR . '/config/installation_includes.php';
         file_put_contents($dbConfigFile, $dbConfigData);
-        file_put_contents($includesFile, '<?php
-                                                    ' . "require_once('$dbConfigFile');\n", FILE_APPEND);
+        file_put_contents($includesFile, '<?php ' . "require_once('$dbConfigFile');\n");
 
         if ($permissionsConfig['backend'] === 'redis') {
-            $redisConfigData = '<?php
-                                      ' . '$redisConfig=' . var_export($redisConfig, true) . ';';
+            $redisConfigData = '<?php ' . '$redisConfig=' . var_export($redisConfig, true) . ';';
             file_put_contents($userManagementFile,  $redisConfigData);
         }
 
         if ($permissionsConfig['backend'] === 'memcached') {
-            $memcachedConfigData = '<?php
-                                       ' . var_export($memcachedConfig, true) . ';';
+            $memcachedConfigData = '<?php ' . var_export($memcachedConfig, true) . ';';
             file_put_contents($userManagementFile, $memcachedConfigData);
         }
 
@@ -366,26 +375,18 @@ class Installer extends Setup
         file_put_contents($includesFile, '$enableCaptchaCode=' . $mainConfig['enableCaptchaCode'] . ';' . PHP_EOL, FILE_APPEND);
     }
 
-    public function createPermissionsFile()
+    /**
+     * @return void
+     * @throws \Exception
+     */
+    public function installPermissions(): void
     {
         $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
         require_once $primaryConfigFile;
         global $dbConfig;
         Permissions::populateActionsTable($this->adb, $dbConfig['tables']['actions_table_name']);
         Permissions::populateRolesTable($this->adb, $dbConfig['tables']['roles_table_name']);
-        /**
-         * 'expense_category_table_name' => '',
-         * 'expenses_table_name'         => '',
-         * 'users_table_name'            => '',
-         * 'history_table_name'          => '',
-         * 'actions_table_name'          => '',
-         * 'roles_table_name'            => '',
-         * 'role_permissions_table_name' => '',
-         * 'user_to_role_table_name'     => '',
-         */
         Permissions::createRolePermissions($this->adb, $dbConfig['tables']['roles_table_name'], $dbConfig['tables']['actions_table_name'], $dbConfig['tables']['role_permissions_table_name']);
-        Permissions::createPermissionsFile($this->adb, $dbConfig['tables']['roles_table_name']);
-
-        $permissionsFile = EXTR_ROOT_DIR . '/config/user/permissions.php';
+        Permissions::createPermissionsFile($this->adb, $dbConfig['tables']['role_permissions_table_name']);
     }
 }

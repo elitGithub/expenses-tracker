@@ -25,8 +25,8 @@ use User;
  */
 class Permissions
 {
-    protected static Memcached $memcached;
-    protected static Redis     $redis;
+    protected static ?Memcached $memcached = null;
+    protected static ?Redis     $redis = null;
     protected ?PearDatabase    $adb = null;
 
     /**
@@ -103,7 +103,7 @@ class Permissions
     /**
      * Write data to the configured backend.
      *
-     * @param  mixed  $userId  The user ID to use as part of the key.
+     * @param         $key
      * @param  mixed  $data  The data to write.
      *
      * @return bool
@@ -226,6 +226,13 @@ class Permissions
         }
     }
 
+    /**
+     * @param  \database\PearDatabase  $adb
+     * @param  string                  $rolePermissionsTable
+     *
+     * @return void
+     * @throws \Exception
+     */
     public static function createPermissionsFile(PearDatabase $adb, string $rolePermissionsTable)
     {
         $rolePermRes = $adb->preparedQuery("SELECT * FROM $rolePermissionsTable;", []);
@@ -235,18 +242,23 @@ class Permissions
         }
 
         self::write('permissions_data', $rolePermissionsArray);
-        file_put_contents(EXTR_ROOT_DIR . '/config/user/default_permissions.php', '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true));
+        file_put_contents(EXTR_ROOT_DIR . '/config/user/default_permissions.php', '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
     }
 
     /**
      * @return \Redis
+     * @throws \RedisException
      */
     private static function getRedisConnection(): Redis
     {
         global $redisConfig;
 
         if (null === self::$redis) {
-            self::$redis = new Redis($redisConfig);
+            self::$redis = new Redis();;
+            self::$redis->connect($redisConfig['host'], $redisConfig['port']);
+            if (!empty($redisConfig['auth'])) {
+                self::$redis->auth($redisConfig['auth']);
+            }
         }
 
         return self::$redis;
@@ -263,6 +275,12 @@ class Permissions
         return in_array($targetRole, self::$hierarchyTree[$userRole] ?? []);
     }
 
+    /**
+     * @param         $action
+     * @param  \User  $user
+     *
+     * @return void
+     */
     public static function isPermittedAction($action, User $user)
     {
         require_once EXTR_ROOT_DIR . '/config/user/permissions.php';
@@ -316,8 +334,8 @@ class Permissions
     {
         $stats = self::$memcached->getStats();
         return !empty($stats) && array_reduce($stats, function ($carry, $server) {
-                return $carry && $server['pid'] > 0; // A simple check to ensure the server's process id is positive.
-            },                                true);
+                return $carry && $server['pid'] > 0;
+                }, true);
     }
 
 

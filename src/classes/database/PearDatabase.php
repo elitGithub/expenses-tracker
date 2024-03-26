@@ -164,6 +164,15 @@ class PearDatabase implements LoggerAwareInterface
     }
     // END
 
+    /**
+     * @return mixed
+     */
+    public static function getTablesConfig()
+    {
+        global $dbConfig;
+        return $dbConfig['tables'];
+    }
+
     /*
      * Reset query result for resuing if cache is enabled.
      */
