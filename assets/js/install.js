@@ -87,9 +87,37 @@ function nextStep() {
 function handleNextSection(nextSectionElement) {
     const INITIAL_STEP = 1;
 
+    steps.forEach((step, index) => {
+        if (index < currentSection) {
+            step.classList.remove('active');
+            step.classList.add('done');
+            return;
+        }
+
+        step.classList.remove('done');
+        step.classList.toggle('active', index === currentSection);
+    });
     currentSection++;
-    steps.forEach((step, index) => step.classList.toggle('active', index !== currentSection));
     currentStep = INITIAL_STEP; // Reset to the first step of the new section
+}
+
+const handlePreviousSection = (currentSection) => {
+    steps.forEach((step, index) => {
+        console.log(step, index, currentSection);
+        step.classList.remove('active');
+        step.classList.remove('done');
+        step.classList.toggle('active', index === currentSection - 1);
+
+        if (index < currentSection) {
+            step.classList.add('done');
+        }
+
+        if (index === currentSection - 1) {
+            step.classList.remove('done');
+        }
+    });
+
+    currentStep = 1; // Reset to the first step of the previous section
 }
 
 function prevStep() {
@@ -98,6 +126,7 @@ function prevStep() {
         currentSection--;
         const steps = document.querySelectorAll(`[data-form-section="${currentSection}"] [data-step]`);
         currentStep = steps.length; // Assumes steps are sequentially ordered
+        handlePreviousSection(currentSection);
 
         return updateVisibility();
     }

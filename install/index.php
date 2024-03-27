@@ -118,6 +118,9 @@ $installer = new Installer($system);
                             <h3 class="mb-3">Step 1/3: Database setup</h3>
                             <!-- Basic Info Form -->
                             <div data-step="1" id="basic-info-form">
+                                <h4 class="mb-3">
+                                    Basic Information
+                                </h4>
                                 <div class="row mb-2">
                                     <label class="col-sm-3 col-form-label" for="sql_type">Server:</label>
                                     <div class="col-sm-9">
@@ -155,10 +158,13 @@ $installer = new Installer($system);
 
                             <!-- Connection Info Form -->
                             <div data-step="2" class="d-none" id="connection-info-form">
+                                <h4 class="mb-3">
+                                    Connection Information
+                                </h4>
                                 <div class="row mb-2">
                                     <div class="col-sm-9 offset-sm-3">
-                                        <input type="checkbox" name="useSameUser" class="form-check-input" id="useSameUser">
-                                        <label for="useSameUser" class="form-check-label">Use the same user for database creation and system
+                                        <input type="checkbox" name="useSameUser" class="form-check-input cursor-pointer" id="useSameUser">
+                                        <label for="useSameUser" class="form-check-label cursor-pointer">Use the same user for database creation and system
                                             operations.</label>
                                     </div>
                                 </div>
@@ -200,10 +206,13 @@ $installer = new Installer($system);
 
                             <!-- DB Type Form -->
                             <div data-step="3" class="d-none" id="db-type-form">
+                                <h4 class="mb-3">
+                                    Database Type
+                                </h4>
                                 <div class="row mb-2">
                                     <div class="col-sm-9 offset-sm-3">
                                         <input type="checkbox" name="createMyOwnDb" class="form-check-input" id="createMyOwnDb">
-                                        <label for="createMyOwnDb" class="form-check-label">I want to create my own Database or I have an existing
+                                        <label for="createMyOwnDb" class="form-check-label cursor-pointer">I want to create my own Database or I have an existing
                                             Database</label>
                                     </div>
                                 </div>
@@ -250,7 +259,7 @@ $installer = new Installer($system);
                             <div data-step="1" id="cache-system-form" class="row mb-2">
                                 <div class="col-sm-9 offset-sm-3">
                                     <input type="checkbox" name="useMyOwnUserSystem" class="form-check-input" id="useMyOwnUserSystem">
-                                    <label for="useMyOwnUserSystem" class="form-check-label">I have my own user system, no need for Expense Tracker's
+                                    <label for="useMyOwnUserSystem" class="form-check-label cursor-pointer">I have my own user system, no need for Expense Tracker's
                                         system.</label>
                                 </div>
                             </div>
@@ -336,7 +345,7 @@ $installer = new Installer($system);
                                 <div class="row mb-2">
                                     <label class="col-sm-3 col-form-label" for="admin_email">System Admin Email:</label>
                                     <div class="col-sm-9">
-                                        <input type="email" name="admin_email" id="admin_email" class="form-control" required>
+                                        <input type="email" name="admin_email" id="admin_email" class="form-control" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                                         <small class="form-text text-muted">Please enter your email.</small>
                                     </div>
                                 </div>
