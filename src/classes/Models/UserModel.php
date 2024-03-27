@@ -65,6 +65,19 @@ class UserModel
 
     /**
      * @param  string  $email
+     * @param  string  $userName
+     *
+     * @return array|null
+     */
+    public function getByEmailAndUserName(string $email, string $userName): ?array
+    {
+        $query = "SELECT * FROM `$this->entityTable` WHERE `email` = ? AND `user_name` = ? AND `active` = 1;";
+        $res = $this->adb->preparedQuery($query, [$email, $userName]);
+        return $this->adb->fetchByAssoc($res);
+    }
+
+    /**
+     * @param  string  $email
      *
      * @return bool
      * @throws \Exception

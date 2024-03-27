@@ -326,6 +326,11 @@ class Installer extends Setup
             throw new Exception('Passwords do not match');
         }
         $createUser = $userModel->createNew($email, $userName, $firstName, $lastName, $password, \User::getActiveAdminUser(), Role::getRoleIdByName('administrator'));
+        // TODO: in case already exist, add the user into Cache.
+        if (!$createUser) {
+            $createUser = $userModel->getByEmailAndUserName($email, $userName)['user_id'] ?? false;
+        }
+
         if (!$createUser) {
             throw new Exception('Could not create admin user');
         }

@@ -103,7 +103,7 @@ class Permissions
     public static function writeUser($userId, $data)
     {
         global $permissionsConfig;
-        $key = $permissionsConfig['writing_key'] . $userId;
+        $key = $permissionsConfig['writing_key'] . '_' . $userId;
         self::hashWrite($key, (string)$userId, $data);
     }
 
@@ -187,10 +187,10 @@ class Permissions
      * @return mixed The data read from the storage, or null if not found.
      * @throws Exception
      */
-    public static function read($userId)
+    public static function readUser($userId)
     {
         global $permissionsConfig;
-        $key = $permissionsConfig['writing_key'] . $userId;
+        $key = $permissionsConfig['writing_key'] . '_' . $userId;
 
         switch ($permissionsConfig['backend']) {
             case 'redis':

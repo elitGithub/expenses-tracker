@@ -14,8 +14,7 @@ class PermissionsManager
         if (isset(self::$_userPrivileges[$userId]) && is_array(self::$_userPrivileges[$userId])) {
             return self::$_userPrivileges[$userId];
         }
-        var_dump($userId);
-        $permissions = Permissions::read($userId);
+        $permissions = Permissions::readUser($userId);
         var_dump($permissions);
         return [];
     }
