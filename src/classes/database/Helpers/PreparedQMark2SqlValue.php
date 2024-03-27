@@ -1,16 +1,29 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace database\Helpers;
 
+/**
+ *
+ */
 class PreparedQMark2SqlValue
 {
     // Constructor
+    /**
+     * @param $vals
+     */
     public function __construct ($vals)
     {
         $this->ctr = 0;
         $this->vals = $vals;
     }
 
+    /**
+     * @param $matches
+     *
+     * @return mixed
+     */
     public function call ($matches)
     {
         /**

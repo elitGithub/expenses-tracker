@@ -93,11 +93,55 @@ class Permissions
     ];
 
 
+    /**
+     * @param $userId
+     * @param $data
+     *
+     * @return void
+     * @throws \Throwable
+     */
     public static function writeUser($userId, $data)
     {
         global $permissionsConfig;
         $key = $permissionsConfig['writing_key'] . $userId;
-        self::write($key, $data);
+        self::hashWrite($key, (string)$userId, $data);
+    }
+
+    /**
+     * @param $key
+     * @param $hashKey
+     * @param $data
+     *
+     * @return void
+     * @throws \Throwable
+     */
+    private static function hashWrite($key, $hashKey, $data): void
+    {
+        global $permissionsConfig;
+
+        switch ($permissionsConfig['backend']) {
+            case 'redis':
+                $redis = self::getRedisConnection();
+                $redis->hset($key, $hashKey, serialize($data));
+                return;
+
+            case 'memcached':
+                $memcached = self::getMemcachedConnection();
+                $memcached->set($key, $data);
+                return;
+
+            case 'apcu':
+                if (!self::isAPCUEnabled()) {
+                    throw new Exception('APCu is not enabled or available.');
+                }
+                apcu_store($key, $data);
+                return;
+
+            case 'default':
+                return;
+            default:
+                throw new Exception('Unsupported backend specified.');
+        }
     }
 
     /**
@@ -241,7 +285,7 @@ class Permissions
             $rolePermissionsArray[] = $row;
         }
 
-        self::write('permissions_data', $rolePermissionsArray);
+        self::write('expense_tracker_permissions_data', $rolePermissionsArray);
         file_put_contents(EXTR_ROOT_DIR . '/config/user/default_permissions.php', '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
     }
 

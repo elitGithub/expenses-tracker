@@ -82,7 +82,7 @@ class PearDatabase implements LoggerAwareInterface
      */
     public function __construct($dbtype = '', $host = '', $dbname = '', $username = '', $passwd = '')
     {
-        $this->setLogger(new DatabaseLogger('query_errors', Logger::WARNING));
+        $this->setLogger(new DatabaseLogger('query_errors', Logger::INFO));
         $this->logsqltm = new DatabaseLogger('sql_time_log', Logger::WARNING);
         $this->resetSettings($dbtype, $host, $dbname, $username, $passwd);
 
@@ -421,7 +421,8 @@ class PearDatabase implements LoggerAwareInterface
         $this->executeSetNamesUTF8SQL();
 
         $sql_start_time = microtime(true);
-        $result = &$this->database->Execute($sql);
+        $recordSet = $this->database->Execute($sql);
+        $result = &$recordSet;
         $this->logSqlTiming($sql_start_time, microtime(true), $sql);
 
         $this->lastmysqlrow = -1;
@@ -597,7 +598,8 @@ class PearDatabase implements LoggerAwareInterface
         $this->executeSetNamesUTF8SQL();
 
         $sql_start_time = microtime(true);
-        $result =& $this->database->SelectLimit($sql, $count, $start);
+        $recordSet = $this->database->SelectLimit($sql, $count, $start);
+        $result = &$recordSet;
         $this->logSqlTiming($sql_start_time, microtime(true), "$sql LIMIT $count, $start");
 
         if (!$result) {
@@ -613,7 +615,8 @@ class PearDatabase implements LoggerAwareInterface
         $this->executeSetNamesUTF8SQL();
 
         $sql_start_time = microtime(true);
-        $result =& $this->database->GetOne($sql);
+        $oneRecord = $this->database->GetOne($sql);
+        $result = &$oneRecord;
         $this->logSqlTiming($sql_start_time, microtime(true), "$sql GetONE");
 
         if (!$result) {
@@ -971,9 +974,17 @@ class PearDatabase implements LoggerAwareInterface
         return '';
     }
 
-    /* function which extends requireSingleResult api to execute prepared statment
-     */
 
+
+    /**
+     * @param $sql
+     * @param $params
+     * @param $dieOnError
+     * @param $msg
+     * @param $encode
+     *
+     * @return \ADORecordSet|\ADORecordSet_array|\ADORecordSet_empty|bool|string
+     */
     public function requirePsSingleResult($sql, $params, $dieOnError = false, $msg = '', $encode = true)
     {
         $result = $this->pquery($sql, $params, $dieOnError, $msg);
@@ -987,13 +998,20 @@ class PearDatabase implements LoggerAwareInterface
         return $result;
     }
 
+    /**
+     * @param $result
+     * @param $rowNum
+     * @param $encode
+     *
+     * @return array|void|null
+     */
     public function fetchByAssoc(&$result, $rowNum = -1, $encode = true)
     {
         if (is_object($result)) {
             if ($result->EOF) {
                 return null;
             }
-            if (isset($result) && $rowNum < 0) {
+            if ($rowNum < 0) {
                 $row = $this->change_key_case($result->GetRowAssoc(false));
                 $result->MoveNext();
                 if ($encode && is_array($row)) {
@@ -1251,7 +1269,8 @@ class PearDatabase implements LoggerAwareInterface
     public function get_tables()
     {
         $this->checkConnection();
-        $result = &$this->database->MetaTables('TABLES');
+        $metaTables = $this->database->MetaTables('TABLES');
+        $result = &$metaTables;
         return $result;
     }
 

@@ -711,7 +711,7 @@ if (!defined('_ADODB_LAYER')) {
 		//
 		var $_oldRaiseFn = false;
 		var $_transOK    = null;
-		/** @var resource Identifier for the native database connection */
+		/** @var resource|mysqli|bool Identifier for the native database connection */
 		var $_connectionID = false;
 
 		/**

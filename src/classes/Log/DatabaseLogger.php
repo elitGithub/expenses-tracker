@@ -26,10 +26,10 @@ class DatabaseLogger extends AbstractLogger
         }
         $context = array_merge($context, $trace);
         $this->logger->log($level, $message, $context);
-        echo($message);
-        echo '<pre>';
-        echo(json_encode($context, JSON_PRETTY_PRINT));
-        echo '</pre>';
+//        echo($message);
+//        echo '<pre>';
+//        echo(json_encode($context, JSON_PRETTY_PRINT));
+//        echo '</pre>';
         error_log($message);
     }
 

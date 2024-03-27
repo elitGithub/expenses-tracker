@@ -13,10 +13,22 @@ class UserModel
     protected PearDatabase $adb;
 
     public function __construct() {
-        global $dbConfig;
-        $this->entityTable = $dbConfig['tables']['users_table_name'];
-        $this->roleTable = $dbConfig['tables']['user_to_role_table_name'];
+        $tables = PearDatabase::getTablesConfig();
+        $this->entityTable = $tables['users_table_name'];
+        $this->roleTable = $tables['user_to_role_table_name'];
         $this->adb = PearDatabase::getInstance();
+    }
+
+    /**
+     * @param  string  $email
+     * @param  string  $userName
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function existsByEmailOrUserName(string $email, string $userName): bool
+    {
+        return !$this->checkUniqueEmail($email) || !$this->checkUniqueUserName($userName);
     }
 
     /**
@@ -52,7 +64,7 @@ class UserModel
      */
     public function checkUniqueEmail(string $email): bool
     {
-        $result = $this->adb->pquery("SELECT COUNT(*) AS total FROM $this->entityTable WHERE 'email' = CAST(? AS BINARY) AND `deleted_at` IS NULL;", [$email]);
+        $result = $this->adb->pquery("SELECT COUNT(*) AS `total` FROM `$this->entityTable` WHERE 'email' = CAST(? AS BINARY) AND `deleted_at` IS NULL;", [$email]);
         return ($this->adb->query_result($result, 0, 'total') < 1);
 
     }
@@ -65,7 +77,7 @@ class UserModel
      */
     public function checkUniqueUserName(string $userName): bool
     {
-        $result = $this->adb->pquery("SELECT COUNT(*) AS total FROM $this->entityTable WHERE user_name = CAST(? AS BINARY) AND `deleted_at` IS NULL;", [$userName]);
+        $result = $this->adb->pquery("SELECT COUNT(*) AS `total` FROM `$this->entityTable` WHERE `user_name` = CAST(? AS BINARY) AND `deleted_at` IS NULL;", [$userName]);
         return ($this->adb->query_result($result, 0, 'total') < 1);
     }
 

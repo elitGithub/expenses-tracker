@@ -12,6 +12,7 @@ use Log\InstallLog;
 use Memcached;
 use Models\UserModel;
 use Permissions\Permissions;
+use Permissions\Role;
 use Redis;
 use Throwable;
 
@@ -247,7 +248,9 @@ class Installer extends Setup
         $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword);
         // check database connection
         try {
-            $masterDb->connect(true);
+            $masterDb->connect();
+            global $adb;
+            $adb = $masterDb;
         } catch (Throwable $exception) {
             $this->logger->critical('Exception trying to connect to DB', ['exception' => $exception]);
             throw new Exception($exception->getMessage());
@@ -267,28 +270,55 @@ class Installer extends Setup
         $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $rootUser, $rootPassword);
 
         foreach ($queries as $query) {
-            $masterDb->preparedQuery($query, [], true);
+            $masterDb->preparedQuery($query, [],);
         }
 
         // Now that we have tables, let's check for the user:
         $userQuery = 'SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = ?) AS "exists";';
-        $result = $masterDb->preparedQuery($userQuery, [$dbConfig['db_user']], true);
+        $result = $masterDb->preparedQuery($userQuery, [$dbConfig['db_user']]);
 
         // If the user already exists, we don't need to create it.
         if (!$masterDb->query_result($result, 0, 'exists')) {
             $sqlCreateUser = "CREATE USER IF NOT EXISTS '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}' IDENTIFIED BY '{$dbConfig['db_pass']}';";
             $masterDb->preparedQuery($sqlCreateUser, [], true);
             $sqlGrantPrivileges = "GRANT SELECT, INSERT, UPDATE, DELETE ON `{$dbConfig['db_name']}`.* TO '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}';";
-            $result = $masterDb->preparedQuery($sqlGrantPrivileges, [], true);
+            $result = $masterDb->preparedQuery($sqlGrantPrivileges, []);
             $masterDb->preparedQuery('FLUSH PRIVILEGES;');
         }
         $this->adb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'], $dbConfig['db_pass']);
         try {
-            $this->adb->connect(true);
+            $this->adb->connect();
+            global $adb;
+            $adb = $this->adb;
         } catch (Throwable $exception) {
             throw new Exception($exception->getMessage());
         }
 
+        $this->connectCache($permissionsConfig, $redisConfig, $memcachedConfig);
+        $dbConfig['tables'] = $tablesSettings;
+        $this->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
+        $this->installPermissions();
+        $userModel = new UserModel();
+        if (!$userModel->existsByEmailOrUserName('system@exepnsetracker.com', 'expense_tracker_system')) {
+            $createdAdmin = $userModel->createNew('system@exepnsetracker.com', 'expense_tracker_system', 'Expense Tracker', 'Admin', 1, 1);
+            if (!$createdAdmin) {
+                throw new Exception('Failed to create the system admin user');
+            }
+        }
+        $email = Filter::filterInput(INPUT_POST, 'admin_email', FILTER_SANITIZE_SPECIAL_CHARS);
+        $userName = Filter::filterInput(INPUT_POST, 'admin_user', FILTER_SANITIZE_SPECIAL_CHARS);
+        $firstName = Filter::filterInput(INPUT_POST, 'admin_first_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $lastName = Filter::filterInput(INPUT_POST, 'admin_last_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $createUser = $userModel->createNew($email, $userName, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'));
+
+    }
+
+    /**
+     * @return void
+     * @throws \RedisException
+     */
+    private function connectCache(&$permissionsConfig, &$redisConfig, &$memcachedConfig)
+    {
         $permissionsConfig['writing_key'] = $this->system->getRandomString(18);
         $permissionsConfig['backend'] = Filter::filterInput(INPUT_POST, 'user_management', FILTER_SANITIZE_SPECIAL_CHARS);
         if ($permissionsConfig['backend'] === 'redis') {
@@ -319,18 +349,6 @@ class Installer extends Setup
             $memcacheConnect->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
             $memcacheConnect->addServer($memcachedConfig['host'], $memcachedConfig['port']);
         }
-
-        $dbConfig['tables'] = $tablesSettings;
-        $this->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
-        $this->installPermissions();
-        $userModel = new UserModel();
-        $createdAdmin = $userModel->createNew('system@exepnsetracker.com', 'expense_tracker_system', 'Expense Tracker', 'Admin', 1, 1);
-        if (!$createdAdmin) {
-            throw new Exception('Failed to create the system admin user!');
-        }
-
-
-
     }
 
     /**
