@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Permissions;
 
-if (!file_exists(EXTR_ROOT_DIR . '/config/user/permissions.php')) {
+if (!file_exists(EXTR_ROOT_DIR . '/system/user/permissions.php')) {
     throw new Exception('Missing user configuration, please install the system first!');
 }
 
-require_once EXTR_ROOT_DIR . '/config/user/permissions.php';
+require_once EXTR_ROOT_DIR . '/system/user/permissions.php';
 global $permissionsConfig;
 if (!isset($permissionsConfig['backend'])) {
     throw new Exception('No backend specified in permissions configuration.');
@@ -286,7 +286,7 @@ class Permissions
         }
 
         self::write('expense_tracker_permissions_data', $rolePermissionsArray);
-        file_put_contents(EXTR_ROOT_DIR . '/config/user/default_permissions.php', '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
+        file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php', '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
     }
 
     /**
@@ -327,7 +327,7 @@ class Permissions
      */
     public static function isPermittedAction($action, User $user)
     {
-        require_once EXTR_ROOT_DIR . '/config/user/permissions.php';
+        require_once EXTR_ROOT_DIR . '/system/user/permissions.php';
     }
 
 

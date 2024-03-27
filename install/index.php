@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Core\System;
 use Setup\Installer;
 
-if (file_exists('./config/database.php')) {
+if (file_exists('./system/config/database.php')) {
     header('Location: /');
     exit(1);
 }

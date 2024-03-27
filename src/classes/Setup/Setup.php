@@ -4,18 +4,23 @@ declare(strict_types = 1);
 
 namespace Setup;
 
+require_once EXTR_ROOT_DIR . '/system/config.php';
+
+
 /**
  *
  */
 class Setup
 {
-    private string $rootDir;
+    protected string $primaryConfigFile;
+    private string   $rootDir;
 
     /**
      * Setup constructor.
      */
     public function __construct()
     {
+        $this->primaryConfigFile = EXTR_ROOT_DIR . '/system/config.php';
         $this->setRootDir(EXTR_ROOT_DIR);
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-require_once './config/config.php';
+require_once './system/config.php';
 require_once 'functions.php';
 
 spl_autoload_register(function ($className) {

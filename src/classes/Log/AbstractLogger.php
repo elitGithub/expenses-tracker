@@ -22,7 +22,7 @@ abstract class AbstractLogger implements LoggerInterface
      */
     public function __construct(string $logName, $logLevel = Logger::DEBUG)
     {
-        $this->logger = new Logger($logName, [new FileLogger(EXTR_ROOT_DIR . '/config/logs/', $logName, $logLevel)]);
+        $this->logger = new Logger($logName, [new FileLogger(EXTR_ROOT_DIR . '/system/logs/', $logName, $logLevel)]);
     }
 
     /**

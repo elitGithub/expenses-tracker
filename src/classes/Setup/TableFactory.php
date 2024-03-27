@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS `%susers`
     `user_name`      VARCHAR(200)     NOT NULL,
     `first_name`     VARCHAR(200)     NOT NULL,
     `last_name`      VARCHAR(200)     NOT NULL,
+    `password`       VARCHAR(255)     NOT NULL,
     `created_by`     INT UNSIGNED NOT NULL,
     `active`         TINYINT(1)       NOT NULL DEFAULT '1',
     `last_update_at` DATE             NOT NULL,

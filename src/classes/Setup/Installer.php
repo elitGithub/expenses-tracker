@@ -92,12 +92,12 @@ class Installer extends Setup
         $instanceSetup->setRootDir(EXTR_ROOT_DIR);
 
         $dirs = [
-            '/config/config',
-            '/config/data',
-            '/config/logs',
-            '/config/user',
-            '/config/user/images',
-            '/config/user/attachments',
+            '/system/config',
+            '/system/data',
+            '/system/logs',
+            '/system/user',
+            '/system/user/images',
+            '/system/user/attachments',
         ];
         $failedDirs = $instanceSetup->checkDirs($dirs);
         $numDirs = count($failedDirs);
@@ -245,6 +245,11 @@ class Installer extends Setup
         if (!$dbConfig['db_host']) {
             $dbConfig['db_host'] = '127.0.0.1'; // Default SQL server
         }
+
+        // If the DB type is 'PDO', and not another extension, it is probably mysqli.
+        if (mb_strtolower($dbConfig['db_type']) === 'pdo') {
+            $dbConfig['db_type'] = 'mysqli';
+        }
         $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword);
         // check database connection
         try {
@@ -299,18 +304,33 @@ class Installer extends Setup
         $this->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
         $this->installPermissions();
         $userModel = new UserModel();
+
         if (!$userModel->existsByEmailOrUserName('system@exepnsetracker.com', 'expense_tracker_system')) {
-            $createdAdmin = $userModel->createNew('system@exepnsetracker.com', 'expense_tracker_system', 'Expense Tracker', 'Admin', 1, 1);
+            $createdAdmin = $userModel->createNew('system@exepnsetracker.com', 'expense_tracker_system', $this->system->getRandomString(), 'Expense Tracker', 'Admin', 1, 1);
             if (!$createdAdmin) {
                 throw new Exception('Failed to create the system admin user');
             }
         }
+
         $email = Filter::filterInput(INPUT_POST, 'admin_email', FILTER_SANITIZE_SPECIAL_CHARS);
         $userName = Filter::filterInput(INPUT_POST, 'admin_user', FILTER_SANITIZE_SPECIAL_CHARS);
         $firstName = Filter::filterInput(INPUT_POST, 'admin_first_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
         $lastName = Filter::filterInput(INPUT_POST, 'admin_last_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
-        $createUser = $userModel->createNew($email, $userName, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'));
+        $password = Filter::filterInput(INPUT_POST, 'admin_password', FILTER_SANITIZE_SPECIAL_CHARS);
+        $confirmPassword = Filter::filterInput(INPUT_POST, 'password_retype', FILTER_SANITIZE_SPECIAL_CHARS);
+        if (is_null($password) || is_null($confirmPassword)) {
+            throw new Exception('Passwords do not match');
+        }
 
+        if (strcmp($password, $confirmPassword) !== 0) {
+            throw new Exception('Passwords do not match');
+        }
+        $createUser = $userModel->createNew($email, $userName, $firstName, $lastName, $password, \User::getActiveAdminUser(), Role::getRoleIdByName('administrator'));
+        if (!$createUser) {
+            throw new Exception('Could not create admin user');
+        }
+        $user = new \User($createUser);
+        $user->retrieveUserInfoFromFile();
     }
 
     /**
@@ -361,18 +381,15 @@ class Installer extends Setup
      */
     public function createConfigFiles(array $dbConfig = [], array $permissionsConfig = [], array $redisConfig = [], array $memcachedConfig = [])
     {
-        $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
-        require_once $primaryConfigFile;
-
-        $dbConfigFile = EXTR_ROOT_DIR . '/config/database.php';
-        $userManagementFile = EXTR_ROOT_DIR . '/config/user/permissions.php';
+        $dbConfigFile = EXTR_ROOT_DIR . '/system/config/database.php';
+        $userManagementFile = EXTR_ROOT_DIR . '/system/user/permissions.php';
         $dbConfigData = '<?php
                               $dbConfig=' . var_export($dbConfig, true) . ';';
 
 
-        $includesFile = EXTR_ROOT_DIR . '/config/installation_includes.php';
+        $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
         file_put_contents($dbConfigFile, $dbConfigData);
-        file_put_contents($includesFile, '<?php ' . "require_once('$dbConfigFile');\n");
+        file_put_contents($includesFile, '<?php ' . "\nrequire_once('$dbConfigFile');\n");
 
         if ($permissionsConfig['backend'] === 'redis') {
             $redisConfigData = '<?php ' . '$redisConfig=' . var_export($redisConfig, true) . ';';
@@ -399,8 +416,6 @@ class Installer extends Setup
      */
     public function installPermissions(): void
     {
-        $primaryConfigFile = EXTR_ROOT_DIR . '/config/config.php';
-        require_once $primaryConfigFile;
         global $dbConfig;
         Permissions::populateActionsTable($this->adb, $dbConfig['tables']['actions_table_name']);
         Permissions::populateRolesTable($this->adb, $dbConfig['tables']['roles_table_name']);

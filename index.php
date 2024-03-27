@@ -7,7 +7,7 @@ if (!defined('PROJECT_ROOT')) {
 }
 require_once './ignition.php';
 
-if (!file_exists('./config/database.php')) {
+if (!file_exists('./system/config/database.php')) {
     require_once 'install/index.php';
     exit(1);
 }

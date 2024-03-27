@@ -26,7 +26,7 @@ class Role
         $query = "SELECT `role_id` FROM {$tables['roles_table_name']} WHERE `role_name` = ?";
         $result = $adb->preparedQuery($query, [$roleName]);
         $roleId = $adb->query_result($result, 0, 'role_id');
-        self::$roleIdByName[$roleName] = $roleId;
+        self::$roleIdByName[$roleName] = (int)$roleId;
         return self::$roleIdByName[$roleName];
     }
 }

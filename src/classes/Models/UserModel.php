@@ -5,6 +5,8 @@ declare(strict_types = 1);
 namespace Models;
 
 use database\PearDatabase;
+use Permissions\Permissions;
+use User;
 
 class UserModel
 {
@@ -34,23 +36,28 @@ class UserModel
     /**
      * @param  string  $email
      * @param  string  $userName
+     * @param  string  $password
      * @param  string  $firstName
      * @param  string  $lastName
      * @param          $createdBy
      * @param  int     $roleId
      *
-     * @return bool
-     * @throws \Exception
+     * @return bool|int
+     * @throws \Throwable
      */
-    public function createNew(string $email, string $userName, string $firstName, string $lastName, $createdBy, int $roleId): bool
+    public function createNew(string $email, string $userName, string $password, string $firstName, string $lastName, $createdBy, int $roleId)
     {
         if ($this->checkUniqueEmail($email) && $this->checkUniqueUserName($userName)) {
-            $query = "INSERT INTO $this->entityTable (`email`, `user_name`, `first_name`, `last_name`, `created_by`, `active`, `last_update_at`, `created_at`)
-                                 VALUES (?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());";
-            $this->adb->pquery($query, [$email, $userName, $firstName, $lastName, $createdBy]);
+            $user = new User();
+            $query = "INSERT INTO `$this->entityTable` (`email`, `user_name`, `first_name`, `last_name`, `password`, `created_by`, `active`, `last_update_at`, `created_at`)
+                                 VALUES (?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());";
+            $this->adb->pquery($query, [$email, $userName, $firstName, $lastName, $user->encryptPassword($password), $createdBy]);
             $id = $this->adb->getLastInsertID();
-            $this->adb->pquery("INSERT INTO $this->roleTable (`user_id`, `role_id`) VALUES (?, ?)", [$id, $roleId]);
-            return true;
+            $this->adb->pquery("INSERT INTO `$this->roleTable` (`user_id`, `role_id`) VALUES (?, ?)", [$id, $roleId]);
+            if ($id) {
+                Permissions::writeUser($id, ['userName' => $userName, 'name' => $firstName . ' ' . $lastName, 'active' => 1]);
+            }
+            return $id;
         }
 
         return false;

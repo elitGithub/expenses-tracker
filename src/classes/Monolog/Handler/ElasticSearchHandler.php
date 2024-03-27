@@ -11,11 +11,11 @@
 
 namespace Monolog\Handler;
 
-use Monolog\Formatter\FormatterInterface;
-use Monolog\Formatter\ElasticaFormatter;
-use Monolog\Logger;
 use Elastica\Client;
 use Elastica\Exception\ExceptionInterface;
+use Monolog\Formatter\ElasticaFormatter;
+use Monolog\Formatter\FormatterInterface;
+use Monolog\Logger;
 
 /**
  * Elastic Search handler
@@ -38,29 +38,29 @@ class ElasticSearchHandler extends AbstractProcessingHandler
     /**
      * @var Client
      */
-    protected $client;
+    protected Client $client;
 
     /**
      * @var array Handler config options
      */
-    protected $options = array();
+    protected array $options = [];
 
     /**
-     * @param Client $client  Elastica Client object
-     * @param array  $options Handler configuration
-     * @param int    $level   The minimum logging level at which this handler will be triggered
-     * @param bool   $bubble  Whether the messages that are handled can bubble up the stack or not
+     * @param  Client  $client  Elastica Client object
+     * @param  array   $options  Handler configuration
+     * @param  int     $level  The minimum logging level at which this handler will be triggered
+     * @param  bool    $bubble  Whether the messages that are handled can bubble up the stack or not
      */
-    public function __construct(Client $client, array $options = array(), $level = Logger::DEBUG, $bubble = true)
+    public function __construct(Client $client, array $options = [], int $level = Logger::DEBUG, $bubble = true)
     {
         parent::__construct($level, $bubble);
         $this->client = $client;
         $this->options = array_merge(
-            array(
-                'index'          => 'monolog',      // Elastic index name
-                'type'           => 'record',       // Elastic document type
-                'ignore_error'   => false,          // Suppress Elastica exceptions
-            ),
+            [
+                'index'        => 'monolog',      // Elastic index name
+                'type'         => 'record',       // Elastic document type
+                'ignore_error' => false,          // Suppress Elastica exceptions
+            ],
             $options
         );
     }
@@ -68,15 +68,15 @@ class ElasticSearchHandler extends AbstractProcessingHandler
     /**
      * {@inheritDoc}
      */
-    protected function write(array $record)
+    protected function write(array $record): void
     {
-        $this->bulkSend(array($record['formatted']));
+        $this->bulkSend([$record['formatted']]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setFormatter(FormatterInterface $formatter)
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         if ($formatter instanceof ElasticaFormatter) {
             return parent::setFormatter($formatter);
@@ -86,6 +86,7 @@ class ElasticSearchHandler extends AbstractProcessingHandler
 
     /**
      * Getter options
+     *
      * @return array
      */
     public function getOptions()
@@ -104,7 +105,7 @@ class ElasticSearchHandler extends AbstractProcessingHandler
     /**
      * {@inheritdoc}
      */
-    public function handleBatch(array $records)
+    public function handleBatch(array $records): void
     {
         $documents = $this->getFormatter()->formatBatch($records);
         $this->bulkSend($documents);
@@ -112,7 +113,9 @@ class ElasticSearchHandler extends AbstractProcessingHandler
 
     /**
      * Use Elasticsearch bulk API to send list of documents
-     * @param  array             $documents
+     *
+     * @param  array  $documents
+     *
      * @throws \RuntimeException
      */
     protected function bulkSend(array $documents)

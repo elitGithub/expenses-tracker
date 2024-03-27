@@ -3538,7 +3538,7 @@ const Manipulator = {
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap util/config.js
+ * Bootstrap util/system.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -6370,7 +6370,7 @@ class Tooltip extends BaseComponent {
       this._templateFactory = new TemplateFactory({
         ...this._config,
         // the `content` var has to be after `this._config`
-        // to override config.content in case of popover
+        // to override system.content in case of popover
         content,
         extraClass: this._resolvePossibleFunction(this._config.customClass)
       });
@@ -6741,7 +6741,7 @@ class ScrollSpy extends BaseComponent {
   constructor(element, config) {
     super(element, config);
 
-    // this._element is the observablesContainer and config.target the menu links wrapper
+    // this._element is the observablesContainer and system.target the menu links wrapper
     this._targetLinks = new Map();
     this._observableSections = new Map();
     this._rootElement = getComputedStyle(this._element).overflowY === 'visible' ? null : this._element;
@@ -7779,7 +7779,7 @@ document.addEventListener('DOMContentLoaded', function () {
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -7793,14 +7793,14 @@ document.addEventListener('DOMContentLoaded', function () {
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /************************************************************************/
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	!function() {
@@ -7813,12 +7813,12 @@ document.addEventListener('DOMContentLoaded', function () {
 /******/ 			}
 /******/ 		};
 /******/ 	}();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	!function() {
 /******/ 		__webpack_require__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
 /******/ 	}();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	!function() {
 /******/ 		// define __esModule on exports
@@ -7829,7 +7829,7 @@ document.addEventListener('DOMContentLoaded', function () {
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	}();
-/******/ 	
+/******/
 /************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
