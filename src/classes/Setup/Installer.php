@@ -246,10 +246,6 @@ class Installer extends Setup
             $dbConfig['db_host'] = '127.0.0.1'; // Default SQL server
         }
 
-        // If the DB type is 'PDO', and not another extension, it is probably mysqli.
-        if (mb_strtolower($dbConfig['db_type']) === 'pdo') {
-            $dbConfig['db_type'] = 'mysqli';
-        }
         $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword);
         // check database connection
         try {

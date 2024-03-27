@@ -66,10 +66,6 @@ class System
             self::VERSION_MINIMUM_PHP,
             'PHP mysqli extension for MySQL v5.7/ MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL.',
         ],
-        'pdo'     => [
-            self::VERSION_MINIMUM_PHP,
-            'PHP Data Objects (PDO) extension for MySQL v5.7/ MariaDB v10 / Percona Server v8 / Galera Cluster v4 for MySQL.',
-        ],
         'pgsql'   => [
             self::VERSION_MINIMUM_PHP,
             'PHP extension for PostgreSQL v10 or later.',
