@@ -1,5 +1,6 @@
 const toggleAdminPassword = document.getElementById('toggleAdminPassword');
 const toggleRetypePassword = document.getElementById('toggleRetypePassword');
+const showRetypePassword = document.getElementById('showRetypePassword');
 const showAdminPassword = document.getElementById('showAdminPassword');
 const adminPassword = document.getElementById('admin_password');
 const passwordRetype = document.getElementById('password_retype');
