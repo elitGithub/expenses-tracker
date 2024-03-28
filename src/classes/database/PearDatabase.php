@@ -82,6 +82,7 @@ class PearDatabase implements LoggerAwareInterface
      */
     public function __construct($dbtype = '', $host = '', $dbname = '', $username = '', $passwd = '')
     {
+        global $dbConfig;
         $this->setLogger(new DatabaseLogger('query_errors', Logger::INFO));
         $this->logsqltm = new DatabaseLogger('sql_time_log', Logger::WARNING);
         $this->resetSettings($dbtype, $host, $dbname, $username, $passwd);
@@ -153,7 +154,7 @@ class PearDatabase implements LoggerAwareInterface
     /**
      * Manage instance usage of this class
      */
-    public static function &getInstance()
+    public static function &getInstance(): PearDatabase
     {
         global $adb;
 
@@ -167,7 +168,7 @@ class PearDatabase implements LoggerAwareInterface
     /**
      * @return mixed
      */
-    public static function getTablesConfig()
+    public function getTablesConfig()
     {
         global $dbConfig;
         return $dbConfig['tables'];
@@ -1077,6 +1078,7 @@ class PearDatabase implements LoggerAwareInterface
         if ($dieOnError) {
             $this->setDieOnError($dieOnError);
         }
+
         $this->database = NewADOConnection($this->dbType);
         $this->database->PConnect($this->dbHostName, $this->userName, $this->userPassword, $this->dbName);
         $this->database->LogSQL($this->enableSQLlog);

@@ -22,7 +22,7 @@ class Role
             return self::$roleIdByName[$roleName];
         }
         $adb = PearDatabase::getInstance();
-        $tables = PearDatabase::getTablesConfig();
+        $tables =$adb->getTablesConfig();
         $query = "SELECT `role_id` FROM {$tables['roles_table_name']} WHERE `role_name` = ?";
         $result = $adb->preparedQuery($query, [$roleName]);
         $roleId = $adb->query_result($result, 0, 'role_id');

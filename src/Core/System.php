@@ -220,7 +220,7 @@ class System
      */
     public function checkInstallation(): bool
     {
-        return !is_file(EXTR_ROOT_DIR . '/system/config/database.php');
+        return !is_file(EXTR_ROOT_DIR . '/system/installation_includes.php');
     }
 
     /**

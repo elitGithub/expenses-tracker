@@ -24,7 +24,37 @@ class Installer extends Setup
 {
 
     protected System        $system;
-    protected ?PearDatabase $adb = null;
+    protected ?PearDatabase $adb               = null;
+    protected array         $dirs              = [
+        '/system/config',
+        '/system/data',
+        '/system/logs',
+        '/system/user',
+        '/system/user/images',
+        '/system/user/attachments',
+    ];
+    protected array         $dbConfig          = [
+        'db_user' => '',
+        'db_pass' => '',
+        'db_host' => '',
+        'db_port' => 0,
+        'db_name' => '',
+        'db_type' => '',
+        'log_sql' => true,
+    ];
+    protected array         $tablesSettings    = [
+        'expense_category_table_name' => '',
+        'expenses_table_name'         => '',
+        'users_table_name'            => '',
+        'history_table_name'          => '',
+        'actions_table_name'          => '',
+        'roles_table_name'            => '',
+        'role_permissions_table_name' => '',
+        'user_to_role_table_name'     => '',
+    ];
+    protected array         $redisConfig       = [];
+    protected array         $memcachedConfig   = [];
+    protected array         $permissionsConfig = [];
 
     /**
      * @var \Log\InstallLog
@@ -44,7 +74,7 @@ class Installer extends Setup
     }
 
     /**
-     * Check absolutely necessary stuff and die.
+     * Check the necessary stuff and die.
      *
      * @throws Exception
      */
@@ -91,16 +121,7 @@ class Installer extends Setup
     {
         $instanceSetup = new Setup();
         $instanceSetup->setRootDir(EXTR_ROOT_DIR);
-
-        $dirs = [
-            '/system/config',
-            '/system/data',
-            '/system/logs',
-            '/system/user',
-            '/system/user/images',
-            '/system/user/attachments',
-        ];
-        $failedDirs = $instanceSetup->checkDirs($dirs);
+        $failedDirs = $instanceSetup->checkDirs($this->dirs);
         $numDirs = count($failedDirs);
 
         if (1 <= $numDirs) {
@@ -139,61 +160,38 @@ class Installer extends Setup
      */
     public function startInstall(array $setup = null): void
     {
-        global $dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig;
-        $dbConfig = [
-            'db_user' => '',
-            'db_pass' => '',
-            'db_host' => '',
-            'db_port' => 0,
-            'db_name' => '',
-            'db_type' => '',
-            'log_sql' => true,
-        ];
-        $tablesSettings = [
-            'expense_category_table_name' => '',
-            'expenses_table_name'         => '',
-            'users_table_name'            => '',
-            'history_table_name'          => '',
-            'actions_table_name'          => '',
-            'roles_table_name'            => '',
-            'role_permissions_table_name' => '',
-            'user_to_role_table_name'     => '',
-        ];
-
-        $redisConfig = [];
-        $memcachedConfig = [];
-
-
+        global $adb, $dbConfig;
         $useRootUserForSystem = Filter::filterInput(INPUT_POST, 'useSameUser', FILTER_VALIDATE_BOOLEAN, false);
-        $masterDb = $this->setUpMasterDB($dbConfig, $setup);
-        $this->createDB($masterDb, $tablesSettings);
+        $masterDb = $this->setUpMasterDB($setup);
+        $this->createDB($masterDb);
 
 
-        $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'], $dbConfig['db_pass']);
+        $masterDb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], $this->dbConfig['db_name'], $this->dbConfig['db_user'],
+                                     $this->dbConfig['db_pass']);
         $masterDb->connect();
         $this->adb = $masterDb;
-        global $adb;
         $adb = $this->adb;
 
         if (!$useRootUserForSystem) {
             // Now that we have tables, let's check for the user:
-            $dbConfig['db_user'] = Filter::filterInput(INPUT_POST, 'sql_user', FILTER_SANITIZE_SPECIAL_CHARS, '');
-            $dbConfig['db_pass'] = Filter::filterInput(INPUT_POST, 'sql_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
-            if (is_null($dbConfig['db_pass']) && $dbConfig['db_type'] !== 'sqlite') {
+            $this->dbConfig['db_user'] = Filter::filterInput(INPUT_POST, 'sql_user', FILTER_SANITIZE_SPECIAL_CHARS, '');
+            $this->dbConfig['db_pass'] = Filter::filterInput(INPUT_POST, 'sql_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
+            if (is_null($this->dbConfig['db_pass']) && $this->dbConfig['db_type'] !== 'sqlite') {
                 // The Password can be empty...
-                $dbConfig['db_pass'] = '';
+                $this->dbConfig['db_pass'] = '';
             }
             $userQuery = 'SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = ?) AS "exists";';
-            $result = $masterDb->preparedQuery($userQuery, [$dbConfig['db_user']]);
+            $result = $masterDb->preparedQuery($userQuery, [$this->dbConfig['db_user']]);
             if (!$masterDb->query_result($result, 0, 'exists')) {
-                $sqlCreateUser = "CREATE USER IF NOT EXISTS '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}' IDENTIFIED BY '{$dbConfig['db_pass']}';";
+                $sqlCreateUser = "CREATE USER IF NOT EXISTS '{$this->dbConfig['db_user']}'@'{$this->dbConfig['db_host']}' IDENTIFIED BY '{$this->dbConfig['db_pass']}';";
                 $masterDb->preparedQuery($sqlCreateUser, [], true);
-                $sqlGrantPrivileges = "GRANT SELECT, INSERT, UPDATE, DELETE ON `{$dbConfig['db_name']}`.* TO '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}';";
+                $sqlGrantPrivileges = "GRANT SELECT, INSERT, UPDATE, DELETE ON `{$this->dbConfig['db_name']}`.* TO '{$this->dbConfig['db_user']}'@'{$this->dbConfig['db_host']}';";
                 $result = $masterDb->query($sqlGrantPrivileges);
                 $masterDb->preparedQuery('FLUSH PRIVILEGES;');
             }
-            $this->adb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'],
-                                          $dbConfig['db_pass']);
+            $this->adb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], $this->dbConfig['db_name'],
+                                          $this->dbConfig['db_user'],
+                                          $this->dbConfig['db_pass']);
             try {
                 $this->adb->connect();
                 global $adb;
@@ -202,20 +200,12 @@ class Installer extends Setup
                 throw new Exception($exception->getMessage());
             }
         }
-
-        $this->connectCache($permissionsConfig, $redisConfig, $memcachedConfig);
-        $dbConfig['tables'] = $tablesSettings;
-        $this->createConfigFiles($dbConfig, $permissionsConfig, $redisConfig, $memcachedConfig);
+        $this->dbConfig['tables'] = $this->tablesSettings;
+        $dbConfig = $this->dbConfig;
+        $this->connectCache();
+        $this->createConfigFiles();
         $this->installPermissions();
         $userModel = new UserModel();
-
-        if (!$userModel->existsByEmailOrUserName('system@exepnsetracker.com', 'expense_tracker_system')) {
-            $createdAdmin = $userModel->createNew('system@exepnsetracker.com', 'expense_tracker_system', $this->system->getRandomString(),
-                                                  'Expense Tracker', 'Admin', 1, 1);
-            if (!$createdAdmin) {
-                throw new Exception('Failed to create the system admin user');
-            }
-        }
 
         $email = Filter::filterInput(INPUT_POST, 'admin_email', FILTER_SANITIZE_SPECIAL_CHARS);
         $userName = Filter::filterInput(INPUT_POST, 'admin_user', FILTER_SANITIZE_SPECIAL_CHARS);
@@ -224,20 +214,21 @@ class Installer extends Setup
         $password = Filter::filterInput(INPUT_POST, 'admin_password', FILTER_SANITIZE_SPECIAL_CHARS);
         $confirmPassword = Filter::filterInput(INPUT_POST, 'password_retype', FILTER_SANITIZE_SPECIAL_CHARS);
         if (is_null($password) || is_null($confirmPassword)) {
-            throw new Exception('Passwords do not match');
+            throw new Exception('Please make sure you typed password and confirm password');
         }
 
         if (strcmp($password, $confirmPassword) !== 0) {
             throw new Exception('Passwords do not match');
         }
-        $createUser = $userModel->createNew($email, $userName, $firstName, $lastName, $password, User::getActiveAdminUser()->id, Role::getRoleIdByName('administrator'));
+
+        $createUser = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'));
 
         if (!$createUser) {
             $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
             $createUser = $existUserData['user_id'] ?? false;
             if ($createUser) {
                 Permissions::writeUser($createUser, [
-                    'userName' => $userName, 'name' => $createUser['first_name'] . ' ' . $createUser['last_name'], 'active' => 1,
+                    'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'], 'active' => 1,  'role' => $existUserData['role_id']
                 ]);
             }
         }
@@ -253,13 +244,13 @@ class Installer extends Setup
      * @return void
      * @throws \RedisException
      */
-    private function connectCache(&$permissionsConfig, &$redisConfig, &$memcachedConfig)
+    private function connectCache()
     {
-        $permissionsConfig['writing_key'] = $this->system->getRandomString(18);
-        $permissionsConfig['backend'] = Filter::filterInput(INPUT_POST, 'user_management', FILTER_SANITIZE_SPECIAL_CHARS);
-        if ($permissionsConfig['backend'] === 'redis') {
+        $this->permissionsConfig['writing_key'] = $this->system->getRandomString(18);
+        $this->permissionsConfig['backend'] = Filter::filterInput(INPUT_POST, 'user_management', FILTER_SANITIZE_SPECIAL_CHARS);
+        if ($this->permissionsConfig['backend'] === 'redis') {
             $redisPass = Filter::filterInput(INPUT_POST, 'redis_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
-            $redisConfig = [
+            $this->redisConfig = [
                 'host'           => Filter::filterInput(INPUT_POST, 'redis_host', FILTER_SANITIZE_SPECIAL_CHARS, '127.0.0.1'),
                 'readTimeout'    => 2.5,
                 'connectTimeout' => 2.5,
@@ -269,52 +260,49 @@ class Installer extends Setup
             ];
 
             $redis = new Redis();
-            $redis->connect($redisConfig['host'], $redisConfig['port']);
-            if (!empty($redisConfig['auth'])) {
-                $redis->auth($redisConfig['auth']);
+            $redis->connect($this->redisConfig['host'], $this->redisConfig['port']);
+            if (!empty($this->redisConfig['auth'])) {
+                $redis->auth($this->redisConfig['auth']);
             }
         }
 
-        if ($permissionsConfig['backend'] === 'memcached') {
-            $memcachedConfig = [
+        if ($this->permissionsConfig['backend'] === 'memcached') {
+            $this->memcachedConfig = [
                 'host'         => Filter::filterInput(INPUT_POST, 'memcache_host', FILTER_SANITIZE_SPECIAL_CHARS, '127.0.0.1'),
                 'persist_name' => Filter::filterInput(INPUT_POST, 'memcache_user', FILTER_SANITIZE_SPECIAL_CHARS, 'expense_tracker_cache'),
                 'port'         => Filter::filterInput(INPUT_POST, 'memcache_port', FILTER_VALIDATE_INT, 11211),
             ];
-            $memcacheConnect = new Memcached($memcachedConfig['persist_name']);
+            $memcacheConnect = new Memcached($this->memcachedConfig['persist_name']);
             $memcacheConnect->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
-            $memcacheConnect->addServer($memcachedConfig['host'], $memcachedConfig['port']);
+            $memcacheConnect->addServer($this->memcachedConfig['host'], $this->memcachedConfig['port']);
         }
     }
 
     /**
-     * @param  array  $dbConfig
-     * @param  array  $permissionsConfig
-     * @param  array  $redisConfig
-     * @param  array  $memcachedConfig
      *
      * @return void
      */
-    public function createConfigFiles(array $dbConfig = [], array $permissionsConfig = [], array $redisConfig = [], array $memcachedConfig = [])
+    public function createConfigFiles()
     {
         $dbConfigFile = EXTR_ROOT_DIR . '/system/config/database.php';
         $userManagementFile = EXTR_ROOT_DIR . '/system/user/permissions.php';
         $dbConfigData = '<?php
-                              $dbConfig=' . var_export($dbConfig, true) . ';';
+                              $dbConfig=' . var_export($this->dbConfig, true) . ';';
 
 
         $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+        file_put_contents($userManagementFile, '<?php $permissionsConfig=' . var_export($this->permissionsConfig, true) . ';' . PHP_EOL);
         file_put_contents($dbConfigFile, $dbConfigData);
         file_put_contents($includesFile, '<?php ' . "\nrequire_once('$dbConfigFile');\n");
 
-        if ($permissionsConfig['backend'] === 'redis') {
-            $redisConfigData = '<?php ' . '$redisConfig=' . var_export($redisConfig, true) . ';';
-            file_put_contents($userManagementFile, $redisConfigData);
+        if ($this->permissionsConfig['backend'] === 'redis') {
+            $redisConfigData = '$redisConfig=' . var_export($this->redisConfig, true) . ';' . PHP_EOL;
+            file_put_contents($userManagementFile, $redisConfigData, FILE_APPEND);
         }
 
-        if ($permissionsConfig['backend'] === 'memcached') {
-            $memcachedConfigData = '<?php ' . var_export($memcachedConfig, true) . ';';
-            file_put_contents($userManagementFile, $memcachedConfigData);
+        if ($this->permissionsConfig['backend'] === 'memcached') {
+            $memcachedConfigData = '$memcachedConfig=' . var_export($this->memcachedConfig, true) . ';' . PHP_EOL;
+            file_put_contents($userManagementFile, $memcachedConfigData, FILE_APPEND);
         }
 
         file_put_contents($includesFile, "require_once('$userManagementFile');\n", FILE_APPEND);
@@ -332,79 +320,77 @@ class Installer extends Setup
      */
     public function installPermissions(): void
     {
-        global $dbConfig;
-        Permissions::populateActionsTable($this->adb, $dbConfig['tables']['actions_table_name']);
-        Permissions::populateRolesTable($this->adb, $dbConfig['tables']['roles_table_name']);
-        Permissions::createRolePermissions($this->adb, $dbConfig['tables']['roles_table_name'], $dbConfig['tables']['actions_table_name'],
-                                           $dbConfig['tables']['role_permissions_table_name']);
-        Permissions::createPermissionsFile($this->adb, $dbConfig['tables']['role_permissions_table_name']);
+        Permissions::populateActionsTable($this->adb, $this->dbConfig['tables']['actions_table_name']);
+        Permissions::populateRolesTable($this->adb, $this->dbConfig['tables']['roles_table_name']);
+        Permissions::createRolePermissions($this->adb, $this->dbConfig['tables']['roles_table_name'], $this->dbConfig['tables']['actions_table_name'],
+                                           $this->dbConfig['tables']['role_permissions_table_name']);
+        Permissions::createPermissionsFile($this->adb, $this->dbConfig['tables']['role_permissions_table_name']);
     }
 
     /**
-     * @param              $dbConfig
      * @param  array|null  $setup
      *
      * @return \database\PearDatabase
      * @throws \Exception
      */
-    private function setUpMasterDB(&$dbConfig, ?array $setup = null): PearDatabase
+    private function setUpMasterDB(?array $setup = null): PearDatabase
     {
         // Check the selected database:
         if (!isset($setup['dbType'])) {
-            $dbConfig['db_type'] = Filter::filterInput(INPUT_POST, 'sql_type', FILTER_SANITIZE_SPECIAL_CHARS);
-            $dbConfig['db_type'] = trim((string) $dbConfig['db_type']);
+            $this->dbConfig['db_type'] = Filter::filterInput(INPUT_POST, 'sql_type', FILTER_SANITIZE_SPECIAL_CHARS);
+            $this->dbConfig['db_type'] = trim((string) $this->dbConfig['db_type']);
         } else {
-            $dbConfig['db_type'] = $setup['dbType'];
+            $this->dbConfig['db_type'] = $setup['dbType'];
         }
 
-        if (!is_string($dbConfig['db_type']) || strlen($dbConfig['db_type']) < 1) {
+        if (!is_string($this->dbConfig['db_type']) || strlen($this->dbConfig['db_type']) < 1) {
             throw new Exception('Please select a database type.');
         }
 
         // Check table prefix
-        $dbConfig['db_host'] = Filter::filterInput(INPUT_POST, 'sql_server', FILTER_SANITIZE_SPECIAL_CHARS, '127.0.0.1');
+        $this->dbConfig['db_host'] = Filter::filterInput(INPUT_POST, 'sql_server', FILTER_SANITIZE_SPECIAL_CHARS, '127.0.0.1');
         // root_user
         $rootUser = Filter::filterInput(INPUT_POST, 'root_user', FILTER_SANITIZE_SPECIAL_CHARS, '');
         $rootPassword = Filter::filterInput(INPUT_POST, 'root_password', FILTER_SANITIZE_SPECIAL_CHARS, '');
 
         // Check the database name
         if (!isset($setup['db_type'])) {
-            $dbConfig['db_name'] = Filter::filterInput(INPUT_POST, 'sql_db', FILTER_SANITIZE_SPECIAL_CHARS);
+            $this->dbConfig['db_name'] = Filter::filterInput(INPUT_POST, 'sql_db', FILTER_SANITIZE_SPECIAL_CHARS);
         } else {
-            $dbConfig['db_name'] = $setup['dbDatabaseName'];
+            $this->dbConfig['db_name'] = $setup['dbDatabaseName'];
         }
 
-        if (!is_string($dbConfig['db_name']) || strlen($dbConfig['db_name']) < 1) {
-            $dbConfig['db_name'] = 'expense_tracker';
+        if (!is_string($this->dbConfig['db_name']) || strlen($this->dbConfig['db_name']) < 1) {
+            $this->dbConfig['db_name'] = 'expense_tracker';
         }
 
 
         // Check database port
         if (!isset($setup['db_type'])) {
-            $dbConfig['db_port'] = Filter::filterInput(INPUT_POST, 'sql_port', FILTER_VALIDATE_INT, 3306);
+            $this->dbConfig['db_port'] = Filter::filterInput(INPUT_POST, 'sql_port', FILTER_VALIDATE_INT, 3306);
         } else {
-            $dbConfig['db_port'] = $setup['dbPort'];
+            $this->dbConfig['db_port'] = $setup['dbPort'];
         }
 
-        if ($dbConfig['db_type'] === 'sqlite') {
-            $dbConfig['db_host'] = Filter::filterInput(
+        if ($this->dbConfig['db_type'] === 'sqlite') {
+            $this->dbConfig['db_host'] = Filter::filterInput(
                 INPUT_POST,
                 'sql_sqlitefile',
                 FILTER_SANITIZE_SPECIAL_CHARS,
-                $setup['dbServer'] ?? $dbConfig['db_host']
+                $setup['dbServer'] ?? $this->dbConfig['db_host']
             );
-            if (is_null($dbConfig['db_host'])) {
+            if (is_null($this->dbConfig['db_host'])) {
                 throw new Exception('Please add a SQLite database filename.');
             }
         }
 
-        if (!$dbConfig['db_host']) {
-            $dbConfig['db_host'] = '127.0.0.1'; // Default SQL server
+        if (!$this->dbConfig['db_host']) {
+            $this->dbConfig['db_host'] = '127.0.0.1'; // Default SQL server
         }
 
-        $dbConfig['db_user'] = $rootUser;
-        $dbConfig['db_pass'] = $rootPassword;
-        $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword);
+        $this->dbConfig['db_user'] = $rootUser;
+        $this->dbConfig['db_pass'] = $rootPassword;
+        $masterDb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword);
         // check database connection
         try {
             $masterDb->connect();
@@ -419,17 +405,15 @@ class Installer extends Setup
 
     /**
      * @param  \database\PearDatabase  $masterDb
-     * @param                          $tablesSettings
      *
      * @return void
      * @throws \Exception
      */
-    private function createDB(PearDatabase $masterDb, &$tablesSettings)
+    private function createDB(PearDatabase $masterDb)
     {
-        global $dbConfig;
         $createMyOwnDb = Filter::filterInput(INPUT_POST, 'createMyOwnDb', FILTER_VALIDATE_BOOLEAN, false);
         $tablePrefix = Filter::filterInput(INPUT_POST, 'table_prefix', FILTER_SANITIZE_SPECIAL_CHARS, '');
-        $dbCreator = new DatabaseCreator($masterDb, $dbConfig['db_name'], !$createMyOwnDb);
+        $dbCreator = new DatabaseCreator($masterDb, $this->dbConfig['db_name'], !$createMyOwnDb);
 
         $dbCreated = $dbCreator->createDatabase();
         if (!$dbCreated) {
@@ -437,9 +421,10 @@ class Installer extends Setup
             throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
 
-        $tablesFactory = new TableFactory($tablesSettings, $tablePrefix);
+        $tablesFactory = new TableFactory($this->tablesSettings, $tablePrefix);
         $queries = $tablesFactory->getQueries();
-        $masterDb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'], $dbConfig['db_pass']);
+        $masterDb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], $this->dbConfig['db_name'], $this->dbConfig['db_user'],
+                                     $this->dbConfig['db_pass']);
         foreach ($queries as $query) {
             $masterDb->query($query);
         }

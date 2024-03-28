@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types = 1);
-
+global $dbConfig, $dbConfigOption;
 $dbConfigOption = [
     'persistent'     => true,
     'autofree'       => false,
@@ -13,6 +13,6 @@ $dbConfigOption = [
 
 $default_charset = 'utf-8';
 
-if (is_file('installation_includes.php')) {
+if (file_exists('system/installation_includes.php')) {
     require_once 'installation_includes.php';
 }

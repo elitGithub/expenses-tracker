@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use database\PearDatabase;
+use Permissions\Permissions;
 use Permissions\PermissionsManager;
 use Permissions\Role;
 
@@ -28,20 +29,42 @@ class User
     /**
      * @param  int  $id
      */
-    public function __construct(int $id = 0) {
+    public function __construct(int $id = 0)
+    {
         if ($id) {
             $this->id = $id;
-            $tables = PearDatabase::getTablesConfig();
-            $this->entityTable = $tables['users_table_name'];
-            $this->roleTable = $tables['user_to_role_table_name'];
-            $this->adb = PearDatabase::getInstance();
         }
+        $this->adb = PearDatabase::getInstance();
+        $tables = $this->adb->getTablesConfig();
+        $this->entityTable = $tables['users_table_name'];
+        $this->roleTable = $tables['user_to_role_table_name'];
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     *
+     * @return void
+     */
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
+
+    /**
+     * @param $name
+     *
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->$name;
     }
 
     public static function getActiveAdminUser(): User
     {
         $adb = PearDatabase::getInstance();
-        $tables = PearDatabase::getTablesConfig();
+        $tables = $adb->getTablesConfig();
         $query = "SELECT * FROM
              `{$tables['users_table_name']}`
                  LEFT JOIN `{$tables['user_to_role_table_name']}` ON
@@ -59,17 +82,69 @@ class User
         return $user;
     }
 
+    public function login($userName, $password)
+    {
+        // TODO: add log!
+        // TODO: redirect to logout page.
+        $query = "SELECT * FROM `$this->entityTable` WHERE CAST(`user_name` AS BINARY) = ?";
+        $result = $this->adb->requirePsSingleResult($query, [$userName]);
+
+        if (!$result) {
+            return false;
+        }
+
+
+        $row = $this->adb->fetchByAssoc($result);
+
+        if ((bool) $row['active'] !== true) {
+            /**
+             * require_once('modules/Users/Logout.php');
+             * die('Privileges not found.');
+             */
+            return false;
+        }
+
+        if (!password_verify($password, $row['password'])) {
+            return false;
+        }
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $this->id = $row['user_id'];
+        $this->retrieveUserInfoFromFile();
+        $_SESSION['user'] = $userName;
+        return true;
+    }
+
+    /**
+     * @return void
+     */
     public function retrieveUserInfoFromFile()
     {
-        $data = PermissionsManager::getUserPrivileges($this->id);
-        var_dump($data);
+        try {
+            $userData = PermissionsManager::getUserPrivileges($this->id);
+            foreach ($userData as $propertyName => $propertyValue) {
+                $this->$propertyName = $propertyValue;
+            }
+
+        } catch (Throwable $exception) {
+            // TODO: add log
+            /**
+             *  require_once('modules/Users/Logout.php');
+             *
+             * /
+             */
+            die('Privileges not found.');
+        }
     }
 
     /**
      * @param  string  $password
+     *
      * @return string|null
      */
-    public function encryptPassword (string $password): ?string
+    public function encryptPassword(string $password): ?string
     {
         return password_hash($password, PASSWORD_DEFAULT);
     }
@@ -79,9 +154,9 @@ class User
      *
      * @return bool
      */
-    public function verifyPassword ($password): bool
+    public function verifyPassword($password): bool
     {
-        $query = "SELECT user_name, password FROM $this->entityTable WHERE id=?";
+        $query = "SELECT `user_name`, `password` FROM `$this->entityTable` WHERE id = ?;";
         $result = $this->adb->pquery($query, [$this->id]);
         $row = $this->adb->fetchByAssoc($result);
         return password_verify($password, $row['password']);

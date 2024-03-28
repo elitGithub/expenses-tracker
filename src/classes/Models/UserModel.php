@@ -8,17 +8,21 @@ use database\PearDatabase;
 use Permissions\Permissions;
 use User;
 
+/**
+ * User Model for storage
+ */
 class UserModel
 {
-    protected string $entityTable;
-    protected string $roleTable;
+    protected string       $entityTable;
+    protected string       $userToRoleTable;
     protected PearDatabase $adb;
 
     public function __construct() {
-        $tables = PearDatabase::getTablesConfig();
-        $this->entityTable = $tables['users_table_name'];
-        $this->roleTable = $tables['user_to_role_table_name'];
+
         $this->adb = PearDatabase::getInstance();
+        $tables = $this->adb->getTablesConfig();
+        $this->entityTable = $tables['users_table_name'];
+        $this->userToRoleTable = $tables['user_to_role_table_name'];
     }
 
     /**
@@ -53,9 +57,9 @@ class UserModel
                                  VALUES (?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());";
             $this->adb->pquery($query, [$email, $userName, $firstName, $lastName, $user->encryptPassword($password), $createdBy]);
             $id = $this->adb->getLastInsertID();
-            $this->adb->pquery("INSERT INTO `$this->roleTable` (`user_id`, `role_id`) VALUES (?, ?)", [$id, $roleId]);
+            $this->adb->pquery("INSERT INTO `$this->userToRoleTable` (`user_id`, `role_id`) VALUES (?, ?)", [$id, $roleId]);
             if ($id) {
-                Permissions::writeUser($id, ['userName' => $userName, 'name' => $firstName . ' ' . $lastName, 'active' => 1]);
+                Permissions::writeUser($id, ['userName' => $userName, 'name' => $firstName . ' ' . $lastName, 'active' => 1, 'role' => $roleId]);
             }
             return $id;
         }
@@ -71,7 +75,7 @@ class UserModel
      */
     public function getByEmailAndUserName(string $email, string $userName): ?array
     {
-        $query = "SELECT * FROM `$this->entityTable` WHERE `email` = ? AND `user_name` = ? AND `active` = 1;";
+        $query = "SELECT * FROM `$this->entityTable` LEFT JOIN `$this->userToRoleTable` ON `$this->userToRoleTable`.`user_id` = `$this->entityTable`.`user_id` WHERE `email` = ? AND `user_name` = ? AND `active` = 1;";
         $res = $this->adb->preparedQuery($query, [$email, $userName]);
         return $this->adb->fetchByAssoc($res);
     }

@@ -4,21 +4,14 @@ declare(strict_types = 1);
 
 namespace Permissions;
 
-if (!file_exists(EXTR_ROOT_DIR . '/system/user/permissions.php')) {
-    throw new Exception('Missing user configuration, please install the system first!');
-}
-
-require_once EXTR_ROOT_DIR . '/system/user/permissions.php';
-global $permissionsConfig;
-if (!isset($permissionsConfig['backend'])) {
-    throw new Exception('No backend specified in permissions configuration.');
-}
-
 use database\PearDatabase;
 use Exception;
 use Memcached;
 use Redis;
 use User;
+
+global $permissionsConfig, $redisConfig, $memcachedConfig;
+require_once 'system/user/permissions.php';
 
 /**
  * Permissions Manager system, using various systems for fast in memory access.
@@ -27,8 +20,8 @@ class Permissions
 {
     protected static ?Memcached $memcached = null;
     protected static ?Redis     $redis     = null;
-    protected ?PearDatabase     $adb       = null;
     protected const CACHE_WRITE_PREFIX = 'expense_tracker_permissions_data';
+    protected const PERMISSION_HASH_KEY = '_permissions';
 
     /**
      * Array with user rights.
@@ -123,7 +116,7 @@ class Permissions
         switch ($permissionsConfig['backend']) {
             case 'redis':
                 $redis = self::getRedisConnection();
-                $redis->hset($key, $hashKey, serialize($data));
+                $redis->hSet($key, $hashKey, serialize($data));
                 return;
 
             case 'memcached':
@@ -181,24 +174,20 @@ class Permissions
     }
 
     /**
-     * Read data from the configured backend.
+     * @param          $key
+     * @param  string  $hasKey
      *
-     * @param  mixed  $userId  The user ID to use as part of the key.
-     *
-     * @return mixed The data read from the storage, or null if not found.
-     * @throws Exception
+     * @return false|mixed|null
+     * @throws \RedisException
      */
-    public static function readUser($userId)
+    private static function read($key, string $hasKey)
     {
         global $permissionsConfig;
-        $key = $permissionsConfig['writing_key'] . '_' . $userId;
-
         switch ($permissionsConfig['backend']) {
             case 'redis':
                 $redis = self::getRedisConnection();
-                $data = $redis->get($key);
+                $data = $redis->hGet($key, $hasKey);
                 return $data !== false ? unserialize($data) : null;
-
             case 'memcached':
                 $memcached = self::getMemcachedConnection();
                 return $memcached->get($key) ?: null;
@@ -214,6 +203,21 @@ class Permissions
             default:
                 throw new Exception('Unsupported backend specified.');
         }
+    }
+
+    /**
+     * Read data from the configured backend.
+     *
+     * @param  mixed  $userId  The user ID to use as part of the key.
+     *
+     * @return mixed The data read from the storage, or null if not found.
+     * @throws Exception
+     */
+    public static function readUser($userId)
+    {
+        global $permissionsConfig;
+
+        return self::read(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . '_' . $userId, (string)$userId);
     }
 
     /**
@@ -280,15 +284,26 @@ class Permissions
      */
     public static function createPermissionsFile(PearDatabase $adb, string $rolePermissionsTable)
     {
-        $rolePermRes = $adb->preparedQuery("SELECT * FROM $rolePermissionsTable;", []);
+        global $permissionsConfig;
+        $rolePermRes = $adb->query("SELECT * FROM `$rolePermissionsTable`;");
         $rolePermissionsArray = [];
         while ($row = $adb->fetchByAssoc($rolePermRes)) {
             $rolePermissionsArray[] = $row;
         }
-
-        self::write(static::CACHE_WRITE_PREFIX, $rolePermissionsArray);
+        $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY;
+        self::hashWrite($key, self::PERMISSION_HASH_KEY, $rolePermissionsArray);
         file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php',
                           '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
+    }
+
+    /**
+     * @return false|mixed|null
+     * @throws \RedisException
+     */
+    public static function readPermissions()
+    {
+        global $permissionsConfig;
+        return self::read(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY, self::PERMISSION_HASH_KEY);
     }
 
     /**
@@ -300,7 +315,7 @@ class Permissions
         global $redisConfig;
 
         if (null === self::$redis) {
-            self::$redis = new Redis();;
+            self::$redis = new Redis();
             self::$redis->connect($redisConfig['host'], $redisConfig['port']);
             if (!empty($redisConfig['auth'])) {
                 self::$redis->auth($redisConfig['auth']);
@@ -329,7 +344,7 @@ class Permissions
      */
     public static function isPermittedAction($action, User $user)
     {
-        require_once EXTR_ROOT_DIR . '/system/user/permissions.php';
+
     }
 
 
