@@ -189,7 +189,7 @@ class Installer extends Setup
                 $sqlCreateUser = "CREATE USER IF NOT EXISTS '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}' IDENTIFIED BY '{$dbConfig['db_pass']}';";
                 $masterDb->preparedQuery($sqlCreateUser, [], true);
                 $sqlGrantPrivileges = "GRANT SELECT, INSERT, UPDATE, DELETE ON `{$dbConfig['db_name']}`.* TO '{$dbConfig['db_user']}'@'{$dbConfig['db_host']}';";
-                $result = $masterDb->preparedQuery($sqlGrantPrivileges, []);
+                $result = $masterDb->query($sqlGrantPrivileges);
                 $masterDb->preparedQuery('FLUSH PRIVILEGES;');
             }
             $this->adb = new PearDatabase($dbConfig['db_type'], $dbConfig['db_host'], $dbConfig['db_name'], $dbConfig['db_user'],
@@ -230,11 +230,16 @@ class Installer extends Setup
         if (strcmp($password, $confirmPassword) !== 0) {
             throw new Exception('Passwords do not match');
         }
-        $createUser = $userModel->createNew($email, $userName, $firstName, $lastName, $password, User::getActiveAdminUser()->id,
-                                            Role::getRoleIdByName('administrator'));
-        // TODO: in case already exist, add the user into Cache.
+        $createUser = $userModel->createNew($email, $userName, $firstName, $lastName, $password, User::getActiveAdminUser()->id, Role::getRoleIdByName('administrator'));
+
         if (!$createUser) {
-            $createUser = $userModel->getByEmailAndUserName($email, $userName)['user_id'] ?? false;
+            $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
+            $createUser = $existUserData['user_id'] ?? false;
+            if ($createUser) {
+                Permissions::writeUser($createUser, [
+                    'userName' => $userName, 'name' => $createUser['first_name'] . ' ' . $createUser['last_name'], 'active' => 1,
+                ]);
+            }
         }
 
         if (!$createUser) {
@@ -330,7 +335,8 @@ class Installer extends Setup
         global $dbConfig;
         Permissions::populateActionsTable($this->adb, $dbConfig['tables']['actions_table_name']);
         Permissions::populateRolesTable($this->adb, $dbConfig['tables']['roles_table_name']);
-        Permissions::createRolePermissions($this->adb, $dbConfig['tables']['roles_table_name'], $dbConfig['tables']['actions_table_name'], $dbConfig['tables']['role_permissions_table_name']);
+        Permissions::createRolePermissions($this->adb, $dbConfig['tables']['roles_table_name'], $dbConfig['tables']['actions_table_name'],
+                                           $dbConfig['tables']['role_permissions_table_name']);
         Permissions::createPermissionsFile($this->adb, $dbConfig['tables']['role_permissions_table_name']);
     }
 

@@ -349,14 +349,12 @@ $installer = new Installer($system);
                                         <small class="form-text text-muted">Please enter your email.</small>
                                     </div>
                                 </div>
-                                <?php
-                                $suggestedPassword = $system->getRandomString(18) ?>
+
                                 <div class="row mb-2">
                                     <label class="col-sm-3 col-form-label" for="admin_password">Your password:</label>
                                     <div class="col-sm-9">
                                         <div class="input-group" id="show_admin_password">
-                                            <input name="admin_password" value="<?php
-                                                                                echo $suggestedPassword ?>" type="password" autocomplete="off" minlength="8" id="admin_password" class="form-control" required>
+                                            <input name="admin_password" type="password" autocomplete="off" minlength="8" id="admin_password" class="form-control" required>
                                             <span class="input-group-text cursor-pointer" id="toggleAdminPassword"><i class="fa fa-eye" id="showAdminPassword"></i></span>
                                         </div>
                                         <small class="form-text text-muted">Please enter your password with at least 8 characters.</small>
@@ -366,8 +364,7 @@ $installer = new Installer($system);
                                     <label class="col-sm-3 col-form-label" for="password_retype">Retype password:</label>
                                     <div class="col-sm-9">
                                         <div class="input-group" id="show_retype_password">
-                                            <input type="password" autocomplete="off" name="password_retype" id="password_retype" value="<?php
-                                                                                                                                            echo $suggestedPassword ?>" minlength="8" class="form-control" required>
+                                            <input type="password" autocomplete="off" name="password_retype" id="password_retype" minlength="8" class="form-control" required>
                                             <span class="input-group-text cursor-pointer" id="toggleRetypePassword"><i class="fa fa-eye" id="showRetypePassword"></i></span>
                                         </div>
                                         <small class="form-text text-muted">Please retype your password.</small>

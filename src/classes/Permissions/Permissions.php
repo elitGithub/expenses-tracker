@@ -26,8 +26,9 @@ use User;
 class Permissions
 {
     protected static ?Memcached $memcached = null;
-    protected static ?Redis     $redis = null;
-    protected ?PearDatabase    $adb = null;
+    protected static ?Redis     $redis     = null;
+    protected ?PearDatabase     $adb       = null;
+    protected const CACHE_WRITE_PREFIX = 'expense_tracker_permissions_data';
 
     /**
      * Array with user rights.
@@ -103,8 +104,8 @@ class Permissions
     public static function writeUser($userId, $data)
     {
         global $permissionsConfig;
-        $key = $permissionsConfig['writing_key'] . '_' . $userId;
-        self::hashWrite($key, (string)$userId, $data);
+        $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . '_' . $userId;
+        self::hashWrite($key, (string) $userId, $data);
     }
 
     /**
@@ -285,8 +286,9 @@ class Permissions
             $rolePermissionsArray[] = $row;
         }
 
-        self::write('expense_tracker_permissions_data', $rolePermissionsArray);
-        file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php', '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
+        self::write(static::CACHE_WRITE_PREFIX, $rolePermissionsArray);
+        file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php',
+                          '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
     }
 
     /**
@@ -379,7 +381,7 @@ class Permissions
         $stats = self::$memcached->getStats();
         return !empty($stats) && array_reduce($stats, function ($carry, $server) {
                 return $carry && $server['pid'] > 0;
-                }, true);
+            },                                true);
     }
 
 
