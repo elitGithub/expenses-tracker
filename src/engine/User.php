@@ -11,7 +11,7 @@ use Permissions\Role;
  */
 class User
 {
-    protected int $id;
+    public int $id;
     /**
      * @var mixed
      */
@@ -38,7 +38,7 @@ class User
         }
     }
 
-    public static function getActiveAdminUser()
+    public static function getActiveAdminUser(): User
     {
         $adb = PearDatabase::getInstance();
         $tables = PearDatabase::getTablesConfig();
@@ -56,7 +56,7 @@ class User
         }
         $user = new User($adb->query_result($exists, 0, 'user_id'));
         $user->retrieveUserInfoFromFile();
-        return 1;
+        return $user;
     }
 
     public function retrieveUserInfoFromFile()
