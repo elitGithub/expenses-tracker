@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Models;
 
 use database\PearDatabase;
-use Permissions\Permissions;
+use Permissions\CacheSystemManager;
 use User;
 
 /**
@@ -59,7 +59,7 @@ class UserModel
             $id = $this->adb->getLastInsertID();
             $this->adb->pquery("INSERT INTO `$this->userToRoleTable` (`user_id`, `role_id`) VALUES (?, ?)", [$id, $roleId]);
             if ($id) {
-                Permissions::writeUser($id, ['userName' => $userName, 'name' => $firstName . ' ' . $lastName, 'active' => 1, 'role' => $roleId]);
+                CacheSystemManager::writeUser($id, ['userName' => $userName, 'name' => $firstName . ' ' . $lastName, 'active' => 1, 'role' => $roleId]);
             }
             return $id;
         }

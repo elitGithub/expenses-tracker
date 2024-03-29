@@ -3,9 +3,9 @@
 declare(strict_types = 1);
 
 use database\PearDatabase;
-use Permissions\Permissions;
 use Permissions\PermissionsManager;
 use Permissions\Role;
+use Session\SessionWrapper;
 
 /**
  *
@@ -24,7 +24,8 @@ class User
     /**
      * @var \database\PearDatabase
      */
-    protected PearDatabase $adb;
+    protected PearDatabase            $adb;
+    protected SessionWrapper $session;
 
     /**
      * @param  int  $id
@@ -38,6 +39,7 @@ class User
         $tables = $this->adb->getTablesConfig();
         $this->entityTable = $tables['users_table_name'];
         $this->roleTable = $tables['user_to_role_table_name'];
+        $this->session = new SessionWrapper();
     }
 
     /**
@@ -61,6 +63,10 @@ class User
         return $this->$name;
     }
 
+    /**
+     * @return \User
+     * @throws \Exception
+     */
     public static function getActiveAdminUser(): User
     {
         $adb = PearDatabase::getInstance();
@@ -82,7 +88,13 @@ class User
         return $user;
     }
 
-    public function login($userName, $password)
+    /**
+     * @param $userName
+     * @param $password
+     *
+     * @return bool
+     */
+    public function login($userName, $password): bool
     {
         // TODO: add log!
         // TODO: redirect to logout page.
@@ -107,13 +119,10 @@ class User
         if (!password_verify($password, $row['password'])) {
             return false;
         }
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         $this->id = $row['user_id'];
         $this->retrieveUserInfoFromFile();
-        $_SESSION['user'] = $userName;
+        $this->session->sessionAddKey('user', $userName);
+        $this->session->sessionAddKey('is_logged_in', true);
         return true;
     }
 
@@ -147,6 +156,23 @@ class User
     public function encryptPassword(string $password): ?string
     {
         return password_hash($password, PASSWORD_DEFAULT);
+    }
+
+
+    /**
+     * @param int $userId
+     * @return array - Data related to last_login and last_login_As
+     */
+    public static function getLastLoginData(int $userId): array
+    {
+        $adb = PearDatabase::getInstance();
+        if (!$userId || !is_numeric($userId)) {
+            return [];
+        }
+        $tables = $adb->getTablesConfig();
+        $sql = "SELECT `last_login`, `user_name`, `email` FROM `{$tables['users_table_name']}` WHERE id = ?";
+        $res = $adb->pquery($sql, [$userId]);
+        return $adb->num_rows($res) ? $adb->fetchByAssoc($res) : [];
     }
 
 }

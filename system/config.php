@@ -12,6 +12,8 @@ $dbConfigOption = [
 ];
 
 $default_charset = 'utf-8';
+$default_language = 'en_us';
+
 
 if (file_exists('system/installation_includes.php')) {
     require_once 'installation_includes.php';

@@ -11,7 +11,7 @@ use Filter;
 use Log\InstallLog;
 use Memcached;
 use Models\UserModel;
-use Permissions\Permissions;
+use Permissions\CacheSystemManager;
 use Permissions\Role;
 use Redis;
 use Throwable;
@@ -28,6 +28,8 @@ class Installer extends Setup
     protected array         $dirs              = [
         '/system/config',
         '/system/data',
+        '/system/data/storage',
+        '/system/data/storage/jwt',
         '/system/logs',
         '/system/user',
         '/system/user/images',
@@ -227,7 +229,7 @@ class Installer extends Setup
             $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
             $createUser = $existUserData['user_id'] ?? false;
             if ($createUser) {
-                Permissions::writeUser($createUser, [
+                CacheSystemManager::writeUser($createUser, [
                     'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'], 'active' => 1,  'role' => $existUserData['role_id']
                 ]);
             }
@@ -236,6 +238,9 @@ class Installer extends Setup
         if (!$createUser) {
             throw new Exception('Could not create admin user');
         }
+
+        $this->system->generateJwtKeys();
+
         $user = new User($createUser);
         $user->login($userName, $password);
         $user->retrieveUserInfoFromFile();
@@ -317,15 +322,15 @@ class Installer extends Setup
 
     /**
      * @return void
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function installPermissions(): void
     {
-        Permissions::populateActionsTable($this->adb, $this->dbConfig['tables']['actions_table_name']);
-        Permissions::populateRolesTable($this->adb, $this->dbConfig['tables']['roles_table_name']);
-        Permissions::createRolePermissions($this->adb, $this->dbConfig['tables']['roles_table_name'], $this->dbConfig['tables']['actions_table_name'],
+        CacheSystemManager::populateActionsTable($this->adb, $this->dbConfig['tables']['actions_table_name']);
+        CacheSystemManager::populateRolesTable($this->adb, $this->dbConfig['tables']['roles_table_name']);
+        CacheSystemManager::createRolePermissions($this->adb, $this->dbConfig['tables']['roles_table_name'], $this->dbConfig['tables']['actions_table_name'],
                                            $this->dbConfig['tables']['role_permissions_table_name']);
-        Permissions::createPermissionsFile($this->adb, $this->dbConfig['tables']['role_permissions_table_name']);
+        CacheSystemManager::createPermissionsFile($this->adb, $this->dbConfig['tables']['role_permissions_table_name']);
     }
 
     /**
@@ -367,7 +372,7 @@ class Installer extends Setup
 
 
         // Check database port
-        if (!isset($setup['db_type'])) {
+        if (!isset($setup['dbPort'])) {
             $this->dbConfig['db_port'] = Filter::filterInput(INPUT_POST, 'sql_port', FILTER_VALIDATE_INT, 3306);
         } else {
             $this->dbConfig['db_port'] = $setup['dbPort'];

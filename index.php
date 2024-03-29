@@ -28,6 +28,7 @@ ob_start();
 
 $user = new User();
 $user->login('admin', 'As1as2as3');
+var_dump($_SESSION);
 // $con = register('localhost', 'root', 'admin', 'expense_tracker');
 
 //A function to get difference between to numbers
