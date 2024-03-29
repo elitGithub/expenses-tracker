@@ -169,8 +169,7 @@ class ADODB_mysqli extends ADOConnection {
 					  $argUsername = null,
 					  $argPassword = null,
 					  $argDatabaseName = null,
-					  $persist = false,
-					  $port = null)
+					  $persist = false)
 	{
 		if(!extension_loaded("mysqli")) {
 			return null;
@@ -224,7 +223,7 @@ class ADODB_mysqli extends ADOConnection {
 					$argPassword,
 					$argDatabaseName,
 					# PHP7 compat: port must be int. Use default port if cast yields zero
-					(int)$port != 0 ? $port : (int)$this->port,
+					(int)$this->port != 0 ? $this->port : 3306,
 					$this->socket,
 					$this->clientFlags);
 

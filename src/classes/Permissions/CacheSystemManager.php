@@ -131,17 +131,31 @@ class CacheSystemManager
                 return;
 
             case 'default':
-                $fileName = EXTR_ROOT_DIR . 'system/data/' . $key  . '.php';
-                if (!is_int($expiration)) {
-                    $ttl = time() + $expiration;
-                    $fileName = EXTR_ROOT_DIR . 'system/data/' . $key . '_' . $ttl . '.php';
-                }
-                file_put_contents($fileName, serialize($data));
+                self::writeFile($key, $data, $expiration);
                 return;
 
             default:
                 throw new Exception('Unsupported backend specified.');
         }
+    }
+
+    /**
+     * @param $key
+     * @param $data
+     * @param $expiration
+     *
+     * @return void
+     */
+    private static function writeFile($key, $data, $expiration = null)
+    {
+        $fileName = EXTR_ROOT_DIR . '/system/data/' . $key .'.txt';
+        if (is_int($expiration)) {
+            $expiryFile =  EXTR_ROOT_DIR . '/system/data/' . 'expirations.php';
+            $ttl = time() + $expiration;
+            $$fileName = $ttl;
+            file_put_contents($expiryFile, $$fileName, FILE_APPEND);
+        }
+        file_put_contents($fileName, serialize($data));
     }
 
 
@@ -189,12 +203,7 @@ class CacheSystemManager
                 }
 
             case 'default':
-                $fileName = EXTR_ROOT_DIR . 'system/data/' . $key  . '.php';
-                if (!is_int($expiration)) {
-                    $ttl = time() + $expiration;
-                    $fileName = EXTR_ROOT_DIR . 'system/data/' . $key . '_' . $ttl . '.php';
-                }
-                file_put_contents($fileName, serialize($data));
+                self::writeFile($key, $data, $expiration);
                 return true;
 
             default:
@@ -230,7 +239,7 @@ class CacheSystemManager
                 $data = apcu_fetch($key, $success);
                 return $success ? $data : null;
             case 'default':
-                $data = file_get_contents(EXTR_ROOT_DIR . 'system/data/' . $key);
+                $data = file_get_contents(EXTR_ROOT_DIR . '/system/data/' . $key . '.txt');
                 if ($data !== false) {
                     return unserialize($data);
                 }
@@ -266,7 +275,7 @@ class CacheSystemManager
                 $data = apcu_fetch($key, $success);
                 return $success ? $data : null;
             case 'default':
-                $data = file_get_contents(EXTR_ROOT_DIR . 'system/data/' . $key);
+                $data = file_get_contents(EXTR_ROOT_DIR . '/system/data/' . $key . '.php');
                 if ($data !== false) {
                     return unserialize($data);
                 }

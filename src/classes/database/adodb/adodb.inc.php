@@ -986,7 +986,7 @@ if (!defined('_ADODB_LAYER')) {
 			if (is_array($parsed_url) && isset($parsed_url['host']) && isset($parsed_url['port'])) {
 				if (isset($parsed_url['scheme'])) {
 					// If scheme is specified (ie: ldap:// or ldaps://, make sure we retain that.
-					$this->host = $parsed_url['scheme'] . "://" . $parsed_url['host'];
+					$this->host = $parsed_url['scheme'] . '://' . $parsed_url['host'];
 				} else {
 					$this->host = $parsed_url['host'];
 				}

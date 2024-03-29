@@ -40,6 +40,10 @@ class PearDatabase implements LoggerAwareInterface
      * @var mixed
      */
     public         $dbType                 = null;
+    /**
+     * @var int|string|null
+     */
+    public         $dbPort                 = null;
     public ?string $dbHostName             = null;
     public         $dbName                 = null;
     public         $dbOptions              = null;
@@ -80,12 +84,12 @@ class PearDatabase implements LoggerAwareInterface
      *
      * @throws Exception
      */
-    public function __construct($dbtype = '', $host = '', $dbname = '', $username = '', $passwd = '')
+    public function __construct($dbtype = '', $host = '', $dbname = '', $username = '', $passwd = '', $dbPort = '')
     {
         global $dbConfig;
         $this->setLogger(new DatabaseLogger('query_errors', Logger::INFO));
         $this->logsqltm = new DatabaseLogger('sql_time_log', Logger::WARNING);
-        $this->resetSettings($dbtype, $host, $dbname, $username, $passwd);
+        $this->resetSettings($dbtype, $host, $dbname, $username, $passwd, $dbPort);
 
         // Initialize performance parameters
         $this->isdb_default_utf8_charset = PerformancePrefs::getBoolean('DB_DEFAULT_CHARSET_UTF8');
@@ -1080,6 +1084,7 @@ class PearDatabase implements LoggerAwareInterface
         }
 
         $this->database = NewADOConnection($this->dbType);
+        $this->dbHostName = (int)$this->dbPort > 0 ? $this->dbHostName . ':' . $this->dbPort : $this->dbHostName;
         $this->database->PConnect($this->dbHostName, $this->userName, $this->userPassword, $this->dbName);
         $this->database->LogSQL($this->enableSQLlog);
 
@@ -1091,7 +1096,7 @@ class PearDatabase implements LoggerAwareInterface
         }
     }
 
-    public function resetSettings($dbtype, $host, $dbname, $username, $passwd)
+    public function resetSettings($dbtype, $host, $dbname, $username, $passw, $dbPort)
     {
         global $dbConfig, $dbConfigOption;
 
@@ -1102,6 +1107,7 @@ class PearDatabase implements LoggerAwareInterface
             $this->setUserPassword($dbConfig['db_pass']);
             $this->setDatabaseHost($dbConfig['db_host']);
             $this->setDatabaseName($dbConfig['db_name']);
+            $this->setDbPort($dbConfig['db_port']);
             $this->dbOptions = $dbConfigOption;
             if ($dbConfig['log_sql']) {
                 $this->enableSQLlog = ($dbConfig['log_sql'] == true);
@@ -1110,8 +1116,9 @@ class PearDatabase implements LoggerAwareInterface
             $this->setDatabaseType($dbtype);
             $this->setDatabaseName($dbname);
             $this->setUserName($username);
-            $this->setUserPassword($passwd);
+            $this->setUserPassword($passw);
             $this->setDatabaseHost($host);
+            $this->setDbPort($dbPort);
         }
     }
 
@@ -1329,6 +1336,14 @@ class PearDatabase implements LoggerAwareInterface
     public function getLastError()
     {
         return $this->database->errorMsg();
+    }
+
+    /**
+     * @param  int|string|null  $dbPort
+     */
+    public function setDbPort($dbPort): void
+    {
+        $this->dbPort = $dbPort;
     }
 } /* End of class */
 

@@ -396,7 +396,7 @@ class Installer extends Setup
 
         $this->dbConfig['db_user'] = $rootUser;
         $this->dbConfig['db_pass'] = $rootPassword;
-        $masterDb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword);
+        $masterDb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword, $this->dbConfig['db_port']);
         // check database connection
         try {
             $masterDb->connect();
