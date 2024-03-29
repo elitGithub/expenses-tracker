@@ -5,29 +5,24 @@ let currentSection = 1;
 let currentStep = 1;
 // Initialize form state
 let formState = {
-    databaseInfo: {
-        sql_type: '',
-        sql_server: '',
-        sql_port: '',
-        root_user: '',
-        sql_user: '',
-        root_password: '',
-        sql_password: '',
-        sql_db: 'expense_tracker',
-        createMyOwnDb: 'off',
-        table_prefix: 'expense_',
-        useSameUser: false
-    },
-    cacheData: {
-        user_management: '',
-        redis_port: 6379,
-        redis_password: '',
-        redis_host: '',
-        memcache_host: '',
-        memcache_user: '',
-        memcache_port: 11211,
-    },
-    userdata: {}
+    sql_type: '',
+    sql_server: '',
+    sql_port: '',
+    root_user: '',
+    sql_user: '',
+    root_password: '',
+    sql_password: '',
+    sql_db: 'expense_tracker',
+    createMyOwnDb: 'off',
+    table_prefix: 'expense_',
+    useSameUser: false,
+    user_management: '',
+    redis_port: 6379,
+    redis_password: '',
+    redis_host: '',
+    memcache_host: '',
+    memcache_user: '',
+    memcache_port: 11211,
 };
 
 goBackInstall?.addEventListener('click', (ev) => {
@@ -60,7 +55,7 @@ function updateFormState() {
     currentInputs.forEach(input => {
         // Adjust this logic based on how your formState keys are structured and related to input names
         // check if the input has data-default-* attribute and set the value to that, otherwise set it to empty value
-        formState[input.name] = input.getAttribute('data-default-value') || input.value;
+        formState[input.name] = input.value || input.getAttribute('data-default-value');
     });
 }
 
