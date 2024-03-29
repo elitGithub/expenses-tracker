@@ -237,6 +237,7 @@ class Installer extends Setup
             throw new Exception('Could not create admin user');
         }
         $user = new User($createUser);
+        $user->login($userName, $password);
         $user->retrieveUserInfoFromFile();
     }
 
