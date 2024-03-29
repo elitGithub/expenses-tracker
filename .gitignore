@@ -1,1 +1,7 @@
-config
+system/config
+system/data
+system/logs
+system/user
+system/installation_includes.php
+storage/
+public/

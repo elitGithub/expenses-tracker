@@ -34,7 +34,6 @@ class DatabaseCreator
             try {
                 return $this->checkIfDbExists();
             } catch (\Throwable $exception) {
-                var_dump($exception->getMessage());
                 $this->database->log->info('Failed to check if db exists', ['exception' => $exception->getMessage(), 'class' => $this]);
                 return false;
             }

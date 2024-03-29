@@ -1,19 +1,33 @@
 <?php
 
 declare(strict_types = 1);
+
+use database\PearDatabase;
+
 $rootPath = realpath(dirname(__FILE__)); // Adjust the path as needed
 if (!defined('PROJECT_ROOT')) {
     define('PROJECT_ROOT', $rootPath);
 }
-require_once './ignition.php';
+require_once 'src/engine/ignition.php';
 
-if (!file_exists('./config/database.php')) {
+global $dbConfig;
+
+if (!file_exists('system/installation_includes.php')) {
     require_once 'install/index.php';
     exit(1);
 }
+
+if (empty($adb)) {
+    $adb = new PearDatabase();
+    $adb->connect();
+}
+
+
 session_start();
 ob_start();
-require_once('./src/db_config.php');
+
+$user = new User();
+$user->login('admin', 'As1as2as3');
 // $con = register('localhost', 'root', 'admin', 'expense_tracker');
 
 //A function to get difference between to numbers
@@ -108,17 +122,17 @@ if (@$data === true) {
 
 
     <script>
-      function trim (strText) {
-        // this will get rid of leading spaces
-        while (strText.substring(0, 1) === ' ')
-          strText = strText.substring(1, strText.length)
+        function trim(strText) {
+            // this will get rid of leading spaces
+            while (strText.substring(0, 1) === ' ')
+                strText = strText.substring(1, strText.length);
 
-        // this will get rid of trailing spaces
-        while (strText.substring(strText.length - 1, strText.length) === ' ')
-          strText = strText.substring(0, strText.length - 1)
+            // this will get rid of trailing spaces
+            while (strText.substring(strText.length - 1, strText.length) === ' ')
+                strText = strText.substring(0, strText.length - 1);
 
-        return strText
-      }
+            return strText;
+        }
     </script>
 
 
@@ -443,10 +457,10 @@ if (@$data === true) {
 
 
                 <script>
-                  $(document).ready(function () {
-                    $('#dataTables-example').dataTable()
+                    $(document).ready(function () {
+                        $('#dataTables-example').dataTable();
 
-                  })
+                    });
                 </script>
                 <!-- CUSTOM SCRIPTS -->
                 <script src="assets/js/custom.js"></script>

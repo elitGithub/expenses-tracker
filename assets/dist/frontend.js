@@ -4027,7 +4027,7 @@ const Manipulator = {
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap util/config.js
+ * Bootstrap util/system.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -6859,7 +6859,7 @@ class Tooltip extends BaseComponent {
       this._templateFactory = new TemplateFactory({
         ...this._config,
         // the `content` var has to be after `this._config`
-        // to override config.content in case of popover
+        // to override system.content in case of popover
         content,
         extraClass: this._resolvePossibleFunction(this._config.customClass)
       });
@@ -7230,7 +7230,7 @@ class ScrollSpy extends BaseComponent {
   constructor(element, config) {
     super(element, config);
 
-    // this._element is the observablesContainer and config.target the menu links wrapper
+    // this._element is the observablesContainer and system.target the menu links wrapper
     this._targetLinks = new Map();
     this._observableSections = new Map();
     this._rootElement = getComputedStyle(this._element).overflowY === 'visible' ? null : this._element;
@@ -15620,12 +15620,12 @@ module.exports = angelscript;
 /***/ (function(module) {
 
 /*
-Language: Apache config
+Language: Apache system
 Author: Ruslan Keba <rukeba@gmail.com>
 Contributors: Ivan Sagalaev <maniac@softwaremaniacs.org>
 Website: https://httpd.apache.org
 Description: language definition for Apache configuration files (httpd.conf & .htaccess)
-Category: config, web
+Category: system, web
 Audit: 2020
 */
 
@@ -15648,7 +15648,7 @@ function apache(hljs) {
     begin: /:\d{1,5}/
   };
   return {
-    name: 'Apache config',
+    name: 'Apache system',
     aliases: [ 'apacheconf' ],
     case_insensitive: true,
     contains: [
@@ -21973,7 +21973,7 @@ Language: crmsh
 Author: Kristoffer Gronlund <kgronlund@suse.com>
 Website: http://crmsh.github.io
 Description: Syntax Highlighting for the crmsh DSL
-Category: config
+Category: system
 */
 
 /** @type LanguageFn */
@@ -24577,7 +24577,7 @@ module.exports = django;
 /*
 Language: DNS Zone
 Author: Tim Schumacher <tim@datenknoten.me>
-Category: config
+Category: system
 Website: https://en.wikipedia.org/wiki/Zone_file
 */
 
@@ -24668,7 +24668,7 @@ Requires: bash.js
 Author: Alexis Hénaut <alexis@henaut.net>
 Description: language definition for Dockerfile files
 Website: https://docs.docker.com/engine/reference/builder/
-Category: config
+Category: system
 */
 
 /** @type LanguageFn */
@@ -24896,7 +24896,7 @@ module.exports = dos;
  Language: dsconfig
  Description: dsconfig batch configuration language for LDAP directory servers
  Contributors: Jacob Childress <jacobc@gmail.com>
- Category: enterprise, config
+ Category: enterprise, system
  */
 
 /** @type LanguageFn */
@@ -24973,7 +24973,7 @@ Language: Device Tree
 Description: *.dts files used in the Linux kernel
 Author: Martin Braun <martin.braun@ettus.com>, Moritz Fischer <moritz.fischer@ettus.com>
 Website: https://elinux.org/Device_Tree_Reference
-Category: config
+Category: system
 */
 
 /** @type LanguageFn */
@@ -33460,7 +33460,7 @@ module.exports = inform7;
 Language: TOML, also INI
 Description: TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics.
 Contributors: Guillaume Gomez <guillaume1.gomez@gmail.com>
-Category: common, config
+Category: common, system
 Website: https://github.com/toml-lang/toml
 */
 
@@ -37999,7 +37999,7 @@ module.exports = javascript;
  Author: Raphaël Parrëe <rparree@edc4it.com>
  Description: language definition jboss cli
  Website: https://docs.jboss.org/author/display/WFLY/Command+Line+Interface
- Category: config
+ Category: system
  */
 
 function jbossCli(hljs) {
@@ -39408,7 +39408,7 @@ module.exports = latex;
 /*
 Language: LDIF
 Contributors: Jacob Childress <jacobc@gmail.com>
-Category: enterprise, config
+Category: enterprise, system
 Website: https://en.wikipedia.org/wiki/LDAP_Data_Interchange_Format
 */
 
@@ -40335,7 +40335,7 @@ function less(hljs) {
       MIXIN_GUARD_MODE,
       IDENT_MODE('keyword', 'all\\b'),
       IDENT_MODE('variable', '@\\{' + IDENT_RE + '\\}'), // otherwise it’s identified as tag
-      
+
       {
         begin: '\\b(' + TAGS.join('|') + ')\\b',
         className: 'selector-tag'
@@ -41396,7 +41396,7 @@ function lua(hljs) {
         + 'debug sethook getmetatable gethook setmetatable setlocal traceback setfenv getinfo setupvalue getlocal getregistry getfenv '
         + 'io lines write close flush open output type read stderr stdin input stdout popen tmpfile '
         + 'math log max acos huge ldexp pi cos tanh pow deg tan cosh sinh random randomseed frexp ceil floor rad abs sqrt modf asin min mod fmod log10 atan2 exp sin atan '
-        + 'os exit setlocale date getenv difftime remove time clock tmpname rename execute package preload loadlib loaded loaders cpath config path seeall '
+        + 'os exit setlocale date getenv difftime remove time clock tmpname rename execute package preload loadlib loaded loaders cpath system path seeall '
         + 'string sub upper len gfind rep find match char dump gmatch reverse byte format gsub lower '
         + 'table setn insert getn foreachi maxn foreach concat sort remove'
     },
@@ -50978,7 +50978,7 @@ module.exports = n1ql;
 Language: NestedText
 Description: NestedText is a file format for holding data that is to be entered, edited, or viewed by people.
 Website: https://nestedtext.org/
-Category: config
+Category: system
 */
 
 /** @type LanguageFn */
@@ -51068,10 +51068,10 @@ module.exports = nestedtext;
 /***/ (function(module) {
 
 /*
-Language: Nginx config
+Language: Nginx system
 Author: Peter Leonov <gojpeg@yandex.ru>
 Contributors: Ivan Sagalaev <maniac@softwaremaniacs.org>
-Category: config, web
+Category: system, web
 Website: https://www.nginx.com
 */
 
@@ -51187,7 +51187,7 @@ function nginx(hljs) {
   };
 
   return {
-    name: 'Nginx config',
+    name: 'Nginx system',
     aliases: [ 'nginxconf' ],
     contains: [
       hljs.HASH_COMMENT_MODE,
@@ -53224,11 +53224,11 @@ module.exports = perl;
 /***/ (function(module) {
 
 /*
-Language: Packet Filter config
+Language: Packet Filter system
 Description: pf.conf — packet filter configuration file (OpenBSD)
 Author: Peter Piwowarski <oldlaptop654@aol.com>
 Website: http://man.openbsd.org/pf.conf
-Category: config
+Category: system
 */
 
 function pf(hljs) {
@@ -53244,7 +53244,7 @@ function pf(hljs) {
   };
 
   return {
-    name: 'Packet Filter config',
+    name: 'Packet Filter system',
     aliases: [ 'pf.conf' ],
     keywords: {
       $pattern: /[a-z0-9_<>-]+/,
@@ -55575,7 +55575,7 @@ module.exports = prolog;
 Language: .properties
 Contributors: Valentin Aitken <valentin@nalisbg.com>, Egor Rogov <e.rogov@postgrespro.ru>
 Website: https://en.wikipedia.org/wiki/.properties
-Category: config
+Category: system
 */
 
 /** @type LanguageFn */
@@ -55742,7 +55742,7 @@ module.exports = protobuf;
 Language: Puppet
 Author: Jose Molina Colmenero <gaudy41@gmail.com>
 Website: https://puppet.com/docs
-Category: config
+Category: system
 */
 
 function puppet(hljs) {
@@ -57123,7 +57123,7 @@ function reasonml(hljs) {
         scope: 'operator',
         match: /\s+(\|\||\+[\+\.]?|\*[\*\/\.]?|\/[\.]?|\.\.\.|\|>|&&|===?)\s+/,
         relevance: 0
-      },      
+      },
       hljs.inherit(hljs.APOS_STRING_MODE, {
         scope: 'string',
         relevance: 0
@@ -57206,7 +57206,7 @@ Language: Roboconf
 Author: Vincent Zurczak <vzurczak@linagora.com>
 Description: Syntax highlighting for Roboconf's DSL
 Website: http://roboconf.net
-Category: config
+Category: system
 */
 
 function roboconf(hljs) {
@@ -57317,7 +57317,7 @@ function routeros(hljs) {
 
   const LITERALS = 'true false yes no nothing nil null';
 
-  const OBJECTS = 'traffic-flow traffic-generator firewall scheduler aaa accounting address-list address align area bandwidth-server bfd bgp bridge client clock community config connection console customer default dhcp-client dhcp-server discovery dns e-mail ethernet filter firmware gps graphing group hardware health hotspot identity igmp-proxy incoming instance interface ip ipsec ipv6 irq l2tp-server lcd ldp logging mac-server mac-winbox mangle manual mirror mme mpls nat nd neighbor network note ntp ospf ospf-v3 ovpn-server page peer pim ping policy pool port ppp pppoe-client pptp-server prefix profile proposal proxy queue radius resource rip ripng route routing screen script security-profiles server service service-port settings shares smb sms sniffer snmp snooper socks sstp-server system tool tracking type upgrade upnp user-manager users user vlan secret vrrp watchdog web-access wireless pptp pppoe lan wan layer7-protocol lease simple raw';
+  const OBJECTS = 'traffic-flow traffic-generator firewall scheduler aaa accounting address-list address align area bandwidth-server bfd bgp bridge client clock community system connection console customer default dhcp-client dhcp-server discovery dns e-mail ethernet filter firmware gps graphing group hardware health hotspot identity igmp-proxy incoming instance interface ip ipsec ipv6 irq l2tp-server lcd ldp logging mac-server mac-winbox mangle manual mirror mme mpls nat nd neighbor network note ntp ospf ospf-v3 ovpn-server page peer pim ping policy pool port ppp pppoe-client pptp-server prefix profile proposal proxy queue radius resource rip ripng route routing screen script security-profiles server service service-port settings shares smb sms sniffer snmp snooper socks sstp-server system tool tracking type upgrade upnp user-manager users user vlan secret vrrp watchdog web-access wireless pptp pppoe lan wan layer7-protocol lease simple raw';
 
   const VAR = {
     className: 'variable',
@@ -59140,10 +59140,10 @@ function scala(hljs) {
         excludeBegin: true,
         excludeEnd: true,
         relevance: 0,
-        contains: [ 
-          TYPE, 
-          hljs.C_LINE_COMMENT_MODE, 
-          hljs.C_BLOCK_COMMENT_MODE, 
+        contains: [
+          TYPE,
+          hljs.C_LINE_COMMENT_MODE,
+          hljs.C_BLOCK_COMMENT_MODE,
         ]
       },
       {
@@ -59153,10 +59153,10 @@ function scala(hljs) {
         excludeBegin: true,
         excludeEnd: true,
         relevance: 0,
-        contains: [ 
-          TYPE, 
-          hljs.C_LINE_COMMENT_MODE, 
-          hljs.C_BLOCK_COMMENT_MODE, 
+        contains: [
+          TYPE,
+          hljs.C_LINE_COMMENT_MODE,
+          hljs.C_BLOCK_COMMENT_MODE,
         ]
       },
       NAME
@@ -60655,11 +60655,11 @@ Last update: 07.01.2023, Arma 3 v2.11
 /*
 ////////////////////////////////////////////////////////////////////////////////////////////
   * Author: Leopard20
-  
+
   * Description:
   This script can be used to dump all commands to the clipboard.
   Make sure you're using the Diag EXE to dump all of the commands.
-  
+
   * How to use:
   Simply replace the _KEYWORDS and _LITERAL arrays with the one from this sqf.js file.
   Execute the script from the debug console.
@@ -63246,7 +63246,7 @@ function sqf(hljs) {
     'worldToModelVisual',
     'worldToScreen'
   ];
-  
+
   // list of keywords from:
   // https://community.bistudio.com/wiki/PreProcessor_Commands
   const PREPROCESSOR = {
@@ -63269,7 +63269,7 @@ function sqf(hljs) {
       hljs.C_BLOCK_COMMENT_MODE
     ]
   };
-  
+
   return {
     name: 'SQF',
     case_insensitive: true,
@@ -63289,7 +63289,7 @@ function sqf(hljs) {
     ],
     illegal: [
       //$ is only valid when used with Hex numbers (e.g. $FF)
-      /\$[^a-fA-F0-9]/, 
+      /\$[^a-fA-F0-9]/,
       /\w\$/,
       /\?/,      //There's no ? in SQF
       /@/,       //There's no @ in SQF
@@ -71101,7 +71101,7 @@ Author: Stefan Wienert <stwienert@gmail.com>
 Contributors: Carl Baxter <carl@cbax.tech>
 Requires: ruby.js
 Website: https://yaml.org
-Category: common, config
+Category: common, system
 */
 function yaml(hljs) {
   const LITERALS = 'true false yes no null';
@@ -71454,7 +71454,7 @@ __webpack_require__.r(__webpack_exports__);
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -71468,14 +71468,14 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat get default export */
 /******/ 	!function() {
@@ -71488,7 +71488,7 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 			return getter;
 /******/ 		};
 /******/ 	}();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	!function() {
 /******/ 		// define getter functions for harmony exports
@@ -71500,12 +71500,12 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 			}
 /******/ 		};
 /******/ 	}();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	!function() {
 /******/ 		__webpack_require__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
 /******/ 	}();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	!function() {
 /******/ 		// define __esModule on exports
@@ -71516,7 +71516,7 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	}();
-/******/ 	
+/******/
 /************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.

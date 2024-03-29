@@ -4,18 +4,23 @@ declare(strict_types = 1);
 
 namespace Setup;
 
+require_once EXTR_ROOT_DIR . '/system/config.php';
+
+
 /**
  *
  */
 class Setup
 {
-    private string $rootDir;
+    protected string $primaryConfigFile;
+    private string   $rootDir;
 
     /**
      * Setup constructor.
      */
     public function __construct()
     {
+        $this->primaryConfigFile = EXTR_ROOT_DIR . '/system/config.php';
         $this->setRootDir(EXTR_ROOT_DIR);
     }
 
@@ -63,5 +68,29 @@ class Setup
         }
 
         return $failedDirs;
+    }
+
+    /**
+     * @return array
+     */
+    public function checkNoncriticalSettings(): array
+    {
+        $potentialIssues = [];
+        if (!extension_loaded('gd')) {
+            $potentialIssues[] = "You don't have GD support enabled in your PHP installation. Please enable GD support in your php.ini file otherwise you can't use Captchas for spam protection.";
+        }
+        if (!function_exists('imagettftext')) {
+            $potentialIssues[] = "You don't have Freetype support enabled in the GD extension of your PHP installation. Please enable Freetype support in GD extension otherwise the Captchas for spam protection will be quite easy to break. ";
+        }
+        if (!extension_loaded('curl') || !extension_loaded('openssl')) {
+            $potentialIssues[] = "You don't have cURL and/or OpenSSL support enabled in your PHP installation. Please enable cURL and/or OpenSSL support in your php.ini file otherwise you can't use the Twitter support and/or Elasticsearch.";
+        }
+        if (!extension_loaded('fileinfo')) {
+            $potentialIssues[] = "You don't have Fileinfo support enabled in your PHP installation. Please enable Fileinfo support in your php.ini file otherwise you can't use our backup/restore functionality.";
+        }
+        if (!extension_loaded('sodium')) {
+            $potentialIssues[] = "You don't have Sodium support enabled in your PHP installation. Please enable Sodium support in your php.ini file otherwise you can't use our backup/restore functionality";
+        }
+        return $potentialIssues;
     }
 }

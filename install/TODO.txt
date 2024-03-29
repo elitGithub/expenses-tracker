@@ -8,4 +8,17 @@
 
 Backend:
 1. Finish admin user set up ----- DONE
-2. Finish the installation set up.
+2. Finish the installation set up
+
+
+        /**
+         *  'expense_category_table_name' => '',
+         *  'expenses_table_name'         => '',
+         *  'users_table_name'            => '',
+         *  'history_table_name'          => '',
+         *  'actions_table_name'          => '',
+         *  'roles_table_name'            => '',
+         *  'role_permissions_table_name' => '',
+         *  'user_to_role_table_name'     => '',
+         * /
+         */

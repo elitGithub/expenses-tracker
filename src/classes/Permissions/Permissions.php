@@ -4,37 +4,31 @@ declare(strict_types = 1);
 
 namespace Permissions;
 
-if (!file_exists(EXTR_ROOT_DIR . '/config/user/permissions.php')) {
-    throw new Exception('Missing user configuration, please install the system first!');
-}
-
-require_once EXTR_ROOT_DIR . '/config/user/permissions.php';
-global $permissionsConfig;
-if (!isset($permissionsConfig['backend'])) {
-    throw new Exception('No backend specified in permissions configuration.');
-}
-
 use database\PearDatabase;
 use Exception;
 use Memcached;
 use Redis;
 use User;
 
+global $permissionsConfig, $redisConfig, $memcachedConfig;
+require_once 'system/user/permissions.php';
+
 /**
  * Permissions Manager system, using various systems for fast in memory access.
  */
 class Permissions
 {
-    protected static Memcached $memcached;
-    protected static Redis $redis;
-    protected ?PearDatabase $adb = null;
+    protected static ?Memcached $memcached = null;
+    protected static ?Redis     $redis     = null;
+    protected const CACHE_WRITE_PREFIX = 'expense_tracker_permissions_data';
+    protected const PERMISSION_HASH_KEY = '_permissions';
 
     /**
      * Array with user rights.
      *
      * @var array<array>
      */
-    protected static array $mainRights = [
+    protected static array $actions = [
         [
             'name'        => 'add_user',
             'description' => 'Right to add user accounts',
@@ -85,26 +79,77 @@ class Permissions
         'user',
     ];
 
-    protected static array $permissions = [
+    protected static array $hierarchyTree = [
         'administrator' => ['manager', 'supervisor', 'user'],
-        'manager' => ['supervisor', 'user'],
-        'supervisor' => ['user'],
-        'user' => [],
+        'manager'       => ['supervisor', 'user'],
+        'supervisor'    => ['user'],
+        'user'          => [],
     ];
 
 
     /**
+     * @param $userId
+     * @param $data
+     *
+     * @return void
+     * @throws \Throwable
+     */
+    public static function writeUser($userId, $data)
+    {
+        global $permissionsConfig;
+        $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . '_' . $userId;
+        self::hashWrite($key, (string) $userId, $data);
+    }
+
+    /**
+     * @param $key
+     * @param $hashKey
+     * @param $data
+     *
+     * @return void
+     * @throws \Throwable
+     */
+    private static function hashWrite($key, $hashKey, $data): void
+    {
+        global $permissionsConfig;
+
+        switch ($permissionsConfig['backend']) {
+            case 'redis':
+                $redis = self::getRedisConnection();
+                $redis->hSet($key, $hashKey, serialize($data));
+                return;
+
+            case 'memcached':
+                $memcached = self::getMemcachedConnection();
+                $memcached->set($key, $data);
+                return;
+
+            case 'apcu':
+                if (!self::isAPCUEnabled()) {
+                    throw new Exception('APCu is not enabled or available.');
+                }
+                apcu_store($key, $data);
+                return;
+
+            case 'default':
+                return;
+            default:
+                throw new Exception('Unsupported backend specified.');
+        }
+    }
+
+    /**
      * Write data to the configured backend.
      *
-     * @param  mixed  $userId  The user ID to use as part of the key.
+     * @param         $key
      * @param  mixed  $data  The data to write.
      *
      * @return bool
      * @throws Exception
      */
-    public static function write($userId, $data): bool {
+    public static function write($key, $data): bool
+    {
         global $permissionsConfig;
-        $key = $permissionsConfig['writing_key'] . $userId;
 
         switch ($permissionsConfig['backend']) {
             case 'redis':
@@ -121,29 +166,28 @@ class Permissions
                 }
                 return apcu_store($key, $data);
 
+            case 'default':
+                return true;
             default:
                 throw new Exception('Unsupported backend specified.');
         }
     }
 
     /**
-     * Read data from the configured backend.
+     * @param          $key
+     * @param  string  $hasKey
      *
-     * @param  mixed  $userId  The user ID to use as part of the key.
-     *
-     * @return mixed The data read from the storage, or null if not found.
-     * @throws Exception
+     * @return false|mixed|null
+     * @throws \RedisException
      */
-    public static function read($userId) {
+    private static function read($key, string $hasKey)
+    {
         global $permissionsConfig;
-        $key = $permissionsConfig['writing_key'] . $userId;
-
         switch ($permissionsConfig['backend']) {
             case 'redis':
                 $redis = self::getRedisConnection();
-                $data = $redis->get($key);
+                $data = $redis->hGet($key, $hasKey);
                 return $data !== false ? unserialize($data) : null;
-
             case 'memcached':
                 $memcached = self::getMemcachedConnection();
                 return $memcached->get($key) ?: null;
@@ -162,6 +206,21 @@ class Permissions
     }
 
     /**
+     * Read data from the configured backend.
+     *
+     * @param  mixed  $userId  The user ID to use as part of the key.
+     *
+     * @return mixed The data read from the storage, or null if not found.
+     * @throws Exception
+     */
+    public static function readUser($userId)
+    {
+        global $permissionsConfig;
+
+        return self::read(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . '_' . $userId, (string)$userId);
+    }
+
+    /**
      * @param  \database\PearDatabase  $adb
      * @param                          $tableName
      *
@@ -170,8 +229,9 @@ class Permissions
     public static function populateActionsTable(PearDatabase $adb, $tableName)
     {
         $key = 1;
-        foreach (static::$mainRights as $mainRight) {
-            $adb->pquery("INSERT INTO `$tableName` (`action_label`, `action_key`, `action`) VALUES (?, ?, ?);", [$mainRight['description'], $key, $mainRight['name']]);
+        foreach (static::$actions as $mainRight) {
+            $adb->pquery("INSERT INTO `$tableName` (`action_label`, `action_key`, `action`) VALUES (?, ?, ?);",
+                         [$mainRight['description'], $key, $mainRight['name']]);
             ++$key;
         }
     }
@@ -190,14 +250,76 @@ class Permissions
     }
 
     /**
+     * @param  \database\PearDatabase  $adb
+     * @param  string                  $rolesTable
+     * @param  string                  $actionsTable
+     * @param  string                  $rolePermissionsTable
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public static function createRolePermissions(PearDatabase $adb, string $rolesTable, string $actionsTable, string $rolePermissionsTable)
+    {
+        $getRoleIdQuery = "SELECT `role_id` FROM `$rolesTable` WHERE `role_name` = ?";
+        $getActionIdQuery = "SELECT `action_id` FROM `$actionsTable` WHERE `action` = ?";
+        $insertQuery = "INSERT INTO `$rolePermissionsTable` (`role_id`, `action_id`, `is_enabled`) VALUES (?, ?, ?)";
+        foreach (static::$baseRoles as $role) {
+            $getRoleIsResult = $adb->pquery($getRoleIdQuery, [$role]);
+            $roleId = $adb->query_result($getRoleIsResult, 0, 'role_id');
+            foreach (self::$actions as $action) {
+                $getActionIdResult = $adb->pquery($getActionIdQuery, [$action['name']]);
+                $actionId = $adb->query_result($getActionIdResult, 0, 'action_id');
+                $isEnabled = (int) ((int) $roleId !== 4);
+                $adb->preparedQuery($insertQuery, [$roleId, $actionId, $isEnabled]);
+            }
+        }
+    }
+
+    /**
+     * @param  \database\PearDatabase  $adb
+     * @param  string                  $rolePermissionsTable
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public static function createPermissionsFile(PearDatabase $adb, string $rolePermissionsTable)
+    {
+        global $permissionsConfig;
+        $rolePermRes = $adb->query("SELECT * FROM `$rolePermissionsTable`;");
+        $rolePermissionsArray = [];
+        while ($row = $adb->fetchByAssoc($rolePermRes)) {
+            $rolePermissionsArray[] = $row;
+        }
+        $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY;
+        self::hashWrite($key, self::PERMISSION_HASH_KEY, $rolePermissionsArray);
+        file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php',
+                          '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
+    }
+
+    /**
+     * @return false|mixed|null
+     * @throws \RedisException
+     */
+    public static function readPermissions()
+    {
+        global $permissionsConfig;
+        return self::read(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY, self::PERMISSION_HASH_KEY);
+    }
+
+    /**
      * @return \Redis
+     * @throws \RedisException
      */
     private static function getRedisConnection(): Redis
     {
         global $redisConfig;
 
         if (null === self::$redis) {
-            self::$redis = new Redis($redisConfig);
+            self::$redis = new Redis();
+            self::$redis->connect($redisConfig['host'], $redisConfig['port']);
+            if (!empty($redisConfig['auth'])) {
+                self::$redis->auth($redisConfig['auth']);
+            }
         }
 
         return self::$redis;
@@ -211,12 +333,18 @@ class Permissions
      */
     public static function isPermittedView($userRole, $targetRole): bool
     {
-        return in_array($targetRole, self::$permissions[$userRole] ?? []);
+        return in_array($targetRole, self::$hierarchyTree[$userRole] ?? []);
     }
 
+    /**
+     * @param         $action
+     * @param  \User  $user
+     *
+     * @return void
+     */
     public static function isPermittedAction($action, User $user)
     {
-        
+
     }
 
 
@@ -267,8 +395,8 @@ class Permissions
     {
         $stats = self::$memcached->getStats();
         return !empty($stats) && array_reduce($stats, function ($carry, $server) {
-                return $carry && $server['pid'] > 0; // A simple check to ensure the server's process id is positive.
-            }, true);
+                return $carry && $server['pid'] > 0;
+            },                                true);
     }
 
 

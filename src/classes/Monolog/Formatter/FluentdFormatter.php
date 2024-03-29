@@ -39,8 +39,11 @@ class FluentdFormatter implements FormatterInterface
     /**
      * @var bool $levelTag should message level be a part of the fluentd tag
      */
-    protected $levelTag = false;
+    protected bool $levelTag = false;
 
+    /**
+     * @param  bool  $levelTag
+     */
     public function __construct(bool $levelTag = false)
     {
         if (!function_exists('json_encode')) {
@@ -50,11 +53,22 @@ class FluentdFormatter implements FormatterInterface
         $this->levelTag = $levelTag;
     }
 
+    /**
+     * @return bool
+     */
     public function isUsingLevelsInTag(): bool
     {
         return $this->levelTag;
     }
 
+    /**
+     * Formats a log record.
+     *
+     * @param  array $record A record to format
+     * @return mixed The formatted record
+     *
+     * @phpstan-param Record $record
+     */
     public function format(array $record): string
     {
         $tag = $record['channel'];
@@ -76,6 +90,14 @@ class FluentdFormatter implements FormatterInterface
         return Utils::jsonEncode([$tag, $record['datetime']->getTimestamp(), $message]);
     }
 
+    /**
+     * Formats a set of log records.
+     *
+     * @param  array $records A set of records to format
+     * @return mixed The formatted set of records
+     *
+     * @phpstan-param Record[] $records
+     */
     public function formatBatch(array $records): string
     {
         $message = '';

@@ -14,7 +14,8 @@ toggleAdminPassword?.addEventListener('click', () => {
     }
 });
 toggleRetypePassword?.addEventListener('click', () => {
-    if (adminPassword.type === 'password') {
+    console.log('passwordRetype');
+    if (passwordRetype.type === 'password') {
         passwordRetype.type = 'text';
         showRetypePassword.className = 'fa fa-eye-slash';
     } else {

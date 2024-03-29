@@ -48,12 +48,13 @@ CREATE TABLE IF NOT EXISTS `expenses`
 
 CREATE TABLE IF NOT EXISTS `users`
 (
-    `user_id`        INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `email`          VARCHAR(200)     NOT NULL,
     `user_name`      VARCHAR(200)     NOT NULL,
     `first_name`     VARCHAR(200)     NOT NULL,
     `last_name`      VARCHAR(200)     NOT NULL,
-    `created_by`     INT(11) UNSIGNED NOT NULL,
+    `password`       VARCHAR(255)     NOT NULL,
+    `created_by`     INT UNSIGNED NOT NULL,
     `active`         TINYINT(1)       NOT NULL DEFAULT '1',
     `last_update_at` DATE             NOT NULL,
     `created_at`     DATE             NOT NULL,
