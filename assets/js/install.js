@@ -57,8 +57,6 @@ function updateFormState() {
         // check if the input has data-default-* attribute and set the value to that, otherwise set it to empty value
         formState[input.name] = input.value || input.getAttribute('data-default-value');
     });
-
-    console.log(formState);
 }
 
 function nextStep() {
