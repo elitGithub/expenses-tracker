@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Core;
 
+use Exception;
+
 /**
  * System Handler class
  */
@@ -52,6 +54,7 @@ class System
         'json',
         'sodium',
         'xml',
+        'openssl',
         'zip',
     ];
 
@@ -285,5 +288,23 @@ class System
     public function getSupportedPermissionEngines(): array
     {
         return $this->supportedPermissionEngines;
+    }
+
+    /**
+     * @return void
+     * @throws \Exception
+     */
+    public function generateJwtKeys()
+    {
+        $path = EXTR_ROOT_DIR . '/system/data/storage/jwt/';
+        if (!file_exists($path)) {
+            if (!mkdir($path)) {
+                throw new Exception("Can't create folder: " . $path);
+            }
+        }
+        $private = $path . 'private_key.pem';
+        $public = $path . 'public_key.pem';
+        shell_exec("openssl genpkey -algorithm RSA -out $private -pkeyopt rsa_keygen_bits:2048");
+        shell_exec("openssl rsa -pubout -in $private -out $public");
     }
 }

@@ -56,9 +56,10 @@ CREATE TABLE IF NOT EXISTS `users`
     `password`       VARCHAR(255)     NOT NULL,
     `created_by`     INT UNSIGNED NOT NULL,
     `active`         TINYINT(1)       NOT NULL DEFAULT '1',
+    `last_login`     DATETIME         NULL,
     `last_update_at` DATE             NOT NULL,
     `created_at`     DATE             NOT NULL,
-    `deleted_at`     DATETIME                  DEFAULT NULL, -- Soft delete column added
+    `deleted_at`     DATETIME         DEFAULT NULL, -- Soft delete column added
     PRIMARY KEY (`user_id`),
     UNIQUE INDEX `idx_email` (`email`),
     UNIQUE INDEX `idx_user_name` (`user_name`),              -- Ensure user_name is unique

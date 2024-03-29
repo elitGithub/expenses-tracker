@@ -8,19 +8,18 @@ use database\PearDatabase;
 use Exception;
 use Memcached;
 use Redis;
-use User;
 
 global $permissionsConfig, $redisConfig, $memcachedConfig;
 require_once 'system/user/permissions.php';
 
 /**
- * Permissions Manager system, using various systems for fast in memory access.
+ * Wrapper around the cache system
  */
-class Permissions
+class CacheSystemManager
 {
     protected static ?Memcached $memcached = null;
     protected static ?Redis     $redis     = null;
-    protected const CACHE_WRITE_PREFIX = 'expense_tracker_permissions_data';
+    protected const CACHE_WRITE_PREFIX  = 'expense_tracker_permissions_data';
     protected const PERMISSION_HASH_KEY = '_permissions';
 
     /**
@@ -79,13 +78,6 @@ class Permissions
         'user',
     ];
 
-    protected static array $hierarchyTree = [
-        'administrator' => ['manager', 'supervisor', 'user'],
-        'manager'       => ['supervisor', 'user'],
-        'supervisor'    => ['user'],
-        'user'          => [],
-    ];
-
 
     /**
      * @param $userId
@@ -102,85 +94,132 @@ class Permissions
     }
 
     /**
-     * @param $key
-     * @param $hashKey
-     * @param $data
+     * @param            $key
+     * @param            $hashKey
+     * @param            $data
+     * @param  int|null  $expiration
      *
      * @return void
      * @throws \Throwable
      */
-    private static function hashWrite($key, $hashKey, $data): void
+    private static function hashWrite($key, $hashKey, $data, ?int $expiration = null): void
     {
         global $permissionsConfig;
+
+        // Combine key and hashKey for Memcached, APCu, and file system to simulate hash behavior
+        $combinedKey = $key . ':' . $hashKey;
 
         switch ($permissionsConfig['backend']) {
             case 'redis':
                 $redis = self::getRedisConnection();
                 $redis->hSet($key, $hashKey, serialize($data));
+                if ($expiration !== null) {
+                    $redis->expire($key, $expiration);
+                }
                 return;
 
             case 'memcached':
                 $memcached = self::getMemcachedConnection();
-                $memcached->set($key, $data);
+                $memcached->set($combinedKey, serialize($data), $expiration ?? 0);
                 return;
 
             case 'apcu':
                 if (!self::isAPCUEnabled()) {
                     throw new Exception('APCu is not enabled or available.');
                 }
-                apcu_store($key, $data);
+                apcu_store($combinedKey, serialize($data), $expiration ?? 0);
                 return;
 
             case 'default':
+                self::writeFile($key, $data, $expiration);
                 return;
+
             default:
                 throw new Exception('Unsupported backend specified.');
         }
     }
 
     /**
+     * @param $key
+     * @param $data
+     * @param $expiration
+     *
+     * @return void
+     */
+    private static function writeFile($key, $data, $expiration = null)
+    {
+        $fileName = EXTR_ROOT_DIR . '/system/data/' . $key .'.txt';
+        if (is_int($expiration)) {
+            $expiryFile =  EXTR_ROOT_DIR . '/system/data/' . 'expirations.php';
+            $ttl = time() + $expiration;
+            $$fileName = $ttl;
+            file_put_contents($expiryFile, $$fileName, FILE_APPEND);
+        }
+        file_put_contents($fileName, serialize($data));
+    }
+
+
+    /**
      * Write data to the configured backend.
      *
-     * @param         $key
-     * @param  mixed  $data  The data to write.
+     * @param            $key
+     * @param  mixed     $data  The data to write.
+     * @param  int|null  $expiration
      *
      * @return bool
-     * @throws Exception
+     * @throws \Throwable
      */
-    public static function write($key, $data): bool
+    public static function write($key, $data, ?int $expiration = null): bool
     {
         global $permissionsConfig;
 
         switch ($permissionsConfig['backend']) {
             case 'redis':
                 $redis = self::getRedisConnection();
-                return $redis->set($key, serialize($data));
+                if ($expiration !== null) {
+                    return $redis->set($key, serialize($data), ['ex' => $expiration]);
+                } else {
+                    return $redis->set($key, serialize($data));
+                }
 
             case 'memcached':
                 $memcached = self::getMemcachedConnection();
-                return $memcached->set($key, $data);
+                if ($expiration !== null) {
+                    // Memcached treats expiration values greater than 30 days as a Unix timestamp of an absolute expiration time
+                    $expirationTime = $expiration > 2592000 ? $expiration : time() + $expiration;
+                    return $memcached->set($key, $data, $expirationTime);
+                } else {
+                    return $memcached->set($key, $data);
+                }
 
             case 'apcu':
                 if (!self::isAPCUEnabled()) {
                     throw new Exception('APCu is not enabled or available.');
                 }
-                return apcu_store($key, $data);
+                if ($expiration !== null) {
+                    return apcu_store($key, $data, $expiration);
+                } else {
+                    return apcu_store($key, $data);
+                }
 
             case 'default':
+                self::writeFile($key, $data, $expiration);
                 return true;
+
             default:
                 throw new Exception('Unsupported backend specified.');
         }
     }
+
 
     /**
      * @param          $key
      * @param  string  $hasKey
      *
      * @return false|mixed|null
-     * @throws \RedisException
+     * @throws \Throwable
      */
-    private static function read($key, string $hasKey)
+    private static function hashRead($key, string $hasKey)
     {
         global $permissionsConfig;
         switch ($permissionsConfig['backend']) {
@@ -199,7 +238,48 @@ class Permissions
                 $success = false;
                 $data = apcu_fetch($key, $success);
                 return $success ? $data : null;
+            case 'default':
+                $data = file_get_contents(EXTR_ROOT_DIR . '/system/data/' . $key . '.txt');
+                if ($data !== false) {
+                    return unserialize($data);
+                }
+                return false;
+            default:
+                throw new Exception('Unsupported backend specified.');
+        }
+    }
 
+    /**
+     * @param $key
+     *
+     * @return false|mixed|null
+     * @throws \Throwable
+     */
+    private function read($key)
+    {
+        global $permissionsConfig;
+        switch ($permissionsConfig['backend']) {
+            case 'redis':
+                $redis = self::getRedisConnection();
+                $data = $redis->get($key);
+                return $data !== false ? unserialize($data) : null;
+            case 'memcached':
+                $memcached = self::getMemcachedConnection();
+                return $memcached->get($key) ?: null;
+
+            case 'apcu':
+                if (!self::isAPCUEnabled()) {
+                    throw new Exception('APCu is not enabled or available.');
+                }
+                $success = false;
+                $data = apcu_fetch($key, $success);
+                return $success ? $data : null;
+            case 'default':
+                $data = file_get_contents(EXTR_ROOT_DIR . '/system/data/' . $key . '.php');
+                if ($data !== false) {
+                    return unserialize($data);
+                }
+                return false;
             default:
                 throw new Exception('Unsupported backend specified.');
         }
@@ -211,13 +291,13 @@ class Permissions
      * @param  mixed  $userId  The user ID to use as part of the key.
      *
      * @return mixed The data read from the storage, or null if not found.
-     * @throws Exception
+     * @throws \Throwable
      */
     public static function readUser($userId)
     {
         global $permissionsConfig;
 
-        return self::read(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . '_' . $userId, (string)$userId);
+        return self::hashRead(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . '_' . $userId, (string) $userId);
     }
 
     /**
@@ -280,7 +360,7 @@ class Permissions
      * @param  string                  $rolePermissionsTable
      *
      * @return void
-     * @throws \Exception
+     * @throws \Throwable
      */
     public static function createPermissionsFile(PearDatabase $adb, string $rolePermissionsTable)
     {
@@ -298,12 +378,13 @@ class Permissions
 
     /**
      * @return false|mixed|null
-     * @throws \RedisException
+     * @throws \Throwable
      */
     public static function readPermissions()
     {
         global $permissionsConfig;
-        return self::read(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY, self::PERMISSION_HASH_KEY);
+        return self::hashRead(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY,
+                              self::PERMISSION_HASH_KEY);
     }
 
     /**
@@ -323,28 +404,6 @@ class Permissions
         }
 
         return self::$redis;
-    }
-
-    /**
-     * @param $userRole
-     * @param $targetRole
-     *
-     * @return bool
-     */
-    public static function isPermittedView($userRole, $targetRole): bool
-    {
-        return in_array($targetRole, self::$hierarchyTree[$userRole] ?? []);
-    }
-
-    /**
-     * @param         $action
-     * @param  \User  $user
-     *
-     * @return void
-     */
-    public static function isPermittedAction($action, User $user)
-    {
-
     }
 
 
