@@ -30,10 +30,11 @@ class PermissionsManager
         $permissions = Permissions::readPermissions();
         foreach ($permissions as $permission) {
             if ((int)$permission['role_id'] === (int)$userId) {
+                self::$_userPrivileges[$userId]['user_data'] = $userData;
                 self::$_userPrivileges[$userId]['action_id'] = $permission['is_enabled'];
             }
         }
-        return $userData;
+        return self::$_userPrivileges[$userId];
     }
 
 }

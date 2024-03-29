@@ -123,7 +123,7 @@ class User
     public function retrieveUserInfoFromFile()
     {
         try {
-            $userData = PermissionsManager::getUserPrivileges($this->id);
+            $userData['user_data'] = PermissionsManager::getUserPrivileges($this->id);
             foreach ($userData as $propertyName => $propertyValue) {
                 $this->$propertyName = $propertyValue;
             }
@@ -147,19 +147,6 @@ class User
     public function encryptPassword(string $password): ?string
     {
         return password_hash($password, PASSWORD_DEFAULT);
-    }
-
-    /**
-     * @param $password
-     *
-     * @return bool
-     */
-    public function verifyPassword($password): bool
-    {
-        $query = "SELECT `user_name`, `password` FROM `$this->entityTable` WHERE id = ?;";
-        $result = $this->adb->pquery($query, [$this->id]);
-        $row = $this->adb->fetchByAssoc($result);
-        return password_verify($password, $row['password']);
     }
 
 }
