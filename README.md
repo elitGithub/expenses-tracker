@@ -1,6 +1,4 @@
-# Project Name
-
-## Expense Tracker
+# Expense Tracker
 
 Welcome to the installation and operational guide for your system.
 This README provides all necessary steps to get your

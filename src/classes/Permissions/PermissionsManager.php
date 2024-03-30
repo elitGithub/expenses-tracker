@@ -31,7 +31,6 @@ class PermissionsManager
         }
 
         $userData = CacheSystemManager::readUser($userId);
-
         if ($userData['active'] !== 1) {
             throw new \Exception('Inactive user');
         }
@@ -40,7 +39,7 @@ class PermissionsManager
         self::$_userPrivileges[$userId]['user_data'] = $userData;
         foreach ($permissions as $permission) {
             if ((int)$permission['role_id'] === (int)$userId) {
-                self::$_userPrivileges[$userId]['action_id'] = $permission['is_enabled'];
+                self::$_userPrivileges[$userId]['permissions'][$permission['action_id']] = $permission['is_enabled'];
             }
         }
         return self::$_userPrivileges[$userId];

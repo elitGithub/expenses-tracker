@@ -298,7 +298,7 @@ class System
     {
         $path = EXTR_ROOT_DIR . '/system/data/storage/jwt/';
         if (!file_exists($path)) {
-            if (!mkdir($path)) {
+            if (!mkdir($path, 0777, true)) {
                 throw new Exception("Can't create folder: " . $path);
             }
         }

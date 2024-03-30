@@ -2,6 +2,8 @@
 
 declare(strict_types = 1);
 
+use Session\JWTHelper;
+
 /**
  * @param $string
  *
@@ -15,6 +17,27 @@ function to_html($string)
 
     return $string;
 }
+
+function diff($a = 0, $b = 0)
+{
+    return ($a - $b);
+}
+
+
+/**
+ * @return void
+ * @throws \Throwable
+ */
+function destroyUserSession()
+{
+    if (session_status() !== PHP_SESSION_NONE) {
+        session_unset();
+        session_destroy();
+    }
+    JWTHelper::removeToken();
+    header('Location: login.php');
+}
+
 
 
 /**

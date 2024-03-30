@@ -57,11 +57,12 @@ class JWTHelper
         'certificate_path'        => 'system/data/storage/jwt',
         'certificate_public_key'  => 'public_key.pem',
         'certificate_private_key' => 'private_key.pem',
-        'cookie_name'             => 'jwt-token',
-        'parent_cookie_name'      => 'parent-jwt-token',
+        'cookie_name'             => 'expenses-tracker-token',
+        'parent_cookie_name'      => 'parent-expenses-tracker',
         'expiration_minutes'      => 60 * 24,
         'expired_token_storage'   => 'tokens',
         'refresh_token_name'      => 'rfrsh',
+        'expired_token_prefix'    => '__EXPIRED__',
     ];
 
 
@@ -71,10 +72,10 @@ class JWTHelper
     private static function getParentTokenFromStorage()
     {
         $key = self::$jwt_configuration['parent_cookie_name'];
-        $jwt = $_COOKIE[$key];
+        $jwt = $_COOKIE[$key] ?? false;
         if (!$jwt) {
             $headers = getallheaders();
-            $jwt = $headers[self::translateCookieNameToHeader($key)];
+            $jwt = $headers[self::translateCookieNameToHeader($key)] ?? null;
         }
         return $jwt;
     }
@@ -85,16 +86,17 @@ class JWTHelper
     private static function getTokenFromStorage()
     {
         $key = self::$jwt_configuration['cookie_name'];
-        $jwt = $_COOKIE[$key];
+        $jwt = $_COOKIE[$key] ?? false;
         if (!$jwt) {
             $headers = getallheaders();
-            $jwt = $headers[self::translateCookieNameToHeader($key)];
+            $jwt = $headers[self::translateCookieNameToHeader($key)] ?? null;
         }
         return $jwt;
     }
 
     /**
      * @param $name
+     *
      * @return string
      */
     private static function translateCookieNameToHeader($name): string
@@ -107,7 +109,7 @@ class JWTHelper
     }
 
     /**
-     * @param $token
+     * @param        $token
      * @param  bool  $verifyOnly
      *
      * @return bool
@@ -119,7 +121,7 @@ class JWTHelper
             $publicPath = self::$jwt_configuration['certificate_path'] . '/' . self::$jwt_configuration['certificate_public_key'];
             $publicKey = openssl_pkey_get_public("file://$publicPath");
             if ($verifyOnly) {
-                return $token->verify((string)$publicKey, self::$jwt_configuration['algorithm']);
+                return $token->verify($publicKey, self::$jwt_configuration['algorithm']);
             }
             return $token->isValid($publicKey, self::$jwt_configuration['algorithm']);
         } catch (Throwable $e) {
@@ -134,16 +136,13 @@ class JWTHelper
      */
     public static function isTokenFromOldSession($jwt): bool
     {
-        global $singleLoginEnabled;
-
         $payload = self::getTokenPayload($jwt);
 
-        if (!$singleLoginEnabled ||
-            !is_array($payload) ||
+        if (!is_array($payload) ||
             empty($payload['iat']) ||
             empty($payload['user']) ||
             empty($payload['user']['id']) ||
-            (empty($payload['user']['last_login']) && empty($payload['user']['last_login_as']))) {
+            (empty($payload['user']['last_login']))) {
             return false;
         }
 
@@ -151,18 +150,10 @@ class JWTHelper
 
         $lastLoginTimeDb = strtotime($lastLoginData['last_login']);
 
-        $lastLoginAsTimeDb = strtotime($lastLoginData['last_login_as']);
-
         $lastLoginTimeToken = strtotime($payload['user']['last_login']);
 
-        $lastLoginAsTimeToken = strtotime($payload['user']['last_login_as']);
-
-        if ($lastLoginAsTimeToken) {
-            return ($lastLoginAsTimeToken !== $lastLoginAsTimeDb) || ($lastLoginTimeDb && $lastLoginAsTimeToken <= $lastLoginTimeDb);
-        }
-
         if ($lastLoginTimeToken) {
-            return ($lastLoginTimeToken !== $lastLoginTimeDb) || ($lastLoginAsTimeDb && $lastLoginTimeToken <= $lastLoginAsTimeDb);
+            return ($lastLoginTimeToken !== $lastLoginTimeDb);
         }
 
         return false;
@@ -191,10 +182,6 @@ class JWTHelper
                 self::$userIdFromToken = $userId;
                 self::generateJwtDataCookie($userId, $lang);
                 return true;
-            }
-
-            if ($action == 'PBXManagerAjax') {
-                die('failure');
             }
 
             self::clearCookies();
@@ -359,7 +346,7 @@ class JWTHelper
         $secretData = [
             'id'    => $payload['user']['id'],
             'ip'    => $payload['ip'],
-            'token' => $jwt
+            'token' => $jwt,
         ];
 
         $secretData = json_encode($secretData);
@@ -411,27 +398,15 @@ class JWTHelper
             }
         }
         $expiration = time() + $seconds;
-        setcookie(
-            $cookieName,
-            $token,
-            $expiration,
-            '/',
-            '.' . $_SERVER['SERVER_NAME']
-        );
+        setcookie($cookieName, $token, $expiration, '/', '.' . $_SERVER['SERVER_NAME']);
         if ($cookieName === self::$jwt_configuration['cookie_name']) {
-            setcookie(
-                $cookieName . '-exp',
-                $expiration,
-                $expiration + 60,
-                '/',
-                '.' . $_SERVER['SERVER_NAME']
-            );
+            setcookie($cookieName . '-exp', "$expiration", $expiration + 60, '/', '.' . $_SERVER['SERVER_NAME']);
         }
     }
 
     /**
-     * @param $userId
-     * @param $userLang
+     * @param          $userId
+     * @param          $userLang
      * @param  string  $mode
      *
      * @return void
@@ -440,10 +415,6 @@ class JWTHelper
     {
         global $default_language;
         $name = self::$jwt_configuration['cookie_name'];
-        if ($mode === self::MODE_LOGIN_AS && ($parentToken = self::getTokenFromStorage())) { // LoginAs logic
-            // Save current token into parent cookie
-            self::setTokenCookie(self::$jwt_configuration['parent_cookie_name'], $parentToken);
-        }
         $userData = [];
         switch ($mode) {
             case self::MODE_LOGIN:
@@ -462,8 +433,8 @@ class JWTHelper
     }
 
     /**
-     * @param $userId
-     * @param $userLang
+     * @param         $userId
+     * @param         $userLang
      * @param  array  $userData
      *
      * @return string
@@ -477,12 +448,12 @@ class JWTHelper
         }
         $seconds = self::getSessionTimeout();
         if (!$seconds) {
-            $expirationMinutes = self::$jwt_configuration['expiration_minutes'] ?? 60*24;
+            $expirationMinutes = self::$jwt_configuration['expiration_minutes'] ?? 60 * 24;
             $seconds = $expirationMinutes * 60;
         }
         $data = [
-            'user' => array_merge($userData, ['id' => $userId, 'lang' => $userLang, ]),
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'user' => array_merge($userData, ['id' => $userId, 'lang' => $userLang,]),
+            'ip'   => $_SERVER['REMOTE_ADDR'],
         ];
         return JWTHelper::createJwtToken($data, $seconds);
     }
@@ -518,7 +489,6 @@ class JWTHelper
         $storedValue = self::$jwt_configuration['expired_token_prefix'] . $token;
 
         CacheSystemManager::write($storedValue, $token, 86400);
-
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+session_name('expenses-tracker');
 session_start();
 ob_start();
 	require_once('./src/db_config.php');

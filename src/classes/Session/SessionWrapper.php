@@ -12,6 +12,7 @@ class SessionWrapper
 
     public function __construct() {
         if (session_status() === PHP_SESSION_NONE) {
+            session_name('expenses-tracker');
             session_start();
         }
     }
@@ -35,6 +36,16 @@ class SessionWrapper
     public function sessionReadKey($key)
     {
         return $_SESSION[$key] ?? null;
+    }
+
+    /**
+     * @param $key
+     *
+     * @return bool
+     */
+    public function sessionHasKey($key): bool
+    {
+        return isset($_SESSION[$key]);
     }
 
 }

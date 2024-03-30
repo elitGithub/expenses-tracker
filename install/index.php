@@ -30,9 +30,6 @@ if (DEBUG) {
     error_reporting(E_ALL | E_STRICT);
 }
 
-session_name('expenses-tracker-setup');
-session_start();
-
 $system = new System();
 $installer = new Installer($system);
 ?>
