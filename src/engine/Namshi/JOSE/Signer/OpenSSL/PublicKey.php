@@ -59,7 +59,8 @@ abstract class PublicKey implements SignerInterface
         if (is_resource($key)) {
             return $key;
         }
-
+var_dump($key);
+var_dump(openssl_pkey_get_public($key));
         $resource = openssl_pkey_get_public($key) ?: openssl_pkey_get_private($key, $password);
         if ($resource === false) {
             throw new RuntimeException('Could not read key resource: ' . openssl_error_string());

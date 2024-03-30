@@ -105,10 +105,6 @@ class CacheSystemManager
     private static function hashWrite($key, $hashKey, $data, ?int $expiration = null): void
     {
         global $permissionsConfig;
-
-        // Combine key and hashKey for Memcached, APCu, and file system to simulate hash behavior
-        $combinedKey = $key . ':' . $hashKey;
-
         switch ($permissionsConfig['backend']) {
             case 'redis':
                 $redis = self::getRedisConnection();
@@ -120,14 +116,14 @@ class CacheSystemManager
 
             case 'memcached':
                 $memcached = self::getMemcachedConnection();
-                $memcached->set($combinedKey, serialize($data), $expiration ?? 0);
+                $memcached->set($key, serialize($data), $expiration ?? 0);
                 return;
 
             case 'apcu':
                 if (!self::isAPCUEnabled()) {
                     throw new Exception('APCu is not enabled or available.');
                 }
-                apcu_store($combinedKey, serialize($data), $expiration ?? 0);
+                $result = apcu_store($key, serialize($data), $expiration ?? 0);
                 return;
 
             case 'default':
@@ -152,8 +148,13 @@ class CacheSystemManager
         if (is_int($expiration)) {
             $expiryFile =  EXTR_ROOT_DIR . '/system/data/' . 'expirations.php';
             $ttl = time() + $expiration;
-            $$fileName = $ttl;
-            file_put_contents($expiryFile, $$fileName, FILE_APPEND);
+            $data[$fileName] = $ttl;
+            if (is_file($expiryFile)) {
+                $data = unserialize(file_get_contents($expiryFile));
+                $data[$fileName] = $ttl;
+            }
+
+            file_put_contents($expiryFile, serialize($data), FILE_APPEND);
         }
         file_put_contents($fileName, serialize($data));
     }
@@ -203,6 +204,9 @@ class CacheSystemManager
                 }
 
             case 'default':
+                if (mb_strlen($key) > 255) {
+                    $key =  mb_substr($key, 0, 250);
+                }
                 self::writeFile($key, $data, $expiration);
                 return true;
 
@@ -237,7 +241,7 @@ class CacheSystemManager
                 }
                 $success = false;
                 $data = apcu_fetch($key, $success);
-                return $success ? $data : null;
+                return $success ? unserialize($data) : null;
             case 'default':
                 $data = file_get_contents(EXTR_ROOT_DIR . '/system/data/' . $key . '.txt');
                 if ($data !== false) {

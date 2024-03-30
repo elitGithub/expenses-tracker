@@ -14,6 +14,7 @@ use Models\UserModel;
 use Permissions\CacheSystemManager;
 use Permissions\Role;
 use Redis;
+use Session\JWTHelper;
 use Throwable;
 use User;
 
@@ -162,7 +163,7 @@ class Installer extends Setup
      */
     public function startInstall(array $setup = null): void
     {
-        global $adb, $dbConfig;
+        global $adb, $dbConfig, $default_language;
         $useRootUserForSystem = Filter::filterInput(INPUT_POST, 'useSameUser', FILTER_VALIDATE_BOOLEAN, false);
         $masterDb = $this->setUpMasterDB($setup);
         $this->createDB($masterDb);
@@ -244,6 +245,7 @@ class Installer extends Setup
         $user = new User($createUser);
         $user->login($userName, $password);
         $user->retrieveUserInfoFromFile();
+        JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
     }
 
     /**

@@ -2,13 +2,18 @@
 
 declare(strict_types = 1);
 
+$rootPath = realpath(dirname(__FILE__, 3)); // Adjust the path as needed
+if (!defined('PROJECT_ROOT')) {
+    define('PROJECT_ROOT', $rootPath);
+}
+
 define('EXTR_ROOT_DIR', dirname(__FILE__, 3));
 
 const EXTR_SRC_DIR = EXTR_ROOT_DIR . '/src';
 
 require_once EXTR_ROOT_DIR . '/system/config.php';
 
-require_once 'functions.php';
+require_once EXTR_SRC_DIR . '/engine/functions.php';
 
 
 // Debug mode:

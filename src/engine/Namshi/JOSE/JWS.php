@@ -150,7 +150,8 @@ class JWS extends JWT
 
     /**
      * Verifies that the internal signin input corresponds to the encoded
-     * signature previously stored (@param  string  $key
+     * signature previously stored (
+     * @param  string|resource  $key
      *
      * @param  string|null  $algo  The algorithms this JWS should be signed with. Use it if you want to restrict which algorithms you want to allow
      *     to be validated.
@@ -159,7 +160,7 @@ class JWS extends JWT
      * @see JWS::load).
      *
      */
-    public function verify(string $key, string $algo = null): bool
+    public function verify($key, string $algo = null): bool
     {
         if (empty($key) || ($algo && $this->header['alg'] !== $algo)) {
             return false;

@@ -3,14 +3,16 @@
 declare(strict_types = 1);
 
 use database\PearDatabase;
+use Session\JWTHelper;
 
-$rootPath = realpath(dirname(__FILE__)); // Adjust the path as needed
-if (!defined('PROJECT_ROOT')) {
-    define('PROJECT_ROOT', $rootPath);
-}
+session_name('expenses-tracker');
+session_start();
+ob_start();
+
+
 require_once 'src/engine/ignition.php';
 
-global $dbConfig;
+global $dbConfig, $default_language;
 
 if (!file_exists('system/installation_includes.php')) {
     require_once 'install/index.php';
@@ -21,17 +23,10 @@ if (empty($adb)) {
     $adb = new PearDatabase();
     $adb->connect();
 }
+if (!JWTHelper::checkJWT()) {
+    destroyUserSession();
+}
 
-
-session_start();
-ob_start();
-
-$user = new User();
-$user->login('admin', 'As1as2as3');
-var_dump($_SESSION);
-// $con = register('localhost', 'root', 'admin', 'expense_tracker');
-
-//A function to get difference between to numbers
 
 if (isset($_POST['submit']) && !empty($_POST['amount_spent']) && !empty($_POST['expense_category_id']) && !empty($_POST['expense_date'])
     && !empty($_POST['expense_description'])) {
