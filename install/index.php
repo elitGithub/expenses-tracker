@@ -12,7 +12,6 @@ if (file_exists(EXTR_ROOT_DIR . '/system/installation_includes.php')) {
 
 require_once EXTR_SRC_DIR . '/engine/ignition.php';
 const IS_VALID_EXPENSE_TRACKER = null;
-
 if (version_compare(PHP_VERSION, '7.4.0') < 0) {
     die('Sorry, but you need PHP 7.4.0 or later!');
 }
@@ -27,7 +26,7 @@ if (!defined('DEBUG')) {
 if (DEBUG) {
     ini_set('display_errors', '1');
     ini_set('display_startup_errors', '1');
-    error_reporting(E_ALL | E_STRICT);
+    error_reporting(E_ALL);
 }
 
 $system = new System();
@@ -90,7 +89,7 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                 <ol>
                     <li>Web server: Apache or Nginx.</li>
                     <li>PHP version 7.4.33 or newer.</li>
-                    <li>Change the ownership of the config folder and its subdirectories to the web server user (apache/nginx) or create the
+                    <li>Change the ownership of the system folder and its subdirectories to the web server user (apache/nginx) or create the
                         required
                         directories under the config directory.
                         <ol>
@@ -258,80 +257,74 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                 <div data-form-section="2" id="step2" class="step d-none">
                     <h3 class="mb-3">Step 2/3: User system setup</h3>
                     <div data-step="1" id="cache-system-form" class="row mb-2">
-                        <div class="col-sm-9 offset-sm-3">
-                            <input type="checkbox" name="useMyOwnUserSystem" class="form-check-input" id="useMyOwnUserSystem">
-                            <label for="useMyOwnUserSystem" class="form-check-label cursor-pointer">I have my own user system, no need for Expense
-                                Tracker's
-                                system.</label>
+                        <div class="row mb-2 create-my-own-user-control">
+                            <div class="row mb-2">
+                                <label class="col-sm-3 col-form-label" for="user_management">Server:</label>
+                                <div class="col-sm-9">
+                                    <select name="user_management" id="user_management" class="form-select" required>
+                                        <option selected disabled value="">Please choose your preferred cache system ...</option>
+                                        <?php
+                                        echo implode('', $system->getSupportedSafePermissionEngines(true)) ?>
+                                    </select>
+                                    <small class="form-text text-muted">Please select your preferred cache type.</small>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-2 create-my-own-user-control">
-                        <div class="row mb-2">
-                            <label class="col-sm-3 col-form-label" for="user_management">Server:</label>
+                        <div class="row mb-2 default-control d-none">
+                            <div class="alert alert-warning">
+                                Please note that using the default file system will create a permissions file
+                                that will be loaded every time the user permissions need to be checked.
+                                While this is not an issue for minimal user number, it is recommended to use a caching engine for better scale.
+                            </div>
+                        </div>
+                        <div class="row mb-2 redis-control d-none">
+                            <label class="col-sm-3 col-form-label" for="redis_host">Redis Host:</label>
                             <div class="col-sm-9">
-                                <select name="user_management" id="user_management" class="form-select" required>
-                                    <option selected disabled value="">Please choose your preferred cache system ...</option>
-                                    <?php
-                                    echo implode('', $system->getSupportedSafePermissionEngines(true)) ?>
-                                </select>
-                                <small class="form-text text-muted">Please select your preferred cache type.</small>
+                                <input type="text" name="redis_host" placeholder="e.g. 127.0.0.1" id="redis_host" class="form-control" required>
+                                <small class="form-text text-muted">Please enter your redis host.</small>
                             </div>
                         </div>
-                    </div>
-                    <div class="row mb-2 default-control d-none">
-                        <div class="alert alert-warning">
-                            Please note that using the default file system will create a permissions file
-                            that will be loaded every time the user permissions need to be checked.
-                            While this is not an issue for minimal user number, it is recommended to use a caching engine for better scale.
-                        </div>
-                    </div>
-                    <div class="row mb-2 redis-control d-none">
-                        <label class="col-sm-3 col-form-label" for="redis_host">Redis Host:</label>
-                        <div class="col-sm-9">
-                            <input type="text" name="redis_host" placeholder="e.g. 127.0.0.1" id="redis_host" class="form-control" required>
-                            <small class="form-text text-muted">Please enter your redis host.</small>
-                        </div>
-                    </div>
 
-                    <div class="row mb-2 redis-control d-none">
-                        <label class="col-sm-3 col-form-label" for="redis_port">Redis Port:</label>
-                        <div class="col-sm-9">
-                            <input type="number" placeholder="6379" value="6379" name="redis_port" id="redis_port" class="form-control" required>
-                            <small class="form-text text-muted">Please enter your redis port.</small>
-                        </div>
-                    </div>
-                    <div class="row mb-2 redis-control d-none">
-                        <label class="col-sm-3 col-form-label" for="redis_password">Redis password:</label>
-                        <div class="col-sm-9">
-                            <div class="input-group" id="show_redis_password">
-                                <input name="redis_password" type="password" autocomplete="off" id="redis_password" class="form-control">
-                                <span class="input-group-text cursor-pointer" id="toggleRedisPassword"><i class="fa fa-eye"
-                                                                                                          id="showRedisPass"></i></span>
+                        <div class="row mb-2 redis-control d-none">
+                            <label class="col-sm-3 col-form-label" for="redis_port">Redis Port:</label>
+                            <div class="col-sm-9">
+                                <input type="number" placeholder="6379" value="6379" name="redis_port" id="redis_port" class="form-control" required>
+                                <small class="form-text text-muted">Please enter your redis port.</small>
                             </div>
-                            <small class="form-text text-muted">Please enter your redis password. Leave blank if your redis server has no
-                                password.</small>
                         </div>
-                    </div>
+                        <div class="row mb-2 redis-control d-none">
+                            <label class="col-sm-3 col-form-label" for="redis_password">Redis password:</label>
+                            <div class="col-sm-9">
+                                <div class="input-group" id="show_redis_password">
+                                    <input name="redis_password" type="password" autocomplete="off" id="redis_password" class="form-control">
+                                    <span class="input-group-text cursor-pointer" id="toggleRedisPassword"><i class="fa fa-eye"
+                                                                                                              id="showRedisPass"></i></span>
+                                </div>
+                                <small class="form-text text-muted">Please enter your redis password. Leave blank if your redis server has no
+                                    password.</small>
+                            </div>
+                        </div>
 
-                    <div class="row mb-2 memcache-control d-none">
-                        <label class="col-sm-3 col-form-label" for="memcache_host">Memcache Host:</label>
-                        <div class="col-sm-9">
-                            <input type="text" name="memcache_host" id="memcache_host" class="form-control" required>
-                            <small class="form-text text-muted">Please enter your memcached host.</small>
+                        <div class="row mb-2 memcache-control d-none">
+                            <label class="col-sm-3 col-form-label" for="memcache_host">Memcache Host:</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="memcache_host" id="memcache_host" class="form-control" required>
+                                <small class="form-text text-muted">Please enter your memcached host.</small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-2 memcache-control d-none">
-                        <label class="col-sm-3 col-form-label" for="memcache_user">Memcache server prefix:</label>
-                        <div class="col-sm-9">
-                            <input type="text" name="memcache_user" id="memcache_user" class="form-control" required>
-                            <small class="form-text text-muted">Please enter a prefix for your memcached servers.</small>
+                        <div class="row mb-2 memcache-control d-none">
+                            <label class="col-sm-3 col-form-label" for="memcache_user">Memcache server prefix:</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="memcache_user" id="memcache_user" class="form-control" required>
+                                <small class="form-text text-muted">Please enter a prefix for your memcached servers.</small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-2 memcache-control d-none">
-                        <label class="col-sm-3 col-form-label" for="memcache_port">Memcache Port:</label>
-                        <div class="col-sm-9">
-                            <input type="text" name="memcache_port" id="memcache_port" class="form-control" required>
-                            <small class="form-text text-muted">Please enter your memcached port.</small>
+                        <div class="row mb-2 memcache-control d-none">
+                            <label class="col-sm-3 col-form-label" for="memcache_port">Memcache Port:</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="memcache_port" id="memcache_port" class="form-control" required>
+                                <small class="form-text text-muted">Please enter your memcached port.</small>
+                            </div>
                         </div>
                     </div>
                 </div>

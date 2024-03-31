@@ -218,18 +218,18 @@ class CacheSystemManager
 
     /**
      * @param          $key
-     * @param  string  $hasKey
+     * @param  string  $hashKey
      *
      * @return false|mixed|null
      * @throws \Throwable
      */
-    private static function hashRead($key, string $hasKey)
+    private static function hashRead($key, string $hashKey)
     {
         global $permissionsConfig;
         switch ($permissionsConfig['backend']) {
             case 'redis':
                 $redis = self::getRedisConnection();
-                $data = $redis->hGet($key, $hasKey);
+                $data = $redis->hGet($key, $hashKey);
                 return $data !== false ? unserialize($data) : null;
             case 'memcached':
                 $memcached = self::getMemcachedConnection();

@@ -12,12 +12,14 @@ if (!file_exists('system/installation_includes.php')) {
 
 use Core\System;
 use Session\JWTHelper;
+$user = new User();
+if ($user->isLoggedIn()) {
+    header('Location: index.php');
+}
 
 ?>
-
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
@@ -29,19 +31,41 @@ use Session\JWTHelper;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="assets/css/font-awesome-4.5.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="assets/css/custom.css">
+    <link rel="stylesheet" href="assets/css/login.css">
     <link rel="shortcut icon" href="assets/img/favicon_1.ico">
     <title>Expenses Tracker <?php
-        echo System::getVersion() ?> Setup</title>
+        echo System::getVersion() ?> Login</title>
 </head>
+<body>
+<div class="main">
+    <h1>Expense Tracker Login</h1>
+    <h3>Enter your login credentials</h3>
+    <form action="authenticate.php" method="POST">
+        <!-- CSRF Token -->
+        <input type="hidden" name="csrf_token" value="<?php echo $app_unique_key; ?>">
 
-<?php
+        <!-- Existing form fields -->
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
 
-$user = new User();
-if ($user->isLoggedIn()) {
-    header('Location: index.php');
-}
-echo 'LOGIN WORKS!';
-//
-//JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
-//var_dump($_COOKIE);
+        <!-- Honeypot field (invisible to users) -->
+        <div style="display:none">
+            <input type="text" name="website" value="">
+        </div>
+
+        <div>
+            <button type="submit">Log In</button>
+        </div>
+    </form>
+
+
+</div>
+</body>
+</html>
+
