@@ -167,7 +167,7 @@ class Installer extends Setup
         $useRootUserForSystem = Filter::filterInput(INPUT_POST, 'useSameUser', FILTER_VALIDATE_BOOLEAN, false);
         $masterDb = $this->setUpMasterDB($setup);
 
-        $this->createDB($masterDb);
+        $this->createDbAndTables($masterDb);
 
         if (!$useRootUserForSystem) {
             // Now that we have tables, let's check for the user:
@@ -188,6 +188,9 @@ class Installer extends Setup
             }
         }
 
+        $this->dbConfig['tables'] = $this->tablesSettings;
+        $dbConfig = $this->dbConfig;
+
         $this->adb = new PearDatabase($this->dbConfig['db_type'],
                                       $this->dbConfig['db_host'],
                                       $this->dbConfig['db_name'],
@@ -201,8 +204,6 @@ class Installer extends Setup
         } catch (Throwable $exception) {
             throw new Exception($exception->getMessage());
         }
-        $this->dbConfig['tables'] = $this->tablesSettings;
-        $dbConfig = $this->dbConfig;
         $this->connectCache();
         $this->createConfigFiles();
         $this->installPermissions();
@@ -416,7 +417,7 @@ class Installer extends Setup
      * @return void
      * @throws \Exception
      */
-    private function createDB(PearDatabase $masterDb)
+    private function createDbAndTables(PearDatabase $masterDb)
     {
         $createMyOwnDb = Filter::filterInput(INPUT_POST, 'createMyOwnDb', FILTER_VALIDATE_BOOLEAN, false);
         $tablePrefix = Filter::filterInput(INPUT_POST, 'table_prefix', FILTER_SANITIZE_SPECIAL_CHARS, '');
@@ -428,13 +429,18 @@ class Installer extends Setup
             throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
 
-        $tablesFactory = new TableFactory($this->tablesSettings, $tablePrefix);
-        $queries = $tablesFactory->getQueries();
-        $this->adb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], $this->dbConfig['db_name'], $this->dbConfig['db_user'],
-                                     $this->dbConfig['db_pass']);
-        $this->adb->connect();
-        foreach ($queries as $query) {
-            $this->adb->query($query, true);
+        if (!$createMyOwnDb) {
+            $tablesFactory = new TableFactory($this->tablesSettings, $tablePrefix);
+            $queries = $tablesFactory->getQueries();
+            $this->adb = new PearDatabase($this->dbConfig['db_type'],
+                                          $this->dbConfig['db_host'],
+                                          $this->dbConfig['db_name'],
+                                          $this->dbConfig['db_user'],
+                                          $this->dbConfig['db_pass']);
+            $this->adb->connect();
+            foreach ($queries as $query) {
+                $this->adb->query($query);
+            }
         }
     }
 
