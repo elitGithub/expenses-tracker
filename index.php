@@ -23,11 +23,13 @@ if (empty($adb)) {
     $adb = new PearDatabase();
     $adb->connect();
 }
+
 if (!JWTHelper::checkJWT()) {
     destroyUserSession();
 }
 
-
+$user = new User();
+$user->retrieveUserInfoFromFile();
 if (isset($_POST['submit']) && !empty($_POST['amount_spent']) && !empty($_POST['expense_category_id']) && !empty($_POST['expense_date'])
     && !empty($_POST['expense_description'])) {
     // echo print_r($_POST);

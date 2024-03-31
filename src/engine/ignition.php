@@ -79,6 +79,15 @@ function scanDirectoryForClassesUsingIterator($dir): array
         if ($file->isFile() && preg_match('/\.(php|class\.php)$/', $file->getFilename())) {
             $path = $file->getRealPath();
             $className = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+            if (isset($classesMap[$className])) {
+                $classPath = explode(DIRECTORY_SEPARATOR, $path);
+                $lastKey = array_key_last($classPath);
+                $className = $classPath[$lastKey];
+                if ($lastKey > 0) {
+                    $keyBeforeLast = array_key_last($classPath) - 1;
+                    $className = join(DIRECTORY_SEPARATOR, [$classPath[$keyBeforeLast], $className]);
+                }
+            }
             $classesMap[$className] = $path;
         }
     }
@@ -92,15 +101,28 @@ function scanDirectoryForClassesUsingIterator($dir): array
  *
  * @return mixed|null
  */
-function getClassPathUsingIterator($className, $classesMap) {
-    // Split class name into parts to handle namespace if needed
-    $classNameParts = explode('\\', $className);
-    $simpleClassName = end($classNameParts);
+function getClassPathUsingIterator($className, $classesMap)
+{
+    $simpleClassName = null;
+    $classPath = explode(DIRECTORY_SEPARATOR, $className);
+    $lastKey = array_key_last($classPath);
+    $nameSpacedClassName = $classPath[$lastKey];
+    if ($lastKey > 0) {
+        $keyBeforeLast = array_key_last($classPath) - 1;
+        $simpleClassName = join(DIRECTORY_SEPARATOR, [$classPath[$keyBeforeLast], $nameSpacedClassName]);
+    }
 
     if (isset($classesMap[$simpleClassName])) {
         return $classesMap[$simpleClassName];
     }
+    // Split class name into parts to handle namespace if needed
+    $classNameParts = explode('\\', $className);
+    $simpleClassName = end($classNameParts);
 
+
+    if (isset($classesMap[$simpleClassName])) {
+        return $classesMap[$simpleClassName];
+    }
     return null;
 }
 

@@ -6,9 +6,13 @@ namespace Permissions;
 
 use database\PearDatabase;
 
+/**
+ *
+ */
 class Role
 {
     private static array $roleIdByName = [];
+    private static array $userToRole   = [];
 
     /**
      * @param  string  $roleName
@@ -22,11 +26,34 @@ class Role
             return self::$roleIdByName[$roleName];
         }
         $adb = PearDatabase::getInstance();
-        $tables =$adb->getTablesConfig();
+        $tables = $adb->getTablesConfig();
         $query = "SELECT `role_id` FROM {$tables['roles_table_name']} WHERE `role_name` = ?";
         $result = $adb->preparedQuery($query, [$roleName]);
         $roleId = $adb->query_result($result, 0, 'role_id');
-        self::$roleIdByName[$roleName] = (int)$roleId;
+        self::$roleIdByName[$roleName] = (int) $roleId;
         return self::$roleIdByName[$roleName];
+    }
+
+    /**
+     * @param $userId
+     *
+     * @return int|mixed
+     * @throws \Exception
+     */
+    public static function getRoleByUserId($userId)
+    {
+        if (isset(self::$userToRole[$userId])) {
+            return self::$userToRole[$userId];
+        }
+        $adb = PearDatabase::getInstance();
+        $tables = $adb->getTablesConfig();
+        $query = "SELECT 'role_id'
+                  FROM `{$tables['user_to_role_table_name']}`
+                  WHERE `{$tables['user_to_role_table_name']}`.`user_id` = ?";
+        $result = $adb->preparedQuery($query, [$userId]);
+
+        $roleId = $adb->query_result($result, 0, 'role_id');
+        self::$userToRole[$userId] = (int) $roleId;
+        return self::$userToRole[$userId];
     }
 }

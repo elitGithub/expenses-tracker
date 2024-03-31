@@ -7,11 +7,21 @@ class UniversalClassLoader
 
     protected array $prefixes = [];
 
+    /**
+     * @return void
+     */
     public function register()
     {
         spl_autoload_register([$this, 'loadClass']);
     }
 
+    /**
+     * @param $prefix
+     * @param $base_dir
+     * @param $prepend
+     *
+     * @return void
+     */
     public function addNamespace($prefix, $base_dir, $prepend = false)
     {
         $prefix = trim($prefix, '\\') . '\\';
@@ -26,6 +36,11 @@ class UniversalClassLoader
         }
     }
 
+    /**
+     * @param $fullyQualifiedClassName
+     *
+     * @return false|string
+     */
     public function loadClass($fullyQualifiedClassName)
     {
         $prefix = $fullyQualifiedClassName;
@@ -41,6 +56,12 @@ class UniversalClassLoader
         return false;
     }
 
+    /**
+     * @param $prefix
+     * @param $relative_class
+     *
+     * @return false|string
+     */
     protected function loadMappedFile($prefix, $relative_class)
     {
         if (isset($this->prefixes[$prefix]) === false) {
@@ -57,6 +78,11 @@ class UniversalClassLoader
         return false;
     }
 
+    /**
+     * @param $file
+     *
+     * @return bool
+     */
     protected function requireFile($file): bool
     {
         if (file_exists($file)) {

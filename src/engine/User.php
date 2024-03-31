@@ -12,7 +12,8 @@ use Session\SessionWrapper;
  */
 class User
 {
-    public int $id;
+    public ?int $id = null;
+    public SessionWrapper $session;
     /**
      * @var mixed
      */
@@ -25,7 +26,6 @@ class User
      * @var \database\PearDatabase
      */
     protected PearDatabase   $adb;
-    protected SessionWrapper $session;
     protected array          $permissions = [];
 
     /**
@@ -115,6 +115,9 @@ class User
             return false;
         }
         $this->id = $row['user_id'];
+        foreach ($row as $key => $userInfo) {
+            $this->$key = $userInfo;
+        }
         $this->retrieveUserInfoFromFile();
 
         $this->session->sessionAddKey('authenticated_user_language', $default_language);
@@ -150,6 +153,9 @@ class User
      */
     public function retrieveUserInfoFromFile()
     {
+        if (!$this->id && $this->session->sessionHasKey('authenticated_user_id')) {
+            $this->id = $this->session->sessionReadKey('authenticated_user_id');
+        }
         try {
             $userData = PermissionsManager::getUserPrivileges($this->id);
             foreach ($userData['user_data'] as $propertyName => $propertyValue) {

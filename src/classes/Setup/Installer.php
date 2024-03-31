@@ -168,13 +168,6 @@ class Installer extends Setup
         $masterDb = $this->setUpMasterDB($setup);
         $this->createDB($masterDb);
 
-
-        $masterDb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], $this->dbConfig['db_name'], $this->dbConfig['db_user'],
-                                     $this->dbConfig['db_pass']);
-        $masterDb->connect();
-        $this->adb = $masterDb;
-        $adb = $this->adb;
-
         if (!$useRootUserForSystem) {
             // Now that we have tables, let's check for the user:
             $this->dbConfig['db_user'] = Filter::filterInput(INPUT_POST, 'sql_user', FILTER_SANITIZE_SPECIAL_CHARS, '');
@@ -192,9 +185,12 @@ class Installer extends Setup
                 $result = $masterDb->query($sqlGrantPrivileges);
                 $masterDb->preparedQuery('FLUSH PRIVILEGES;');
             }
-            $this->adb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], $this->dbConfig['db_name'],
+            $this->adb = new PearDatabase($this->dbConfig['db_type'],
+                                          $this->dbConfig['db_host'],
+                                          $this->dbConfig['db_name'],
                                           $this->dbConfig['db_user'],
-                                          $this->dbConfig['db_pass']);
+                                          $this->dbConfig['db_pass'],
+                                          $this->dbConfig['db_port']);
             try {
                 $this->adb->connect();
                 global $adb;
@@ -224,11 +220,12 @@ class Installer extends Setup
             throw new Exception('Passwords do not match');
         }
 
+        $this->installPermissions();
         $createUser = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'));
-
         if (!$createUser) {
             $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
             $createUser = $existUserData['user_id'] ?? false;
+            $existUserData['role_id'] = Role::getRoleByUserId($createUser);
             if ($createUser) {
                 CacheSystemManager::writeUser($createUser, [
                     'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'], 'active' => 1,  'role' => $existUserData['role_id']
