@@ -34,7 +34,6 @@ goBackInstall?.addEventListener('click', (ev) => {
 document.getElementById('show-setup-form').addEventListener('click', showForm);
 function updateVisibility() {
 
-    console.log(currentSection);
     document.querySelectorAll('[data-form-section]').forEach(section => {
         const sectionNum = parseInt(section.getAttribute('data-form-section'), 10);
         section.classList.toggle('d-none', sectionNum !== currentSection);
@@ -98,7 +97,6 @@ function handleNextSection(nextSectionElement) {
 
 const handlePreviousSection = (currentSection) => {
     steps.forEach((step, index) => {
-        console.log(step, index, currentSection);
         step.classList.remove('active');
         step.classList.remove('done');
         step.classList.toggle('active', index === currentSection - 1);
@@ -142,7 +140,6 @@ document.getElementById('prevBtn').addEventListener('click', () => {
 
 function showForm() {
     form.classList.remove('d-none');
-    console.log(form);
     document.getElementById('pre-install-instructions').classList.add('d-none');
     steps[0].classList.add('active');
 }
