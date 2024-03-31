@@ -30,6 +30,8 @@ if ($user->isLoggedIn()) {
     <link rel="stylesheet" href="assets/css/login.css">
     <link rel="shortcut icon" href="assets/img/favicon_1.ico">
     <title>Expenses Tracker <?php echo System::getVersion(); ?> Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/zod@3.22.4/lib/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous" async></script>
 </head>
 
 <body>
@@ -40,21 +42,23 @@ if ($user->isLoggedIn()) {
                     <div class="card-body">
                         <h1 class="h3 mb-3 fw-normal text-center">Expense Tracker Login</h1>
                         <h3 class="h5 mb-3 fw-normal text-center">Enter your login credentials</h3>
-                        <form action="authenticate.php" method="POST" class="needs-validation" novalidate>
+                        <form action="authenticate.php" method="POST" class="needs-validation" id="loginForm">
                             <input type="hidden" name="csrf_token" value="<?php echo $app_unique_key; ?>">
                             <div class="form-group mb-3">
                                 <label for="username" class="form-label">Username:</label>
                                 <input type="text" id="username" name="username" class="form-control" required autofocus>
+                                <div class="error-message" id="usernameError"></div>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="password" class="form-label">Password:</label>
                                 <input type="password" id="password" name="password" class="form-control" required>
+                                <div class="error-message" id="passwordError"></div>
                             </div>
                             <div style="display:none">
                                 <input type="text" name="website" value="">
                             </div>
                             <div class="d-grid gap-2">
-                                <button class="btn btn-primary btn-lg" type="submit">Log In</button>
+                                <button type="submit" class="btn btn-primary btn-lg" formnovalidate>Log In</button>
                             </div>
                         </form>
                     </div>
@@ -62,7 +66,82 @@ if ($user->isLoggedIn()) {
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-qO/NnmcE5Zkz7Ql2zMS4Rc/kyTg4IxN9kDfzRlPBmE5zJ4//kCJ6YdPkPBiMqx8j" crossorigin="anonymous"></script>
+
+    <script>
+        /**
+         * Validates a given input element against multiple criteria.
+         * 
+         * @param {HTMLElement} input The input element to validate.
+         * @param {Object[]} validators An array of validator objects.
+         * @param {HTMLElement} errorElement The element to display the error message in.
+         * @returns {Boolean} True if all validations pass; otherwise, false.
+         */
+        function validateInput(input, validators, errorElement) {
+            let isValid = true;
+            // Clear previous error messages
+            errorElement.textContent = '';
+            input.classList.remove('is-invalid');
+
+            validators.forEach(validator => {
+                if (!validator.test(input.value)) {
+                    input.classList.add('is-invalid');
+                    // Append error messages if multiple failures
+                    errorElement.textContent += (errorElement.textContent ? ' ' : '') + validator.message;
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        // Example usage with multiple validation rules for a username
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('loginForm');
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const usernameError = document.getElementById('usernameError');
+            const passwordError = document.getElementById('passwordError');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const isUsernameValid = validateInput(username, [{
+                        test: value => value.trim() !== '',
+                        message: 'Please enter your username.'
+                    },
+                    {
+                        test: value => value.length >= 3,
+                        message: 'Username must be at least 3 characters long.'
+                    }
+                ], usernameError);
+
+                const isPasswordValid = validateInput(password, [{
+                        test: value => value.trim() !== '',
+                        message: 'Please enter your password.'
+                    },
+                    {
+                        test: value => value.length >= 8,
+                        message: 'Password must be at least 8 characters long.'
+                    },
+                    {
+                        test: value => /[A-Z]/.test(value),
+                        message: 'Password must contain an uppercase letter.'
+                    },
+                    {
+                        test: value => /[a-z]/.test(value),
+                        message: 'Password must contain a lowercase letter.'
+                    },
+                    {
+                        test: value => /[0-9]/.test(value),
+                        message: 'Password must contain a number.'
+                    }
+                ], passwordError);
+
+                if (isUsernameValid && isPasswordValid) {
+                    form.submit();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
