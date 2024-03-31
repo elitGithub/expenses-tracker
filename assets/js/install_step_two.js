@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         redisControl.map(el => el.classList.add('d-none'));
         defaultControl.map(el => el.classList.add('d-none'));
         memcachedControl.map(el => el.classList.add('d-none'));
-        console.log(cacheType);
+
         switch (cacheType) {
             case 'redis':
                 redisControl.map(el => el.classList.remove('d-none'));

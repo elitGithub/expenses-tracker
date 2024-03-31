@@ -176,11 +176,15 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                             <label class="col-sm-3 col-form-label" for="root_password">Password for database creation:</label>
                             <div class="col-sm-9">
                                 <div class="input-group" id="show_root_password">
-                                    <input name="root_password" type="password" autocomplete="off" id="root_password" class="form-control" required>
+                                    <input name="root_password" type="password" autocomplete="off" id="root_password" class="form-control">
                                     <span class="input-group-text cursor-pointer" id="toggleRootPassword"><i class="fa fa-eye"
                                                                                                              id="showRootPassWord"></i></span>
                                 </div>
-                                <small class="form-text text-muted">Please enter your root user password.</small>
+                                <small class="form-text text-muted">
+                                    Please enter your root user password.
+                                    <br>
+                                    Leave blank if your root user has no password.
+                                </small>
                             </div>
                         </div>
                         <div class="row mb-2 sql_user_control">
