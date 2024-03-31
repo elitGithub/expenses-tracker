@@ -230,7 +230,8 @@ class Installer extends Setup
             $existUserData['role_id'] = Role::getRoleByUserId($createUser);
             if ($createUser) {
                 CacheSystemManager::writeUser($createUser, [
-                    'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'], 'active' => 1,  'role' => $existUserData['role_id']
+                    'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'], 'active' => 1,
+                    'role'     => $existUserData['role_id'],
                 ]);
             }
         }
@@ -239,7 +240,24 @@ class Installer extends Setup
             throw new Exception('Could not create admin user');
         }
 
-        $this->system->generateJwtKeys();
+        try {
+            $this->system->generateJwtKeys();
+        } catch (Throwable $exception) {
+            $dbConfigFile = EXTR_ROOT_DIR . '/system/config/database.php';
+            $userManagementFile = EXTR_ROOT_DIR . '/system/user/permissions.php';
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
+            unlink($dbConfigFile);
+            unlink($userManagementFile);
+            echo sprintf(
+                '<div class="alert alert-danger alert-dismissible fade show mt-2">%s%s</div>',
+                '<h4 class="alert-heading">Could not create private or public keys files.</h4>',
+                '<p> For security reasons, installation has been rolled back. Please make sure you can run shell commands, or alternatively, create the folder system/data/storage/jwt/,
+         and run the following commands in the command line: shell_exec("openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048");
+                                                             shell_exec("openssl rsa -pubout -in private_key.pem -out public_key.pem");</p>'
+            );
+            die;
+        }
 
         $user = new User($createUser);
         $user->login($userName, $password);
@@ -329,8 +347,9 @@ class Installer extends Setup
     {
         CacheSystemManager::populateActionsTable($this->adb, $this->dbConfig['tables']['actions_table_name']);
         CacheSystemManager::populateRolesTable($this->adb, $this->dbConfig['tables']['roles_table_name']);
-        CacheSystemManager::createRolePermissions($this->adb, $this->dbConfig['tables']['roles_table_name'], $this->dbConfig['tables']['actions_table_name'],
-                                           $this->dbConfig['tables']['role_permissions_table_name']);
+        CacheSystemManager::createRolePermissions($this->adb, $this->dbConfig['tables']['roles_table_name'],
+                                                  $this->dbConfig['tables']['actions_table_name'],
+                                                  $this->dbConfig['tables']['role_permissions_table_name']);
         CacheSystemManager::createPermissionsFile($this->adb, $this->dbConfig['tables']['role_permissions_table_name']);
     }
 
@@ -397,7 +416,8 @@ class Installer extends Setup
 
         $this->dbConfig['db_user'] = $rootUser;
         $this->dbConfig['db_pass'] = $rootPassword;
-        $masterDb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword, $this->dbConfig['db_port']);
+        $masterDb = new PearDatabase($this->dbConfig['db_type'], $this->dbConfig['db_host'], 'INFORMATION_SCHEMA', $rootUser, $rootPassword,
+                                     $this->dbConfig['db_port']);
         // check database connection
         try {
             $masterDb->connect();

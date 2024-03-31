@@ -306,5 +306,8 @@ class System
         $public = $path . 'public_key.pem';
         shell_exec("openssl genpkey -algorithm RSA -out $private -pkeyopt rsa_keygen_bits:2048");
         shell_exec("openssl rsa -pubout -in $private -out $public");
+        if (!file_exists($private) || !file_exists($public)) {
+            throw new Exception('Keys not created!');
+        }
     }
 }
