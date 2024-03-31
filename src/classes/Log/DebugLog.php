@@ -23,8 +23,6 @@ class DebugLog extends AbstractLogger
         }
         $context = array_merge($context, $trace);
         $this->logger->log($level, $message, $context);
-        var_dump($message);
-        var_dump($context);
         error_log($message);
     }
 }

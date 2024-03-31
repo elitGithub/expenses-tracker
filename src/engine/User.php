@@ -97,13 +97,13 @@ class User
      */
     public function login($userName, $password): bool
     {
+        global $default_language;
         $query = "SELECT * FROM `$this->entityTable` WHERE CAST(`user_name` AS BINARY) = ?";
         $result = $this->adb->requirePsSingleResult($query, [$userName]);
 
         if (!$result) {
             return false;
         }
-
 
         $row = $this->adb->fetchByAssoc($result);
 
@@ -117,12 +117,15 @@ class User
         $this->id = $row['user_id'];
         $this->retrieveUserInfoFromFile();
 
-        $this->session->sessionAddKey('authenticated_user_language', $userName);
+        $this->session->sessionAddKey('authenticated_user_language', $default_language);
         $this->session->sessionAddKey('authenticated_user_id', $this->id);
         $this->session->sessionAddKey('username', $userName);
+        $this->session->sessionAddKey('authenticated_user_name', $userName);
         $this->session->sessionAddKey('loggedin', true);
         $this->session->sessionAddKey('ua', $_SERVER['HTTP_USER_AGENT']);
         $this->session->sessionAddKey('is_logged_in', true);
+        $this->session->sessionAddKey('username', $this->user_name);
+        $this->session->sessionAddKey('password', $this->password);
         $this->updateLastLogin();
         return true;
     }
@@ -156,7 +159,6 @@ class User
                 $this->permissions[$actionId] = $isEnabled;
             }
         } catch (Throwable $exception) {
-            var_dump($exception);
             die('Privileges not found.');
         }
     }
@@ -197,11 +199,5 @@ class User
         $this->adb->pquery("UPDATE  `{$this->entityTable}` SET `last_login` = CONVERT_TZ(NOW(), 'SYSTEM','+00:00')  WHERE `user_id` = ?;", [$this->id]);
     }
 
-    public function startSession()
-    {
-        $this->session->sessionAddKey('username', $this->user_name);
-        $this->session->sessionAddKey('password', $this->user_name);
-//        $_SESSION['password'] = $_REQUEST['user_password'];
-    }
 
 }

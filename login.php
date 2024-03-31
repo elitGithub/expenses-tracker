@@ -41,7 +41,7 @@ $user = new User();
 if ($user->isLoggedIn()) {
     header('Location: index.php');
 }
-
+echo 'LOGIN WORKS!';
 //
 //JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
 //var_dump($_COOKIE);
