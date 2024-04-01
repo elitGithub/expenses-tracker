@@ -284,7 +284,7 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                         <div class="row mb-2 redis-control d-none">
                             <label class="col-sm-3 col-form-label" for="redis_host">Redis Host:</label>
                             <div class="col-sm-9">
-                                <input type="text" name="redis_host" placeholder="e.g. 127.0.0.1" id="redis_host" class="form-control" required>
+                                <input type="text" name="redis_host" data-default-value="127.0.0.1" placeholder="e.g. 127.0.0.1" id="redis_host" class="form-control" required>
                                 <small class="form-text text-muted">Please enter your redis host.</small>
                             </div>
                         </div>
@@ -292,7 +292,7 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                         <div class="row mb-2 redis-control d-none">
                             <label class="col-sm-3 col-form-label" for="redis_port">Redis Port:</label>
                             <div class="col-sm-9">
-                                <input type="number" placeholder="6379" value="6379" name="redis_port" id="redis_port" class="form-control" required>
+                                <input type="number" placeholder="6379" data-default-value="6379" value="6379" name="redis_port" id="redis_port" class="form-control" required>
                                 <small class="form-text text-muted">Please enter your redis port.</small>
                             </div>
                         </div>
@@ -312,7 +312,7 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                         <div class="row mb-2 memcache-control d-none">
                             <label class="col-sm-3 col-form-label" for="memcache_host">Memcache Host:</label>
                             <div class="col-sm-9">
-                                <input type="text" name="memcache_host" id="memcache_host" class="form-control" required>
+                                <input type="text" data-default-value="127.0.0.1" name="memcache_host" id="memcache_host" class="form-control" required>
                                 <small class="form-text text-muted">Please enter your memcached host.</small>
                             </div>
                         </div>
@@ -326,7 +326,7 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                         <div class="row mb-2 memcache-control d-none">
                             <label class="col-sm-3 col-form-label" for="memcache_port">Memcache Port:</label>
                             <div class="col-sm-9">
-                                <input type="text" name="memcache_port" id="memcache_port" class="form-control" required>
+                                <input type="text" name="memcache_port" id="memcache_port" data-default-value="11211" value="11211" class="form-control" required>
                                 <small class="form-text text-muted">Please enter your memcached port.</small>
                             </div>
                         </div>

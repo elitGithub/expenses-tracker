@@ -252,7 +252,7 @@ class Installer extends Setup
             echo sprintf(
                 '<div class="alert alert-danger alert-dismissible fade show mt-2">%s%s</div>',
                 '<h4 class="alert-heading">Could not create private or public keys files.</h4>',
-                '<p> For security reasons, installation has been rolled back. Please make sure you can run shell commands, or alternatively, create the folder system/data/storage/jwt/,
+                '<p> For security reasons, the installation has been rolled back. Please make sure you can run shell commands, or alternatively, create the folder system/data/storage/jwt/,
          and run the following commands in the command line: shell_exec("openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048");
                                                              shell_exec("openssl rsa -pubout -in private_key.pem -out public_key.pem");</p>'
             );

@@ -48,4 +48,6 @@ class SessionWrapper
         return isset($_SESSION[$key]);
     }
 
+
+
 }

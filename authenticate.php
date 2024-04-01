@@ -24,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
         // uncomment the following line for redirect magic
         header('Location: index.php');
-        echo 'SUCCESS!';
         return;
     }
 
