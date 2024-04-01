@@ -118,22 +118,22 @@ if ($user->isLoggedIn()) {
                         test: value => value.trim() !== '',
                         message: 'Please enter your password.'
                     },
-                    // {
-                    //     test: value => value.length >= 4,
-                    //     message: 'Password must be at least 8 characters long.'
-                    // },
-                    // {
-                    //     test: value => /[A-Z]/.test(value),
-                    //     message: 'Password must contain an uppercase letter.'
-                    // },
-                    // {
-                    //     test: value => /[a-z]/.test(value),
-                    //     message: 'Password must contain a lowercase letter.'
-                    // },
-                    // {
-                    //     test: value => /[0-9]/.test(value),
-                    //     message: 'Password must contain a number.'
-                    // }
+                    {
+                        test: value => value.length >= 8,
+                        message: 'Password must be at least 8 characters long.'
+                    },
+                    {
+                        test: value => /[A-Z]/.test(value),
+                        message: 'Password must contain an uppercase letter.'
+                    },
+                    {
+                        test: value => /[a-z]/.test(value),
+                        message: 'Password must contain a lowercase letter.'
+                    },
+                    {
+                        test: value => /[0-9]/.test(value),
+                        message: 'Password must contain a number.'
+                    }
                 ], passwordError);
 
                 if (isUsernameValid && isPasswordValid) {

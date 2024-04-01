@@ -369,12 +369,14 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                             <label class="col-sm-3 col-form-label" for="admin_password">Your password:</label>
                             <div class="col-sm-9">
                                 <div class="input-group" id="show_admin_password">
-                                    <input name="admin_password" type="password" autocomplete="off" minlength="8" id="admin_password"
+                                    <input name="admin_password" type="password" autocomplete="off" minlength="8" id="admin_password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                                            class="form-control" required>
                                     <span class="input-group-text cursor-pointer" id="toggleAdminPassword"><i class="fa fa-eye"
                                                                                                               id="showAdminPassword"></i></span>
                                 </div>
-                                <small class="form-text text-muted">Please enter your password with at least 8 characters.</small>
+                                <small class="form-text text-muted">
+                                    Please enter your password with at least 8 characters, including at least one number, one uppercase letter, and one lowercase letter.
+                                </small>
                             </div>
                         </div>
                         <div class="row mb-2">
