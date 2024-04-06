@@ -59,6 +59,7 @@ spl_autoload_register(function ($className) {
     // Generate the classes map using RecursiveDirectoryIterator
     $classesMap = scanDirectoryForClassesUsingIterator($baseDir);
 
+
     if ($path = getClassPathUsingIterator($className, $classesMap)) {
         require_once $path;
     }
@@ -86,6 +87,7 @@ function scanDirectoryForClassesUsingIterator($dir): array
                 if ($lastKey > 0) {
                     $keyBeforeLast = array_key_last($classPath) - 1;
                     $className = join(DIRECTORY_SEPARATOR, [$classPath[$keyBeforeLast], $className]);
+                    $className = str_replace('.php', '', $className);
                 }
             }
             $classesMap[$className] = $path;
@@ -104,7 +106,8 @@ function scanDirectoryForClassesUsingIterator($dir): array
 function getClassPathUsingIterator($className, $classesMap)
 {
     $simpleClassName = null;
-    $classPath = explode(DIRECTORY_SEPARATOR, $className);
+    $classPath = explode('\\', $className);
+
     $lastKey = array_key_last($classPath);
     $nameSpacedClassName = $classPath[$lastKey];
     if ($lastKey > 0) {

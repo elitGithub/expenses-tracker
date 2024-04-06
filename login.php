@@ -15,6 +15,7 @@ $user = new User();
 if ($user->isLoggedIn()) {
     header('Location: index.php');
 }
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -36,6 +37,12 @@ if ($user->isLoggedIn()) {
 
 <body>
     <div class="container mt-5">
+        <?php
+        if (isset($_SESSION['error'])) {
+            echo '<p class="alert alert-danger">' . $_SESSION['error'] . '</p>';
+            unset($_SESSION['error']);
+        }
+        ?>
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card">
@@ -70,7 +77,7 @@ if ($user->isLoggedIn()) {
     <script>
         /**
          * Validates a given input element against multiple criteria.
-         * 
+         *
          * @param {HTMLElement} input The input element to validate.
          * @param {Object[]} validators An array of validator objects.
          * @param {HTMLElement} errorElement The element to display the error message in.

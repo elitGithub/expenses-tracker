@@ -27,8 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         return;
     }
 
-    echo 'FAILED MOTGHERFUCKEWR';
-} else {
-    // Not a POST request
-    echo 'Please submit the form.';
+    $_SESSION['error'] = 'Error: incorrect user name or password';
 }
+header('Location: login.php');

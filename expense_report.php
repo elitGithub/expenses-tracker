@@ -1,62 +1,6 @@
 <?php
-session_name('expenses-tracker');
-session_start();
-ob_start();
-	require_once('./src/db_config.php');
+require_once 'header.php';
 ?>
-
-
-
-
-
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-      <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Record Expense</title>
-	<!-- BOOTSTRAP STYLES-->
-    <link href="assets/css/bootstrap.css" rel="stylesheet" />
-     <!-- FONTAWESOME STYLES-->
-    <link href="assets/css/font-awesome.css" rel="stylesheet" />
-     <!-- MORRIS CHART STYLES-->
-        <!-- CUSTOM STYLES-->
-    <link href="assets/css/custom.css" rel="stylesheet" />
-     <!-- GOOGLE FONTS-->
-   <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-     <!-- TABLE STYLES-->
-    <link href="assets/js/dataTables/dataTables.bootstrap.css" rel="stylesheet" />
-
-      <!--ASWESOME ICON-->
-    <link rel="stylesheet" href="font-awesome-4.5.0/css/font-awesome.min.css">
-
-   <!--  <script language="javascript" type="text/javascript">
-function removeSpaces(string) {
- return string.split(' ').join('');
-}
-</script> -->
-
-
-
-<script language="JavaScript"><!--
-function trim(strText) {
-    // this will get rid of leading spaces
-    while (strText.substring(0,1) == ' ')
-        strText = strText.substring(1, strText.length);
-
-    // this will get rid of trailing spaces
-    while (strText.substring(strText.length-1,strText.length) == ' ')
-        strText = strText.substring(0, strText.length-1);
-
-   return strText;
-}
-//--></script>
-
-
-
-
-</head>
-<body>
     <div id="wrapper">
         <nav class="navbar navbar-default navbar-cls-top " role="navigation" style="margin-bottom: 0; color:#FF0">
             <div class="navbar-header" >
@@ -251,21 +195,3 @@ function trim(strText) {
      <!-- /. WRAPPER  -->
     <!-- SCRIPTS -AT THE BOTOM TO REDUCE THE LOAD TIME-->
     <!-- JQUERY SCRIPTS -->
-    <script src="assets/js/jquery-1.10.2.js"></script>
-      <!-- BOOTSTRAP SCRIPTS -->
-    <script src="assets/js/bootstrap.min.js"></script>
-    <!-- METISMENU SCRIPTS -->
-    <script src="assets/js/jquery.metisMenu.js"></script>
-     <!-- DATA TABLE SCRIPTS -->
-    <script src="assets/js/dataTables/jquery.dataTables.js"></script>
-    <script src="assets/js/dataTables/dataTables.bootstrap.js"></script>
-        <script>
-            $(document).ready(function () {
-                $('#dataTables-example').dataTable();
-            });
-    </script>
-         <!-- CUSTOM SCRIPTS -->
-    <script src="assets/js/custom.js"></script>
-
-</body>
-</html>
