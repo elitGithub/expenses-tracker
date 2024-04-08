@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-global $default_language;
+global $default_language, $app_unique_key;
 require_once 'src/engine/ignition.php';
 if (!file_exists('system/installation_includes.php')) {
     require_once 'install/index.php';
@@ -15,6 +15,7 @@ $user = new User();
 if ($user->isLoggedIn()) {
     header('Location: index.php');
 }
+$_SESSION['formToken']['login'] = $app_unique_key;
 
 ?>
 <!doctype html>

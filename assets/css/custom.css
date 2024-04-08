@@ -11,10 +11,6 @@
 /*==============================================
     GENERAL  STYLES
     =============================================*/
-body {
-	font-family: 'Open Sans', sans-serif;
-}
-
 #wrapper {
 	width: 100%;
 	background: #202020;
@@ -41,26 +37,11 @@ body {
 .no-boder {
 	border: 1px solid #f3f3f3;
 }
-
-h2 {
-	color: #f00;
-}
-
-h4 {
-	padding-top: 10px;
-}
-
 .square-btn-adjust {
 	border: 0 solid transparent;
 	-webkit-border-radius: 0;
 	-moz-border-radius: 0;
 	border-radius: 0;
-}
-
-p {
-	font-size: 16px;
-	line-height: 25px;
-	padding-top: 20px;
 }
 
 /*==============================================
@@ -423,10 +404,6 @@ p {
 	justify-content: space-evenly;
 }
 
-.btn {
-	margin: 1rem;
-}
-
 .w-30 {
 	width: 30% !important;
 }
@@ -434,17 +411,6 @@ p {
 /*==============================================
     UI ELEMENTS STYLES
     =============================================*/
-.btn-circle {
-	width: 50px;
-	height: 50px;
-	padding: 6px 0;
-	-webkit-border-radius: 25px;
-	-moz-border-radius: 25px;
-	border-radius: 25px;
-	text-align: center;
-	font-size: 12px;
-	line-height: 1.428571429;
-}
 
 .install-form {
 	display: flex;

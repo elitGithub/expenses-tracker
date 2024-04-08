@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 --
 CREATE TABLE IF NOT EXISTS `expense_category`
 (
-    `expense_category_id`   INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `expense_category_id`   INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `expense_category_name` VARCHAR(200)     NOT NULL,
     `amount`                DECIMAL(10, 2)   NOT NULL DEFAULT '0.00',
     `created_at`            DATE             NOT NULL,
@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS `expense_category`
 --
 CREATE TABLE IF NOT EXISTS `expenses`
 (
-    `expense_id`          INT(11) UNSIGNED    NOT NULL AUTO_INCREMENT,
-    `expense_category_id` INT(11) UNSIGNED    NOT NULL,
+    `expense_id`          INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `expense_category_id` INT UNSIGNED    NOT NULL,
     `expense_description` VARCHAR(200)        NOT NULL,
     `expense_date`        DATE                NOT NULL,
     `created_at`          DATE                NOT NULL,

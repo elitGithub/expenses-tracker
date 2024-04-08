@@ -34,7 +34,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 CREATE TABLE IF NOT EXISTS `%sexpense_category` (
-    `expense_category_id`   INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `expense_category_id`   INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `expense_category_name` VARCHAR(200)     NOT NULL,
     `amount`                DECIMAL(10, 2)   NOT NULL DEFAULT '0.00',
     `created_at`            DATE             NOT NULL,
@@ -44,22 +44,16 @@ CREATE TABLE IF NOT EXISTS `%sexpense_category` (
   DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `%sexpenses` (
-    `user_id`        INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `email`          VARCHAR(200)     NOT NULL,
-    `user_name`      VARCHAR(200)     NOT NULL,
-    `first_name`     VARCHAR(200)     NOT NULL,
-    `last_name`      VARCHAR(200)     NOT NULL,
-    `created_by`     INT(11) UNSIGNED NOT NULL,
-    `active`         TINYINT(1)       NOT NULL DEFAULT '1',
-    `last_update_at` DATE             NOT NULL,
-    `created_at`     DATE             NOT NULL,
-    `deleted_at`     DATETIME         DEFAULT NULL,
-    PRIMARY KEY (`user_id`),
-    UNIQUE INDEX `idx_email` (`email`),
-    UNIQUE INDEX `idx_user_name` (`user_name`),
-    INDEX `idx_created_by` (`created_by`),
-    INDEX `idx_active` (`active`),
-    INDEX `idx_deleted_at` (`deleted_at`)
+    `expense_id`          INT(11) UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `expense_category_id` INT(11) UNSIGNED    NOT NULL,
+    `expense_description` VARCHAR(200)        NOT NULL,
+    `expense_date`        DATE                NOT NULL,
+    `created_at`          DATE                NOT NULL,
+    `deleted`             TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
+    `amount_spent`        DECIMAL(10, 2)      NOT NULL,
+    PRIMARY KEY (`expense_id`),
+    KEY `FK_expense_category_id` (`expense_category_id`),
+    CONSTRAINT `FK_expense_category` FOREIGN KEY (`expense_category_id`) REFERENCES `%sexpense_category` (`expense_category_id`) ON DELETE CASCADE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
