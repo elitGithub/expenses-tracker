@@ -8,7 +8,12 @@ $expenseCategoryList = new ExpenseCategoryList();
 
 ?>
 
-<div class="panel panel-default d-none" id="add_new_expense_modal">
+
+<!--  Modals-->
+<div class="panel panel-default" id="add_new_expense_modal">
+    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">
+        <i class="fa fa-plus-circle fa-2x"></i> Enter Expenses
+    </button>
     <div class="panel-body">
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -86,7 +91,6 @@ $expenseCategoryList = new ExpenseCategoryList();
         </div>
     </div>
 </div>
-
 <div class="modal fade d-none" id="modal_delete<?php echo $row['expense_id'] ?>" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -104,3 +108,4 @@ $expenseCategoryList = new ExpenseCategoryList();
         </div>
     </div>
 </div>
+<!-- End Modals-->

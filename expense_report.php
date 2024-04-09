@@ -2,7 +2,8 @@
 
 declare(strict_types = 1);
 
-
+require_once 'header.php';
+require_once 'sidenav.php';
 ?>
 
 <div class="row">

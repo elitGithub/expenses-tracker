@@ -1,40 +1,6 @@
 <?php
 
-session_name('expenses-tracker');
-session_start();
-ob_start();
-require_once('./src/db_config.php');
-
-if (isset($_POST['submit']) && !empty($_POST['amount']) && !empty($_POST['expense_category_name'])) {
-    // echo print_r($_POST);
-    $amount = mysqli_real_escape_string($con, $_POST['amount']);
-    $expense_category_name = mysqli_real_escape_string($con, $_POST['expense_category_name']);
-    $created_at = date('Y-m-d');
-
-    $sql = "SELECT expense_category_name  FROM expense_category_tbl WHERE expense_category_name = '$expense_category_name' ";
-    $query = mysqli_query($con, $sql);
-    if ($one = mysqli_num_rows($query) == 1) {
-        echo '
-         <script type="text/javascript">
-          alert("' . ucfirst($expense_category_name) . ' already exist");
-         </script>';
-        header('expense_category.php');
-    }
-
-
-    $data = mysqli_query($con,
-                         "INSERT INTO expense_category_tbl(expense_category_name, created_at, amount) VALUES('" . $expense_category_name . "', '" . $created_at . "','" . $amount . "')");
-}
-
-//if data inserted successfully
-if (@$data === true) {
-    echo '
-         <script type="text/javascript">
-          alert("Success!");
-         </script>';
-} else {
-    $message = 'All fields are required';
-}
+declare(strict_types=1);
 ?>
 
 

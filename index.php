@@ -16,31 +16,18 @@ if (!file_exists('system/installation_includes.php')) {
 }
 
 require_once 'header.php';
+$action = Filter::filterInput(INPUT_GET, 'action', FILTER_SANITIZE_STRING, 'home');
+
 ?>
 <div class="container-fluid" id="wrapper" xmlns="http://www.w3.org/1999/html">
     <?php
     require_once 'sidenav.php' ?>
     <div id="page-wrapper">
         <div id="page-inner">
-            <!--  Modals-->
-            <?php
-            require_once 'modals.php' ?>
-            <!-- End Modals-->
-            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">
-                <i class="fa fa-plus-circle fa-2x"></i> Enter Expenses
-            </button>
+            <div class="container-md py-3" id="page-container">
+                <?php include("$action.php");  ?>
+            </div>
 
-
-            <?php
-            $action =Filter::filterInput(INPUT_GET, 'action', FILTER_SANITIZE_STRING, false);
-            switch ($action) {
-                case 'expense_report':
-                    require_once 'expense_report.php';
-                    break;
-                default:
-                    break;
-            }
-            ?>
 
             <?php
             require_once 'footer.php';
