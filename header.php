@@ -64,8 +64,8 @@ $user->retrieveUserInfoFromFile();
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ms-auto">
+        <div class="collapse navbar-collapse pull-right" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto pull-right">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-fill"></i><span class="d-none d-lg-inline"> User</span>

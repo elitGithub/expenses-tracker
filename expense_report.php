@@ -2,8 +2,13 @@
 
 declare(strict_types = 1);
 
+use ExpenseTracker\ExpenseList;
+
 require_once 'header.php';
 require_once 'sidenav.php';
+
+$expensesList = new ExpenseList();
+$rows = $expensesList->getExpenses();
 ?>
 
 <div class="row">
@@ -23,17 +28,14 @@ require_once 'sidenav.php';
                         <th>Description</th>
                         <th>Date</th>
                         <th>Action</th>
-                        </tr>
                         </thead>
                         <tbody>
 
 
                         <?php
-                        $sql = mysqli_query($con, "SELECT *FROM expense_category_tbl i LEFT JOIN expense_tbl s ON i.expense_category_id= s.expense_category_id
-  WHERE (s.expense_category_id>0 )");
-                        while ($row = mysqli_fetch_array($sql))
-                        {
-                        ?>
+                        foreach ($rows
+
+                        as $row): ?>
                         <tr>
                             <td><?php
                                 echo $row['expense_category_name']; ?></td>
@@ -48,16 +50,8 @@ require_once 'sidenav.php';
                                 echo $row['expense_id'] ?>" data-toggle='modal'><span class='glyphicon glyphicon-trash'></span> Delete
                                 </button>
                             </td>
-
-
                             <?php
-                            } ?>
-
-                            <?php
-
-
-                            ob_flush();
-                            mysqli_close($con);
+                            endforeach;
                             ?>
                         </tbody>
                     </table>
