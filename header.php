@@ -30,9 +30,13 @@ $user->retrieveUserInfoFromFile();
     <meta name="application-name" content="Expenses Tracker <?php
     echo System::getVersion() ?>">
     <meta name="copyright" content="(c) 2024-<?php echo date('Y') ?>">
+    <!--  SCRIPT IMPORTS  -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- GOOGLE FONTS-->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
-    <script src="assets/js/jquery.metisMenu.js"></script>
+
+
     <!-- TABLE STYLES-->
     <link href="assets/js/dataTables/dataTables.bootstrap.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -46,12 +50,12 @@ $user->retrieveUserInfoFromFile();
     <link href="assets/css/bootstrap.css" rel="stylesheet"/>
     <link rel="stylesheet" href="./assets/css/custom.css">
 
+    <!-- SCRIPTS DEPENDING ON OTHER SCRIPTS-->
+    <script src="assets/js/jquery.metisMenu.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>Expenses Tracker <?php echo System::getVersion() ?></title>
 
-    <!--  SCRIPT IMPORTS  -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="assets/js/jquery-3.2.1.min.js"></script>
+
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="margin-bottom: 0; color: #FF0;">
