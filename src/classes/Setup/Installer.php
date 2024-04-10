@@ -45,16 +45,7 @@ class Installer extends Setup
         'db_type' => '',
         'log_sql' => true,
     ];
-    protected array         $tablesSettings    = [
-        'expense_category_table_name' => '',
-        'expenses_table_name'         => '',
-        'users_table_name'            => '',
-        'history_table_name'          => '',
-        'actions_table_name'          => '',
-        'roles_table_name'            => '',
-        'role_permissions_table_name' => '',
-        'user_to_role_table_name'     => '',
-    ];
+    protected array         $tablesSettings    = [];
     protected array         $redisConfig       = [];
     protected array         $memcachedConfig   = [];
     protected array         $permissionsConfig = [];
@@ -74,6 +65,9 @@ class Installer extends Setup
         parent::__construct();
         $this->system = $system;
         $this->logger = new InstallLog('install');
+        global $systemSettings;
+        require_once EXTR_ROOT_DIR . '/db_script/tableSettings.php';
+        $this->tablesSettings = $systemSettings['without_names'];
     }
 
     /**
