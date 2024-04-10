@@ -127,9 +127,13 @@ class CacheSystemManager
                 return;
 
             case 'default':
-                self::writeFile($key, $data, $expiration);
+                $key =  mb_substr($key, 0, 15);
+                $newData = [
+                    $key => 0,
+                    'token' => $data,
+                ];
+                self::writeFile($key, $newData, $expiration);
                 return;
-
             default:
                 throw new Exception('Unsupported backend specified.');
         }
@@ -142,19 +146,21 @@ class CacheSystemManager
      *
      * @return void
      */
-    private static function writeFile($key, $data, $expiration = null)
+    private static function writeFile($key, array $data, $expiration = null)
     {
         $fileName = EXTR_ROOT_DIR . '/system/data/' . $key .'.txt';
         if (is_int($expiration)) {
             $expiryFile =  EXTR_ROOT_DIR . '/system/data/' . 'expirations.php';
+
             $ttl = time() + $expiration;
-            $data[$fileName] = $ttl;
+            $data[$key] = $ttl;
             if (is_file($expiryFile)) {
                 $data = unserialize(file_get_contents($expiryFile));
-                $data[$fileName] = $ttl;
+                $data[$key] = $ttl;
             }
 
             file_put_contents($expiryFile, serialize($data), FILE_APPEND);
+            return;
         }
         file_put_contents($fileName, serialize($data));
     }
@@ -204,10 +210,12 @@ class CacheSystemManager
                 }
 
             case 'default':
-                if (mb_strlen($key) > 255) {
-                    $key =  mb_substr($key, 0, 250);
-                }
-                self::writeFile($key, $data, $expiration);
+                $key =  mb_substr($key, 0, 15);
+                $newData = [
+                    $key => 0,
+                    'token' => $data,
+                ];
+                self::writeFile($key, $newData, $expiration);
                 return true;
 
             default:
