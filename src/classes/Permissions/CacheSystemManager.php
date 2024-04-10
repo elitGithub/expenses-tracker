@@ -149,20 +149,22 @@ class CacheSystemManager
     private static function writeFile($key, array $data, $expiration = null)
     {
         $fileName = EXTR_ROOT_DIR . '/system/data/' . $key .'.txt';
+        file_put_contents($fileName, serialize($data));
         if (is_int($expiration)) {
             $expiryFile =  EXTR_ROOT_DIR . '/system/data/' . 'expirations.php';
 
             $ttl = time() + $expiration;
             $data[$key] = $ttl;
+            $data['expiryFileName'] = $fileName;
             if (is_file($expiryFile)) {
                 $data = unserialize(file_get_contents($expiryFile));
+                $data['expiryFileName'] = $fileName;
                 $data[$key] = $ttl;
             }
 
             file_put_contents($expiryFile, serialize($data), FILE_APPEND);
-            return;
         }
-        file_put_contents($fileName, serialize($data));
+
     }
 
 
