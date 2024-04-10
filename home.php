@@ -2,14 +2,23 @@
 
 declare(strict_types = 1);
 
-
+$timeframe = $_GET['timeframe'] ?? 'monthly'; // Default to monthly
 ?>
 
 <div class="container py-5">
+    <div class="mb-4">
+        <form action="" method="GET">
+            <select class="form-select" name="timeframe" onchange="this.form.submit()">
+                <option value="all time" <?php if ($timeframe === 'all time') echo 'selected'; ?>>All Time</option>
+                <option value="yearly" <?php if ($timeframe === 'yearly') echo 'selected'; ?>>Yearly</option>
+                <option value="quarterly" <?php if ($timeframe === 'quarterly') echo 'selected'; ?>>Quarterly</option>
+                <option value="monthly" <?php if ($timeframe === 'monthly') echo 'selected'; ?>>Monthly</option>
+            </select>
+        </form>
+    </div>
     <div class="row row-cols-1 row-cols-md-4 g-4 mb-5">
         <!-- Dynamic PHP Content for Cards will go here -->
         <?php
-        $timeframe = $_GET['timeframe'] ?? 'monthly'; // Default to monthly
         $data = [
             'all time'  => ['budget' => 5000, 'expenses' => 4500, 'categories' => 10, 'topCategory' => 'Food'],
             'yearly'    => ['budget' => 1000, 'expenses' => 800, 'categories' => 8, 'topCategory' => 'Utilities'],
