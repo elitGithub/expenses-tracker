@@ -148,7 +148,7 @@ $expenseCategoryList = new ExpenseCategoryList();
                 <div class="modal-header">
                     <h3 class="modal-title">Update Expense</h3>
                 </div>
-                <form action="update_expense.php" method="POST" enctype="multipart/form-data">
+                <form action="index.php?action=update_expense" method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
 
                         <!-- <center><h4>Are you sure you want to delete this expense?</h4></center> -->
