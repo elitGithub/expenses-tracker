@@ -40,4 +40,9 @@ class Expense
         return $this->adb->getLastInsertID();
     }
 
+    public function getById(int $expenseId)
+    {
+        $query = "SELECT * FROM `{$this->tables['expenses_table_name']}` WHERE `expense_id` = ?";
+    }
+
 }

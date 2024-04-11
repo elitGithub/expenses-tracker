@@ -11,13 +11,13 @@
             <li>
                 <a href="?action=expense_report" <?php
                 if (isset($_GET['action']) && $_GET['action'] === 'expense_report') echo 'class="active-menu"' ?>><i
-                        class='fa fa-keyboard-o fa-2x'></i> Expense</a>
+                        class='fa fa-keyboard-o fa-2x'></i> Expenses Report</a>
             </li>
             <li>
                 <a href="?action=expense_category" <?php
-                if (isset($_GET['action']) && $_GET['action'] === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x" aria-hidden="true"></i> Create Expense</a>
+                if (isset($_GET['action']) && $_GET['action'] === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x" aria-hidden="true"></i> Expenses By Category</a>
             </li>
-            <li><a href="?action=expense_report"><i class="fa fa-list fa-2x"></i>Expense Summary</a></li>
+            <li><a href="?action=user_management"><i class="fa fa-list fa-2x"></i>User Management</a></li>
         </ul>
     </div>
 </nav>
