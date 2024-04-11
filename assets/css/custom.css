@@ -276,6 +276,7 @@ body {
 	align-items: center;
 	text-decoration: none;
 	padding-block: 0.5rem;
+	column-gap: 0.3rem;
 }
 
 .sidebar-collapse > .nav > li {
