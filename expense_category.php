@@ -5,12 +5,13 @@ declare(strict_types = 1);
 use ExpenseTracker\ExpenseCategoryList;
 use Permissions\PermissionsManager;
 
-require_once 'modals.php';
-
 $expenseCategoryList = new ExpenseCategoryList();
 $catList = $expenseCategoryList->getAllCategories();
 ?>
-
+<!-- Trigger Button -->
+<button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+    <i class="fa fa-plus-circle fa-2x"></i> Add Category
+</button>
 
 <div class="row">
     <div class="col-md-12">
@@ -42,7 +43,9 @@ $catList = $expenseCategoryList->getAllCategories();
                                     echo $date = DATE_FORMAT(new DateTime($row['created_at']), 'd-M-Y') ?></td>
                                 <td>
                                     <?php if(PermissionsManager::isPermittedAction('edit_expense_category', $user)): ?>
-                                    <button type="button" class="btn btn-info btn-xs" data-bs-toggle="modal" data-bs-target="#modal_update<?php
+                                    <button type="button" class="btn btn-info btn-xs"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editCategoryModal-<?php
                                     echo $row['expense_category_id'] ?>">
                                         <span class='fa fa-pencil'></span> Edit
                                     </button>
@@ -66,3 +69,8 @@ $catList = $expenseCategoryList->getAllCategories();
         <!--End Advanced Tables -->
     </div>
 </div>
+
+
+<?php
+
+require_once 'modals.php';

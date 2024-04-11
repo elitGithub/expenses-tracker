@@ -8,13 +8,18 @@ use Permissions\PermissionsManager;
 $uniqueIdGenerator = new \Core\UniqueIdsGenerator();
 
 $addNewCatToken = $uniqueIdGenerator->generateTrueRandomString();
+$editCatToken =  $uniqueIdGenerator->generateTrueRandomString();
 $addNewExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
 $editExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
 $deleteExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
+
+
 $_SESSION['formToken']['add_new_category'] = password_hash($addNewCatToken, PASSWORD_DEFAULT);
+$_SESSION['formToken']['edit_category'] = password_hash($editCatToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['add_new_expense'] = password_hash($addNewExpenseToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['edit_expense'] = password_hash($editExpenseToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['delete_expense'] = password_hash($deleteExpenseToken, PASSWORD_DEFAULT);
+
 $expenseCategoryList = new ExpenseCategoryList();
 $expenseCategories = $expenseCategoryList->getAllCategories();
 ?>
@@ -22,13 +27,9 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
 
 <!--  Modals-->
 <div class="d-flex d-row justify-content-between">
+    <!-- MANAGE EXPENSE MODALS   -->
     <?php if (PermissionsManager::isPermittedAction('add_expense', $user) && count($expenseCategories) > 0): ?>
     <div class="panel panel-default" id="add_new_expense_modal">
-        <!-- Modal trigger button with Bootstrap 5 data attributes -->
-        <button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
-            <i class="fa fa-plus-circle fa-2x"></i> Enter Expenses
-        </button>
-
         <div class="panel-body">
             <!-- Modal -->
             <div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -80,48 +81,6 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                 </div>
                             </form>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-    <?php if (PermissionsManager::isPermittedAction('add_expense_category', $user)): ?>
-    <div class="panel panel-default" id="add_new_category_modal">
-        <!-- Trigger Button -->
-        <button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-            <i class="fa fa-plus-circle fa-2x"></i> Add Category
-        </button>
-
-        <!-- Modal Structure -->
-        <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="Add category modal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
-                        <h4 class="modal-title" id="addCategoryModalLabel">
-                            <i class="fa fa-plus-circle fa-1x"></i> Add Expense Category
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        <form action="index.php?action=add_expense_category" method="POST">
-                            <!-- Expense Category Name Input -->
-                            <div class="form-group">
-                                <label for="new_expense_category_name">Category Name:</label>
-                                <input type="text" class="form-control" name="new_expense_category_name" id="new_expense_category_name" placeholder="Enter Category Name" required>
-                            </div>
-
-                            <!-- Category Description Input -->
-                            <div class="form-group">
-                                <label for="new_expense_category_budget">Category Description:</label>
-                                <input type="number" class="form-control" name="new_expense_category_budget" id="new_expense_category_budget" placeholder="Enter Category Budget" required>
-                            </div>
-                            <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($addNewCatToken); ?>">
-                            <div class="modal-footer">
-                                <input type="submit" name="submit" value="Add" class="btn btn-primary">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -187,7 +146,6 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
             </div>
         </div>
     <?php endif; ?>
-
     <?php if (PermissionsManager::isPermittedAction('delete_expense', $user)): ?>
         <div class="panel panel-default" id="modal_delete_expense">
             <div class="modal fade" id="deleteExpenseModal-<?php echo $row['expense_id']; ?>" tabindex="-1" aria-labelledby="deleteExpenseModalLabel-<?php echo $row['expense_id']; ?>" aria-hidden="true">
@@ -215,41 +173,79 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
         </div>
 
     <?php endif; ?>
-    <div class="modal fade" id="modal_update<?php echo $row['expense_category_id'] ?>" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <!-- /MANAGE EXPENSE MODALS   -->
+
+    <!-- MANAGE CATEGORY MODALS   -->
+    <?php if (PermissionsManager::isPermittedAction('add_expense_category', $user)): ?>
+        <div class="panel panel-default" id="add_new_category_modal">
+            <!-- Modal Structure -->
+            <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="Add category modal" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                            <h4 class="modal-title" id="addCategoryModalLabel">
+                                <i class="fa fa-plus-circle fa-1x"></i> Add Expense Category
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="index.php?action=add_expense_category" method="POST">
+                                <div class="form-group">
+                                    <label for="new_expense_category_name">Category Name:</label>
+                                    <input type="text" class="form-control" name="new_expense_category_name" id="new_expense_category_name" placeholder="Enter Category Name" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="new_expense_category_budget">Category Budget:</label>
+                                    <input type="number" class="form-control" name="new_expense_category_budget" id="new_expense_category_budget" placeholder="Enter Category Budget" required>
+                                </div>
+                                <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($addNewCatToken); ?>">
+                                <div class="modal-footer">
+                                    <input type="submit" name="submit" value="Add" class="btn btn-primary">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+    <?php if (PermissionsManager::isPermittedAction('edit_expense_category', $user)): ?>
+    <div class="modal fade" id="editCategoryModal-<?php echo $row['expense_category_id'] ?>" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Update Expense</h3>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                    <h4 class="modal-title" id="addCategoryModalLabel">
+                        <i class="fa fa-plus-circle fa-1x"></i> Update Category
+                    </h4>
                 </div>
-                <form action="index.php?action=update_expense" method="POST" enctype="multipart/form-data">
-                    <div class="modal-body">
-                        <input type="hidden" id="getID" name="getID" value="<?php
-                        echo $row['expense_category_id'] ?>">
-
-                        <div class="row">
-                            <div class="form-group col-md-12">
-                                <label for="expense_name">Expense Name</label>
-                                <input type="text" name="expense_name" id="expense_name" class="form-control"
-                                       value="<?php
-                                       echo $row['expense_category_name'] ?>" required="">
-                            </div>
+                <div class="modal-body">
+                    <form action="index.php?action=update_expense_category" method="POST">
+                        <!-- Expense Category Name Input -->
+                        <div class="form-group">
+                            <label for="expense_category_name">Category Name:</label>
+                            <input type="text" class="form-control" name="expense_category_name" id="expense_category_name" value="<?php
+                            echo $row['expense_category_name'] ?>" required>
                         </div>
 
-                        <div class="row">
-                            <div class="form-group col-md-12">
-                                <label for="amount">Expense Amount</label>
-                                <input type="text" name="amount" id="amount" class="form-control" value="<?php
-                                echo $row['amount'] ?>" required="">
-                            </div>
+                        <!-- Category Description Input -->
+                        <div class="form-group">
+                            <label for="expense_category_budget">Category Budget:</label>
+                            <input type="number" class="form-control" name="expense_category_budget" id="expense_category_budget"value="<?php
+                            echo $row['amount'] ?>" required>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">No</button>
-                        <input type="submit" id="submit" name="submit" value="Yes" class="btn btn-danger"/>
-                    </div>
-                </form>
+                        <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($editCatToken); ?>">
+                        <div class="modal-footer">
+                            <input type="submit" name="submit" value="Edit" class="btn btn-primary">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+    <?php endif;?>
 </div>
 <!-- End Modals-->

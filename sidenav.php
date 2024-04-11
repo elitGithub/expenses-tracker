@@ -15,16 +15,16 @@ use Permissions\PermissionsManager;
             <li>
                 <a href='index.php' <?php
 
-                if (!isset($_GET['action'])) echo 'class="active-menu"' ?>><i class="fa fa-dashboard fa-2x"></i> Dashboard</a>
+                if (!isset($_GET['action']) || $action === 'home') echo 'class="active-menu"' ?>><i class="fa fa-dashboard fa-2x"></i> Dashboard</a>
             </li>
             <li>
                 <a href="?action=expense_report" <?php
-                if (isset($_GET['action']) && $_GET['action'] === 'expense_report') echo 'class="active-menu"' ?>><i
+                if ($action === 'expense_report') echo 'class="active-menu"' ?>><i
                         class='fa fa-keyboard-o fa-2x'></i> Expenses Report</a>
             </li>
             <li>
                 <a href="?action=expense_category" <?php
-                if (isset($_GET['action']) && $_GET['action'] === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x"
+                if (isset($_GET['action']) && $action === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x"
                                                                                                                        aria-hidden="true"></i>
                     Expenses By Category</a>
             </li>
@@ -32,7 +32,7 @@ use Permissions\PermissionsManager;
             if (PermissionsManager::isPermittedAction('view_user_management', $user)):
                 ?>
                 <li><a href="?action=user_management" <?php
-                    if (isset($_GET['action']) && $_GET['action'] === 'user_management') echo 'class="active-menu"' ?>><i
+                    if ($action === 'user_management') echo 'class="active-menu"' ?>><i
                             class="fa fa-list fa-2x"></i>User
                         Management</a></li>
             <?php

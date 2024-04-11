@@ -17,7 +17,9 @@ if (!file_exists('system/installation_includes.php')) {
 
 require_once 'header.php';
 $action = Filter::filterInput(INPUT_GET, 'action', FILTER_SANITIZE_SPECIAL_CHARS, 'home');
-
+if (!is_file("$action.php")) {
+    $action = 'home';
+}
 ?>
 <div class="container-fluid" id="wrapper" xmlns="http://www.w3.org/1999/html">
     <?php
@@ -40,7 +42,8 @@ $action = Filter::filterInput(INPUT_GET, 'action', FILTER_SANITIZE_SPECIAL_CHARS
                     unset($_SESSION['success']);
                 }
                 ?>
-                <?php include("$action.php");  ?>
+                <?php
+                include("$action.php");?>
             </div>
 
 

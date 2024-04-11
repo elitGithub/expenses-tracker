@@ -5,14 +5,14 @@ declare(strict_types = 1);
 use ExpenseTracker\ExpenseList;
 use Permissions\PermissionsManager;
 
-require_once 'header.php';
-require_once 'sidenav.php';
-
-
 $expensesList = new ExpenseList();
 $rows = $expensesList->getExpenses();
-?>
 
+?>
+<!-- Modal trigger button with Bootstrap 5 data attributes -->
+<button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+    <i class="fa fa-plus-circle fa-2x"></i> Enter Expenses
+</button>
 <div class="row">
     <div class="col-md-12">
         <!-- Advanced Tables -->
@@ -80,6 +80,7 @@ $rows = $expensesList->getExpenses();
         <!--End Advanced Tables -->
     </div>
 </div>
-<?php
-require_once 'modals.php'; ?>
 
+<?php
+
+require_once 'modals.php';
