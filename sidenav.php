@@ -6,7 +6,7 @@
             </li>
             <li>
                 <a href='index.php' <?php
-                if (!isset($_GET['action'])) echo 'class="active-menu"' ?>><i class="fa fa-dashboard fa-3x"></i> Dashboard</a>
+                if (!isset($_GET['action'])) echo 'class="active-menu"' ?>><i class="fa fa-dashboard fa-2x"></i> Dashboard</a>
             </li>
             <li>
                 <a href="?action=expense_report" <?php

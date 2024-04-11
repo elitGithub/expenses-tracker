@@ -11,9 +11,14 @@
 /*==============================================
     GENERAL  STYLES
     =============================================*/
+body {
+	overflow-x: clip;
+}
+
 #wrapper {
 	width: 100%;
 	background: #202020;
+	padding: 0;
 }
 
 #page-wrapper {
@@ -252,16 +257,25 @@
 
 .sidebar-collapse .nav {
 	padding: 0;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+}
+
+.sidebar-collapse .nav > li > a > i {
+	width: 3rem;
+	display: flex;
+	justify-content: center;
 }
 
 .sidebar-collapse .nav > li > a {
 	color: #fff;
 	background: #202020;
 	text-shadow: none;
-}
-
-.sidebar-collapse > .nav > li > a {
-	padding: 15px 10px;
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+	padding-block: 0.5rem;
 }
 
 .sidebar-collapse > .nav > li {
@@ -345,10 +359,6 @@
 	background-color: #fff;
 }
 
-.nav > li > a > i {
-	margin-right: 10px;
-}
-
 .stepIndicator {
 	--bs-alert-color: var(--bs-success-text-emphasis);
 	--bs-alert-bg: var(--bs-success-bg-subtle);
@@ -364,18 +374,18 @@
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 0.5em;
-    background-color: rgba(var(--bs-secondary-rgb), .3);
+	background-color: rgba(var(--bs-secondary-rgb), 0.3);
 }
 
 .stepIndicator.active {
 	background-color: var(--bs-info-bg-subtle);
 	border: 1px solid var(--bs-info-border-subtle);
 
-    &::after {
-        content: '\2022';
-        color: var(--bs-info-text-emphasis);
-        font-size: 1.5rem;
-    }
+	&::after {
+		content: '\2022';
+		color: var(--bs-info-text-emphasis);
+		font-size: 1.5rem;
+	}
 }
 
 .stepIndicator.done {
