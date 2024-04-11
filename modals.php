@@ -99,7 +99,7 @@ $expenseCategoryList = new ExpenseCategoryList();
                         </h4>
                     </div>
                     <div class="modal-body">
-                        <form action="index.php" method="POST">
+                        <form action="index.php?=action=add_expense_category" method="POST">
                             <!-- Expense Category Name Input -->
                             <div class="form-group">
                                 <label for="new_expense_category_name">Category Name:</label>

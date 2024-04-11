@@ -7,7 +7,7 @@ use database\PearDatabase;
 use Session\JWTHelper;
 
 if (!defined('DEBUG')) {
-    define('DEBUG', false);
+    define('DEBUG', true);
 }
 
 if (DEBUG) {
