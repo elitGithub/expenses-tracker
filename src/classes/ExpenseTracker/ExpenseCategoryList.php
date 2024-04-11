@@ -32,14 +32,15 @@ class ExpenseCategoryList
      *
      * @return array
      */
-    public function getAllCategories(bool $returnAsHtml = false): array
+    public function getAllCategories(bool $returnAsHtml = false, $selected = null): array
     {
         $list = [];
         $options = [];
         $result = $this->adb->query("SELECT * FROM `{$this->tables['expense_category_table_name']}`");
         while ($row = $this->adb->fetchByAssoc($result)) {
+            $selected = ((int)$row['expense_category_id'] === (int)$selected) ? 'selected' : '';
             $list[] = $row;
-            $options[] = "<option value='{$row['expense_category_id']}'>{$row['expense_category_name']}</option>";
+            $options[] = "<option $selected value='{$row['expense_category_id']}'>{$row['expense_category_name']}</option>";
         }
 
         return $returnAsHtml ? $options : $list;

@@ -6,6 +6,9 @@ namespace ExpenseTracker;
 
 use database\PearDatabase;
 
+/**
+ *
+ */
 class ExpenseCategory
 {
 

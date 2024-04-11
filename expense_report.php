@@ -7,7 +7,7 @@ use Permissions\PermissionsManager;
 
 require_once 'header.php';
 require_once 'sidenav.php';
-require_once 'modals.php';
+
 
 $expensesList = new ExpenseList();
 $rows = $expensesList->getExpenses();
@@ -46,16 +46,27 @@ $rows = $expensesList->getExpenses();
                                 <td><?php
                                     echo $row['expense_date']; ?></td>
                                 <td>
-                                    <?php if (PermissionsManager::isPermittedAction('edit_expense', $user)): ?>
-                                    <button type="button" class="btn btn-info btn-xs" data-bs-toggle="modal_edit_expense"><span
-                                            class='fa fa-pencil'></span> Edit
-                                    </button>
-                                    <?php endif;?>
-                                    <?php if (PermissionsManager::isPermittedAction('delete_expense', $user)): ?>
-                                    <button type="button" class="btn btn-danger btn-xs" data-bs-toggle="modal_delete"><span
-                                            class='fa fa-trash'></span> Delete
-                                    </button>
-                                    <?php endif;?>
+                                    <?php
+                                    if (PermissionsManager::isPermittedAction('edit_expense', $user)): ?>
+                                        <button type="button" class="btn btn-info btn-xs"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editExpenseModal-<?php
+                                                echo $row['expense_id']; ?>">
+                                            <span class='fa fa-pencil'></span> Edit
+                                        </button>
+
+                                    <?php
+                                    endif; ?>
+                                    <?php
+                                    if (PermissionsManager::isPermittedAction('delete_expense', $user)): ?>
+                                        <button type="button" class="btn btn-danger btn-xs"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteExpenseModal-<?php
+                                                echo $row['expense_id']; ?>"><span
+                                                class='fa fa-trash'></span> Delete
+                                        </button>
+                                    <?php
+                                    endif; ?>
                                 </td>
                             </tr>
                         <?php
@@ -64,9 +75,11 @@ $rows = $expensesList->getExpenses();
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
         <!--End Advanced Tables -->
     </div>
 </div>
+<?php
+require_once 'modals.php'; ?>
+
