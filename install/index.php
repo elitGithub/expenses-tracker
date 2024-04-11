@@ -20,13 +20,16 @@ if (version_compare(PHP_VERSION, '7.4.0') < 0) {
 set_time_limit(0);
 
 if (!defined('DEBUG')) {
-    define('DEBUG', true);
+    define('DEBUG', false);
 }
 
 if (DEBUG) {
     ini_set('display_errors', '1');
     ini_set('display_startup_errors', '1');
     error_reporting(E_ALL);
+} else {
+    error_reporting(0);
+    ini_set('display_errors', '0');
 }
 
 $system = new System();
