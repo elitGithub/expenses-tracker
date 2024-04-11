@@ -8,7 +8,8 @@ $timeframe = $_GET['timeframe'] ?? 'monthly'; // Default to monthly
 <div class="container py-5">
     <div class="mb-4">
         <form action="" method="GET">
-            <select class="form-select" name="timeframe" onchange="this.form.submit()">
+            <label for="timeframe">Select time to display</label>
+            <select class="form-select" id="timeframe" name="timeframe" onchange="this.form.submit()">
                 <option value="all time" <?php if ($timeframe === 'all time') echo 'selected'; ?>>All Time</option>
                 <option value="yearly" <?php if ($timeframe === 'yearly') echo 'selected'; ?>>Yearly</option>
                 <option value="quarterly" <?php if ($timeframe === 'quarterly') echo 'selected'; ?>>Quarterly</option>

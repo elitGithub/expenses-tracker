@@ -47,7 +47,6 @@ $user->retrieveUserInfoFromFile();
     <link rel="shortcut icon" href="./assets/img/favicon_1.ico">
 
     <!-- BOOTSTRAP STYLES-->
-    <link href="assets/css/bootstrap.css" rel="stylesheet"/>
     <link rel="stylesheet" href="./assets/css/custom.css">
 
     <!-- SCRIPTS DEPENDING ON OTHER SCRIPTS-->

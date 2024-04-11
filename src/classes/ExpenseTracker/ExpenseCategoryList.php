@@ -39,7 +39,7 @@ class ExpenseCategoryList
         $result = $this->adb->query("SELECT * FROM `{$this->tables['expense_category_table_name']}`");
         while ($row = $this->adb->fetchByAssoc($result)) {
             $list[] = $row;
-            $options[] = "<option value='{$row['expense_category_id']}'{$row['expense_category_name']}</option>";
+            $options[] = "<option value='{$row['expense_category_id']}'>{$row['expense_category_name']}</option>";
         }
 
         return $returnAsHtml ? $options : $list;

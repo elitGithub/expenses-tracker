@@ -25,6 +25,21 @@ $action = Filter::filterInput(INPUT_GET, 'action', FILTER_SANITIZE_SPECIAL_CHARS
     <div id="page-wrapper">
         <div id="page-inner">
             <div class="container-md py-3" id="page-container">
+                <?php
+                if(isset($_SESSION['errors'])) {
+                    foreach ($_SESSION['errors'] as $error) {
+                        echo '<p class="alert alert-danger">' . $error . '</p>';
+                    }
+                    unset($_SESSION['errors']);
+                }
+
+                if(isset($_SESSION['success'])) {
+                    foreach ($_SESSION['success'] as $success) {
+                        echo '<p class="alert alert-success">' . $success . '</p>';
+                    }
+                    unset($_SESSION['success']);
+                }
+                ?>
                 <?php include("$action.php");  ?>
             </div>
 
