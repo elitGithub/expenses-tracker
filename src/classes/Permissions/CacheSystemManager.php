@@ -22,55 +22,6 @@ class CacheSystemManager
     protected const CACHE_WRITE_PREFIX  = 'expense_tracker_permissions_data';
     protected const PERMISSION_HASH_KEY = '_permissions';
 
-    /**
-     * Array with user rights.
-     *
-     * @var array<array>
-     */
-    protected static array $actions = [
-        [
-            'name'        => 'add_user',
-            'description' => 'Right to add user accounts',
-        ],
-        [
-            'name'        => 'edit_user',
-            'description' => 'Right to edit user accounts',
-        ],
-        [
-            'name'        => 'delete_user',
-            'description' => 'Right to delete user accounts',
-        ],
-        [
-            'name'        => 'viewlog',
-            'description' => 'Right to view logfiles',
-        ],
-        [
-            'name'        => 'adminlog',
-            'description' => 'Right to view admin log',
-        ],
-        [
-            'name'        => 'passwd',
-            'description' => 'Right to change passwords',
-        ],
-        [
-            'name'        => 'editconfig',
-            'description' => 'Right to edit configuration',
-        ],
-        [
-            'name'        => 'viewadminlink',
-            'description' => 'Right to see the link to the admin section',
-        ],
-        [
-            'name'        => 'reports',
-            'description' => 'Right to generate reports',
-        ],
-        [
-            'name'        => 'export',
-            'description' => 'Right to export',
-        ],
-    ];
-
-
     protected static array $baseRoles = [
         'administrator',
         'manager',
@@ -322,8 +273,10 @@ class CacheSystemManager
      */
     public static function populateActionsTable(PearDatabase $adb, $tableName)
     {
+        global $actions;
+        require_once EXTR_ROOT_DIR . '/db_script/basePermissions.php';
         $key = 1;
-        foreach (static::$actions as $mainRight) {
+        foreach ($actions as $mainRight) {
             $adb->pquery("INSERT INTO `$tableName` (`action_label`, `action_key`, `action`) VALUES (?, ?, ?);",
                          [$mainRight['description'], $key, $mainRight['name']]);
             ++$key;
@@ -354,13 +307,15 @@ class CacheSystemManager
      */
     public static function createRolePermissions(PearDatabase $adb, string $rolesTable, string $actionsTable, string $rolePermissionsTable)
     {
+        global $actions;
+        require_once EXTR_ROOT_DIR . '/db_script/basePermissions.php';
         $getRoleIdQuery = "SELECT `role_id` FROM `$rolesTable` WHERE `role_name` = ?";
         $getActionIdQuery = "SELECT `action_id` FROM `$actionsTable` WHERE `action` = ?";
         $insertQuery = "INSERT INTO `$rolePermissionsTable` (`role_id`, `action_id`, `is_enabled`) VALUES (?, ?, ?)";
         foreach (static::$baseRoles as $role) {
             $getRoleIsResult = $adb->pquery($getRoleIdQuery, [$role]);
             $roleId = $adb->query_result($getRoleIsResult, 0, 'role_id');
-            foreach (self::$actions as $action) {
+            foreach ($actions as $action) {
                 $getActionIdResult = $adb->pquery($getActionIdQuery, [$action['name']]);
                 $actionId = $adb->query_result($getActionIdResult, 0, 'action_id');
                 $isEnabled = (int) ((int) $roleId !== 4);

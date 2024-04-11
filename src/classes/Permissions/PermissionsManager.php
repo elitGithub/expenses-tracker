@@ -4,11 +4,15 @@ declare(strict_types = 1);
 
 namespace Permissions;
 
+use database\PearDatabase;
+use User;
+
 /**
  * Permission manager
  */
 class PermissionsManager
 {
+    private static array $permissions = [];
     private static array $_userPrivileges = [];
     protected static array $hierarchyTree = [
         'administrator' => ['manager', 'supervisor', 'user'],
@@ -58,13 +62,37 @@ class PermissionsManager
 
     /**
      * @param                     $action
-     * @param  \Permissions\User  $user
+     * @param  \User              $user
      *
-     * @return void
+     * @return false|mixed
+     * @throws \RedisException
      */
     public static function isPermittedAction($action, User $user)
     {
+        if (!is_int($action)) {
+            $action = self::getActionId($action);
+        }
+        $permissions = self::getUserPrivileges($user->id);
 
+        return $permissions['permissions'][$action] ?? false;
+    }
+
+    /**
+     * @param $actionName
+     *
+     * @return array|mixed|string|string[]|null
+     * @throws \Exception
+     */
+    private static function getActionId($actionName)
+    {
+        $adb = PearDatabase::getInstance();
+        $tables = $adb->getTablesConfig();
+        if (isset(self::$permissions[$actionName])) {
+            return self::$permissions[$actionName];
+        }
+        $query = "SELECT `action_id` FROM `{$tables['actions_table_name']}` WHERE `action` = '{$actionName}'";
+        $result = $adb->pquery($query, [$actionName]);
+        return $adb->query_result($result, 0, 'action_id');
     }
 
 }
