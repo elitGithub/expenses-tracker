@@ -1,6 +1,6 @@
 <nav class="navbar-default navbar-side" role="navigation">
     <div class="sidebar-collapse">
-        <ul class="nav" id="main-menu">
+        <ul class="nav metismenu" id="main-menu">
             <li class="text-center">
                 <img src="assets/img/find_user.png" class="user-image img-responsive" alt=""/>
             </li>
@@ -17,7 +17,8 @@
                 <a href="?action=expense_category" <?php
                 if (isset($_GET['action']) && $_GET['action'] === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x" aria-hidden="true"></i> Expenses By Category</a>
             </li>
-            <li><a href="?action=user_management"><i class="fa fa-list fa-2x"></i>User Management</a></li>
+            <li><a href="?action=user_management" <?php
+                if (isset($_GET['action']) && $_GET['action'] === 'user_management') echo 'class="active-menu"' ?>><i class="fa fa-list fa-2x"></i>User Management</a></li>
         </ul>
     </div>
 </nav>
