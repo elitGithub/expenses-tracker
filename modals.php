@@ -99,7 +99,7 @@ $expenseCategoryList = new ExpenseCategoryList();
                         </h4>
                     </div>
                     <div class="modal-body">
-                        <form action="index.php?=action=add_expense_category" method="POST">
+                        <form action="index.php?action=add_expense_category" method="POST">
                             <!-- Expense Category Name Input -->
                             <div class="form-group">
                                 <label for="new_expense_category_name">Category Name:</label>
@@ -108,8 +108,8 @@ $expenseCategoryList = new ExpenseCategoryList();
 
                             <!-- Category Description Input -->
                             <div class="form-group">
-                                <label for="new_expense_category_description">Category Description:</label>
-                                <input type="text" class="form-control" name="new_expense_category_description" id="new_expense_category_description" placeholder="Enter Category Description" required>
+                                <label for="new_expense_category_budget">Category Description:</label>
+                                <input type="number" class="form-control" name="new_expense_category_budget" id="new_expense_category_budget" placeholder="Enter Category Budget" required>
                             </div>
                             <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($addNewCatToken); ?>">
                             <div class="modal-footer">
@@ -150,15 +150,12 @@ $expenseCategoryList = new ExpenseCategoryList();
                 </div>
                 <form action="index.php?action=update_expense" method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
-
-                        <!-- <center><h4>Are you sure you want to delete this expense?</h4></center> -->
-                        <!-- hidden fields -->
                         <input type="hidden" id="getID" name="getID" value="<?php
                         echo $row['expense_category_id'] ?>">
 
                         <div class="row">
                             <div class="form-group col-md-12">
-                                <label>Expense Name</label>
+                                <label for="expense_name">Expense Name</label>
                                 <input type="text" name="expense_name" id="expense_name" class="form-control"
                                        value="<?php
                                        echo $row['expense_category_name'] ?>" required="">
@@ -167,21 +164,16 @@ $expenseCategoryList = new ExpenseCategoryList();
 
                         <div class="row">
                             <div class="form-group col-md-12">
-                                <label>Expense Amount</label>
+                                <label for="amount">Expense Amount</label>
                                 <input type="text" name="amount" id="amount" class="form-control" value="<?php
                                 echo $row['amount'] ?>" required="">
                             </div>
                         </div>
                     </div>
-
-                    <!-- <div class="row" >
-                   <div class="form-group">  -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" data-dismiss="modal">No</button>
                         <input type="submit" id="submit" name="submit" value="Yes" class="btn btn-danger"/>
                     </div>
-                    <!-- </div>
-                   </div> -->
                 </form>
             </div>
         </div>
