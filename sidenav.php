@@ -1,3 +1,11 @@
+<?php
+
+declare(strict_types = 1);
+
+use Permissions\PermissionsManager;
+
+?>
+
 <nav class="navbar-default navbar-side" role="navigation">
     <div class="sidebar-collapse">
         <ul class="nav metismenu" id="main-menu">
@@ -6,6 +14,7 @@
             </li>
             <li>
                 <a href='index.php' <?php
+
                 if (!isset($_GET['action'])) echo 'class="active-menu"' ?>><i class="fa fa-dashboard fa-2x"></i> Dashboard</a>
             </li>
             <li>
@@ -15,10 +24,19 @@
             </li>
             <li>
                 <a href="?action=expense_category" <?php
-                if (isset($_GET['action']) && $_GET['action'] === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x" aria-hidden="true"></i> Expenses By Category</a>
+                if (isset($_GET['action']) && $_GET['action'] === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x"
+                                                                                                                       aria-hidden="true"></i>
+                    Expenses By Category</a>
             </li>
-            <li><a href="?action=user_management" <?php
-                if (isset($_GET['action']) && $_GET['action'] === 'user_management') echo 'class="active-menu"' ?>><i class="fa fa-list fa-2x"></i>User Management</a></li>
+            <?php
+            if (PermissionsManager::isPermittedAction('view_user_management', $user)):
+                ?>
+                <li><a href="?action=user_management" <?php
+                    if (isset($_GET['action']) && $_GET['action'] === 'user_management') echo 'class="active-menu"' ?>><i
+                            class="fa fa-list fa-2x"></i>User
+                        Management</a></li>
+            <?php
+            endif; ?>
         </ul>
     </div>
 </nav>

@@ -12,12 +12,40 @@ return $actions = [
         'description' => 'Right to add a new Expense',
     ],
     [
+        'name'        => 'delete_expense',
+        'description' => 'Right to add a delete Expense',
+    ],
+    [
+        'name'        => 'delete_expense_category',
+        'description' => 'Right to add a delete Expense Categories',
+    ],
+    [
         'name'        => 'add_expense_category',
         'description' => 'Right to add a new Expense Category',
     ],
     [
+        'name'        => 'view_user_management',
+        'description' => 'Right to view and manage users',
+    ],
+    [
         'name'        => 'edit_user',
         'description' => 'Right to edit user accounts',
+    ],
+    [
+        'name'        => 'edit_expense',
+        'description' => 'Right to edit expenses',
+    ],
+    [
+        'name'        => 'delete_expense',
+        'description' => 'Right to delete expenses',
+    ],
+    [
+        'name'        => 'delete_expense_category',
+        'description' => 'Right to delete categories',
+    ],
+    [
+        'name'        => 'edit_expense_category',
+        'description' => 'Right to edit expense category',
     ],
     [
         'name'        => 'delete_user',

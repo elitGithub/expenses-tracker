@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && $_POST['
 
     $_SESSION['errors'][] = 'Could not create a new expense.';
     header('Location: ' . $_SERVER['HTTP_REFERER']);
+    return;
 }
 
 $_SESSION['errors'][] = 'Wrong request format.';

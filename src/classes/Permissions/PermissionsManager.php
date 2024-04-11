@@ -26,7 +26,7 @@ class PermissionsManager
      * @param $userId
      *
      * @return array
-     * @throws \RedisException
+     * @throws \Throwable
      */
     public static function getUserPrivileges($userId): array
     {
@@ -65,12 +65,21 @@ class PermissionsManager
      * @param  \User              $user
      *
      * @return false|mixed
-     * @throws \RedisException
+     * @throws \Throwable
      */
     public static function isPermittedAction($action, User $user)
     {
         if (!is_int($action)) {
-            $action = self::getActionId($action);
+            try {
+                $action = self::getActionId($action);
+            } catch (\Throwable $exception) {
+                return false;
+            }
+
+        }
+
+        if ($action === false) {
+            return false;
         }
         $permissions = self::getUserPrivileges($user->id);
 
@@ -90,8 +99,11 @@ class PermissionsManager
         if (isset(self::$permissions[$actionName])) {
             return self::$permissions[$actionName];
         }
-        $query = "SELECT `action_id` FROM `{$tables['actions_table_name']}` WHERE `action` = '{$actionName}'";
-        $result = $adb->pquery($query, [$actionName]);
+        $query = "SELECT `action_id` FROM `{$tables['actions_table_name']}` WHERE `action` = ?";
+        $result = $adb->pquery($query, [$actionName], true);
+        if (!$adb->num_rows($result)) {
+            return false;
+        }
         return $adb->query_result($result, 0, 'action_id');
     }
 

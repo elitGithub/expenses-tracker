@@ -3,6 +3,8 @@
 declare(strict_types = 1);
 
 use ExpenseTracker\ExpenseCategoryList;
+use Permissions\PermissionsManager;
+
 $uniqueIdGenerator = new \Core\UniqueIdsGenerator();
 
 $addNewCatToken = $uniqueIdGenerator->generateTrueRandomString();
@@ -12,12 +14,13 @@ $_SESSION['formToken']['add_new_category'] = password_hash($addNewCatToken, PASS
 $_SESSION['formToken']['add_new_expense'] = password_hash($addNewExpenseToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['delete_expense'] = password_hash($deleteExpenseToken, PASSWORD_DEFAULT);
 $expenseCategoryList = new ExpenseCategoryList();
-
+$expenseCategories = $expenseCategoryList->getAllCategories();
 ?>
 
 
 <!--  Modals-->
 <div class="d-flex d-row justify-content-between">
+    <?php if (PermissionsManager::isPermittedAction('add_expense', $user) && count($expenseCategories) > 0): ?>
     <div class="panel panel-default" id="add_new_expense_modal">
         <!-- Modal trigger button with Bootstrap 5 data attributes -->
         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
@@ -82,6 +85,8 @@ $expenseCategoryList = new ExpenseCategoryList();
             </div>
         </div>
     </div>
+    <?php endif; ?>
+    <?php if (PermissionsManager::isPermittedAction('add_expense_category', $user)): ?>
     <div class="panel panel-default" id="add_new_category_modal">
         <!-- Trigger Button -->
         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
@@ -122,7 +127,7 @@ $expenseCategoryList = new ExpenseCategoryList();
             </div>
         </div>
     </div>
-
+    <?php endif; ?>
 
 
     <div class="modal fade d-none" id="modal_delete<?php echo $row['expense_id'] ?>" aria-hidden="true">

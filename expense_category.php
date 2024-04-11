@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use ExpenseTracker\ExpenseCategoryList;
+use Permissions\PermissionsManager;
 
 require_once 'modals.php';
 
@@ -40,10 +41,17 @@ $catList = $expenseCategoryList->getAllCategories();
                                 <td><?php
                                     echo $date = DATE_FORMAT(new DateTime($row['created_at']), 'd-M-Y') ?></td>
                                 <td>
+                                    <?php if(PermissionsManager::isPermittedAction('edit_expense_category', $user)): ?>
                                     <button type="button" class="btn btn-info btn-xs" data-bs-toggle="modal" data-bs-target="#modal_update<?php
                                     echo $row['expense_category_id'] ?>">
                                         <span class='fa fa-pencil'></span> Edit
                                     </button>
+                                    <?php endif; ?>
+                                    <?php if (PermissionsManager::isPermittedAction('delete_expense_category', $user)): ?>
+                                        <button type="button" class="btn btn-danger btn-xs" data-bs-toggle="modal_delete_category"><span
+                                                class='fa fa-trash'></span> Delete
+                                        </button>
+                                    <?php endif;?>
                                 </td>
                             </tr>
                         <?php

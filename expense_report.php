@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use ExpenseTracker\ExpenseList;
+use Permissions\PermissionsManager;
 
 require_once 'header.php';
 require_once 'sidenav.php';
@@ -45,9 +46,16 @@ $rows = $expensesList->getExpenses();
                                 <td><?php
                                     echo $row['expense_date']; ?></td>
                                 <td>
+                                    <?php if (PermissionsManager::isPermittedAction('edit_expense', $user)): ?>
+                                    <button type="button" class="btn btn-info btn-xs" data-bs-toggle="modal_edit_expense"><span
+                                            class='fa fa-pencil'></span> Edit
+                                    </button>
+                                    <?php endif;?>
+                                    <?php if (PermissionsManager::isPermittedAction('delete_expense', $user)): ?>
                                     <button type="button" class="btn btn-danger btn-xs" data-bs-toggle="modal_delete"><span
                                             class='fa fa-trash'></span> Delete
                                     </button>
+                                    <?php endif;?>
                                 </td>
                             </tr>
                         <?php

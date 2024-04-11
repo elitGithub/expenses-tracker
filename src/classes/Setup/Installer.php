@@ -339,9 +339,9 @@ class Installer extends Setup
      */
     public function installPermissions(): void
     {
-        CacheSystemManager::populateActionsTable($this->adb, $this->dbConfig['tables']['actions_table_name']);
-        CacheSystemManager::populateRolesTable($this->adb, $this->dbConfig['tables']['roles_table_name']);
-        CacheSystemManager::createRolePermissions($this->adb, $this->dbConfig['tables']['roles_table_name'],
+        PermissionsSeed::populateActionsTable($this->adb, $this->dbConfig['tables']['actions_table_name']);
+        PermissionsSeed::populateRolesTable($this->adb, $this->dbConfig['tables']['roles_table_name']);
+        PermissionsSeed::createRolePermissions($this->adb, $this->dbConfig['tables']['roles_table_name'],
                                                   $this->dbConfig['tables']['actions_table_name'],
                                                   $this->dbConfig['tables']['role_permissions_table_name']);
         CacheSystemManager::createPermissionsFile($this->adb, $this->dbConfig['tables']['role_permissions_table_name']);
