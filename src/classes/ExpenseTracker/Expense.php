@@ -80,7 +80,7 @@ class Expense
     /**
      * @return bool|int
      */
-    public function save()
+    public function update()
     {
         $query = "UPDATE `{$this->tables['expenses_table_name']}` SET
                    `expense_category_id` = ?, `expense_description` = ?, `expense_date` = ?, `amount_spent` = ? WHERE `expense_id` = ?;";

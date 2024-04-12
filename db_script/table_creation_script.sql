@@ -12,10 +12,12 @@ SET time_zone = "+00:00";
 
 CREATE TABLE IF NOT EXISTS `%sexpense_category`
 (
-    `expense_category_id`   INT UNSIGNED   NOT NULL AUTO_INCREMENT,
-    `expense_category_name` VARCHAR(200)   NOT NULL,
-    `amount`                DECIMAL(10, 2) NOT NULL DEFAULT '0.00',
-    `created_at`            DATE           NOT NULL,
+    `expense_category_id`   INT UNSIGNED        NOT NULL AUTO_INCREMENT,
+    `expense_category_name` VARCHAR(200)        NOT NULL,
+    `amount`                DECIMAL(10, 2)      NOT NULL DEFAULT '0.00',
+    `created_at`            DATE                NOT NULL,
+    `is_default`            TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
+    `deleted`               TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
     PRIMARY KEY (`expense_category_id`),
     UNIQUE KEY `expense_category_name_UNIQUE` (`expense_category_name`)
 ) ENGINE = InnoDB

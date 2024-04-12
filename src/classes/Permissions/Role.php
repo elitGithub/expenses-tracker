@@ -47,9 +47,10 @@ class Role
         }
         $adb = PearDatabase::getInstance();
         $tables = $adb->getTablesConfig();
-        $query = "SELECT 'role_id'
+        $query = "SELECT `role_id`
                   FROM `{$tables['user_to_role_table_name']}`
                   WHERE `{$tables['user_to_role_table_name']}`.`user_id` = ?";
+
         $result = $adb->preparedQuery($query, [$userId]);
 
         $roleId = $adb->query_result($result, 0, 'role_id');

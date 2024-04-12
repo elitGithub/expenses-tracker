@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && password_verify($_POST['formToken']
     $expense->amount_spent = $amount;
     $expense->expense_category_id = $categoryId;
     $expense->expense_date = $date;
-    $result = $expense->save();
+    $result = $expense->update();
 
     if ($result > 0) {
         $_SESSION['success'][] = 'Successfully updated an expense with ID ' . $expenseId;

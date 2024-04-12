@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use database\PearDatabase;
+use Permissions\CacheSystemManager;
 use Permissions\PermissionsManager;
 use Permissions\Role;
 use Session\SessionWrapper;
@@ -118,6 +119,8 @@ class User
         foreach ($row as $key => $userInfo) {
             $this->$key = $userInfo;
         }
+        $this->roleid = Role::getRoleByUserId($this->id);
+        CacheSystemManager::refreshUserInCache($this);
         $this->retrieveUserInfoFromFile();
 
         $this->session->sessionAddKey('authenticated_user_language', $default_language);

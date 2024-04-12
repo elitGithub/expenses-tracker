@@ -8,6 +8,7 @@ use database\PearDatabase;
 use Exception;
 use Memcached;
 use Redis;
+use User;
 
 global $permissionsConfig, $redisConfig, $memcachedConfig;
 require_once 'system/user/permissions.php';
@@ -255,6 +256,19 @@ class CacheSystemManager
         global $permissionsConfig;
 
         return self::hashRead(self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . '_' . $userId, (string) $userId);
+    }
+
+    /**
+     * @param  \User  $user
+     *
+     * @return void
+     * @throws \Throwable
+     */
+    public static function refreshUserInCache(User $user)
+    {
+        self::writeUser($user->id, ['userName' =>  $user->user_name, 'name' => $user->first_name . ' ' . $user->last_name, 'active' => $user->active, 'role' => $user->roleid]);
+        $adb = PearDatabase::getInstance();
+        self::createPermissionsFile($adb, $adb->getTablesConfig()['role_permissions_table_name']);
     }
 
     /**

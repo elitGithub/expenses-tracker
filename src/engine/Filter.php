@@ -20,14 +20,18 @@ class Filter
      */
     public static function filterInput(int $type, string $variableName, int $filter, $default = null)
     {
-        $return = filter_input($type, $variableName, $filter);
+        $options = 0;
+        if ($filter === FILTER_SANITIZE_NUMBER_FLOAT) {
+            $options = [FILTER_FLAG_ALLOW_FRACTION, FILTER_FLAG_ALLOW_THOUSAND];
+        }
+        $return = filter_input($type, $variableName, $filter, $options);
 
         if ($filter === FILTER_SANITIZE_SPECIAL_CHARS) {
             $return = filter_input(
                 $type,
                 $variableName,
                 FILTER_CALLBACK,
-                ['options' => [new Filter(), 'filterSanitizeString']]
+                ['options' => [new static(), 'filterSanitizeString']]
             );
         }
 

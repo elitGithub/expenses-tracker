@@ -48,21 +48,24 @@ $rows = $expensesList->getExpenses();
                                 <td>
                                     <?php
                                     if (PermissionsManager::isPermittedAction('edit_expense', $user)): ?>
-                                        <button type="button" class="btn btn-info btn-xs"
+                                        <button type="button" class="btn btn-info btn-xs editButton"
+                                                data-id="<?php echo $row['expense_id']; ?>"
+                                                data-expense-category-id="<?php echo $row['expense_category_id']; ?>"
+                                                data-description="<?php echo htmlspecialchars($row['expense_description']); ?>"
+                                                data-amount="<?php echo htmlspecialchars($row['amount_spent']); ?>"
+                                                data-date="<?php echo htmlspecialchars($row['created_at']); ?>"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#editExpenseModal-<?php
-                                                echo $row['expense_id']; ?>">
+                                                data-bs-target="#editExpenseModal">
                                             <span class='fa fa-pencil'></span> Edit
                                         </button>
-
                                     <?php
                                     endif; ?>
                                     <?php
                                     if (PermissionsManager::isPermittedAction('delete_expense', $user)): ?>
-                                        <button type="button" class="btn btn-danger btn-xs"
+                                        <button type="button" class="btn btn-danger btn-xs deleteButton"
+                                                data-id="<?php echo $row['expense_id']; ?>"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#deleteExpenseModal-<?php
-                                                echo $row['expense_id']; ?>"><span
+                                                data-bs-target="#deleteExpenseModal"><span
                                                 class='fa fa-trash'></span> Delete
                                         </button>
                                     <?php
@@ -84,3 +87,36 @@ $rows = $expensesList->getExpenses();
 <?php
 
 require_once 'modals.php';
+?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const editButtons = document.querySelectorAll('.editButton');
+        const deleteButtons = document.querySelectorAll('.deleteButton');
+        const editExpenseModal = document.getElementById('editExpenseModal');
+        const deleteModal = document.getElementById('deleteExpenseModal');
+
+        deleteButtons.forEach((button) => {
+            button.addEventListener('click', function () {
+                deleteModal.querySelector('#expense_id').value = this.getAttribute('data-id');
+            });
+        });
+
+        editButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                const expenseId = this.getAttribute('data-id');
+                const expenseCategoryId = this.getAttribute('data-expense-category-id');
+                const description = this.getAttribute('data-description');
+                const amount = this.getAttribute('data-amount');
+                const date = this.getAttribute('data-date');
+
+                editExpenseModal.querySelector('#expense_id').value = expenseId;
+                editExpenseModal.querySelector('#expense_category_id').value = expenseCategoryId;
+                editExpenseModal.querySelector('#amount_spent').value = amount;
+                editExpenseModal.querySelector('#expense_description').value = description;
+                editExpenseModal.querySelector('#expense_date').value = date;
+            });
+        });
+    });
+</script>
+

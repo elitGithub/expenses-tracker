@@ -35,7 +35,7 @@ class ExpenseList
     {
         $query = "SELECT * FROM `{$this->tables['expense_category_table_name']}` `i`
                            LEFT JOIN `{$this->tables['expenses_table_name']}` `s` ON `i`.`expense_category_id`= `s`.`expense_category_id`
-                           WHERE (`s`.`expense_category_id` > 0) AND `deleted` = 0 LIMIT {$limit} OFFSET {$offset}";
+                           WHERE (`s`.`expense_category_id` > 0) AND `s`.`deleted` = 0 LIMIT {$limit} OFFSET {$offset}";
         $result = $this->adb->query($query);
         $expenses = [];
 
