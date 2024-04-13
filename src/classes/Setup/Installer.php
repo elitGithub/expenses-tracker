@@ -358,6 +358,9 @@ class Installer extends Setup
         // Check the selected database:
         if (!isset($setup['dbType'])) {
             $this->dbConfig['db_type'] = Filter::filterInput(INPUT_POST, 'sql_type', FILTER_SANITIZE_SPECIAL_CHARS);
+            if ($this->dbConfig['db_type'] === 'ibm_db2') {
+                $this->dbConfig['db_type'] = 'db2'; // ADODB uses ust 'db2'
+            }
             $this->dbConfig['db_type'] = trim((string) $this->dbConfig['db_type']);
         } else {
             $this->dbConfig['db_type'] = $setup['dbType'];

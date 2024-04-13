@@ -2,7 +2,13 @@
 
 declare(strict_types = 1);
 
+use ExpenseTracker\ExpenseCategory;
+use ExpenseTracker\ExpenseCategoryList;
+use ExpenseTracker\ExpenseList;
+
 $timeframe = $_GET['timeframe'] ?? 'monthly'; // Default to monthly
+$expenseCategoryList = new ExpenseCategoryList();
+$expenseList = new ExpenseList();
 ?>
 
 <div class="container py-5">
@@ -20,11 +26,14 @@ $timeframe = $_GET['timeframe'] ?? 'monthly'; // Default to monthly
     <div class="row row-cols-1 row-cols-md-4 g-4 mb-5">
         <!-- Dynamic PHP Content for Cards will go here -->
         <?php
+        $totalBudget = $expenseCategoryList->getBudgetForTimeFrame($timeframe);
+        $totalExpenses = $expenseList->getExpensesByTimeFrame($timeframe);
+        $totalCategories = $expenseCategoryList->countTotalCategories($timeframe);
         $data = [
-            'all time'  => ['budget' => 5000, 'expenses' => 4500, 'categories' => 10, 'topCategory' => 'Food'],
-            'yearly'    => ['budget' => 1000, 'expenses' => 800, 'categories' => 8, 'topCategory' => 'Utilities'],
-            'quarterly' => ['budget' => 500, 'expenses' => 450, 'categories' => 5, 'topCategory' => 'Travel'],
-            'monthly'   => ['budget' => 200, 'expenses' => 180, 'categories' => 4, 'topCategory' => 'Entertainment'],
+            'all time'  => ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => 10, 'topCategory' => 'Food'],
+            'yearly'    => ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => 8, 'topCategory' => 'Utilities'],
+            'quarterly' => ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => 5, 'topCategory' => 'Travel'],
+            'monthly'   => ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => 4, 'topCategory' => 'Entertainment'],
         ];
         $selectedData = $data[$timeframe];
 

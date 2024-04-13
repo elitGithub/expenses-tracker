@@ -36,7 +36,7 @@ $catList = $expenseCategoryList->categoryReport();
                         <tbody>
                         <?php
                         foreach ($catList as $row): ?>
-                            <tr>
+                            <tr <?php if ((float)$row['cat_expenses'] >= (float) $row['amount']) echo 'class="bg-color-red"'?>>
                                 <td><?php
                                     echo $row['expense_category_id'] ?>
                                 </td>

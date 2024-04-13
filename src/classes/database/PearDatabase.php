@@ -204,7 +204,7 @@ class PearDatabase implements LoggerAwareInterface
      * @return bool
      */
 
-    public function isOracle()
+    public function isOracle(): bool
     {
         return $this->dbType === 'oci8';
     }
@@ -215,6 +215,30 @@ class PearDatabase implements LoggerAwareInterface
     public function isPostgres(): bool
     {
         return $this->dbType === 'pgsql';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSqLite(): bool
+    {
+        return ($this->dbType === 'sqlite3') || $this->dbType === 'sqlite';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIbmDb2(): bool
+    {
+        return ($this->dbType === 'db2');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSqlSrv(): bool
+    {
+        return $this->dbType === 'sqlsrv';
     }
 
     /**
