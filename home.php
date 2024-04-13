@@ -28,14 +28,8 @@ $expenseList = new ExpenseList();
         <?php
         $totalBudget = $expenseCategoryList->getBudgetForTimeFrame($timeframe);
         $totalExpenses = $expenseList->getExpensesByTimeFrame($timeframe);
-        $totalCategories = $expenseCategoryList->countTotalCategories($timeframe);
-        $data = [
-            'all time'  => ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => 10, 'topCategory' => 'Food'],
-            'yearly'    => ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => 8, 'topCategory' => 'Utilities'],
-            'quarterly' => ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => 5, 'topCategory' => 'Travel'],
-            'monthly'   => ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => 4, 'topCategory' => 'Entertainment'],
-        ];
-        $selectedData = $data[$timeframe];
+        $totalCategories = $expenseCategoryList->countTotalCategoriesByTimeFrame($timeframe);
+        $selectedData = ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => $totalCategories];
 
         // Generating Cards
         foreach ($selectedData as $key => $value) {
@@ -56,15 +50,14 @@ $expenseList = new ExpenseList();
 <script>
     // Dynamically setting up the Chart
     const data = {
-        labels: ['Budget', 'Expenses', 'Categories', 'Top Category'],
+        labels: ['Budget', 'Expenses', 'Categories'],
         datasets: [{
             label: '<?= $timeframe?> data',
-            data: [<?=$selectedData['budget']?>, <?=$selectedData['expenses']?>, <?=$selectedData['categories']?>, 0], // 0 for 'Top Category' as it's not numerical
+            data: [<?=$selectedData['budget']?>, <?=$selectedData['expenses']?>, <?=$selectedData['categories']?>], // 0 for 'Top Category' as it's not numerical
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
                 'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)'
             ],
             borderColor: [
                 'rgba(255, 99, 132, 1)',
