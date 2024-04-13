@@ -27,6 +27,25 @@ class ExpenseCategoryList
         $this->tables = $this->adb->getTablesConfig();
     }
 
+    public function categoryReport(): array
+    {
+        $list = [];
+        $result = $this->adb->query("SELECT
+                                               `exp_cat`.*,
+                                               SUM(`exp`.`amount_spent`) AS 'cat_expenses'
+                                         FROM
+                                         `{$this->tables['expense_category_table_name']}` exp_cat
+                                             LEFT JOIN `{$this->tables['expenses_table_name']}` exp
+                                                 ON `exp`.`expense_category_id` = `exp_cat`.`expense_category_id`
+                                         WHERE `exp_cat`.`deleted` = 0
+                                         GROUP BY `exp_cat`.expense_category_id, `exp_cat`.expense_category_name;");
+        while ($row = $this->adb->fetchByAssoc($result)) {
+            $list[] = $row;
+        }
+
+        return $list;
+    }
+
     /**
      * @param  bool  $returnAsHtml
      *
@@ -36,7 +55,7 @@ class ExpenseCategoryList
     {
         $list = [];
         $options = [];
-        $result = $this->adb->query("SELECT * FROM `{$this->tables['expense_category_table_name']}`");
+        $result = $this->adb->query("SELECT * FROM `{$this->tables['expense_category_table_name']}` WHERE `deleted` = 0");
         while ($row = $this->adb->fetchByAssoc($result)) {
             $selected = ((int)$row['expense_category_id'] === (int)$selected) ? 'selected' : '';
             $list[] = $row;

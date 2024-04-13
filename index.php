@@ -28,22 +28,24 @@ if (!is_file("$action.php")) {
         <div id="page-inner">
             <div class="container-md py-3" id="page-container">
                 <?php
-                if(isset($_SESSION['errors'])) {
+                if (isset($_SESSION['errors'])) {
                     foreach ($_SESSION['errors'] as $error) {
-                        echo '<p class="alert alert-danger">' . $error . '</p>';
+                        echo '<p class="alert alert-danger session-flash-error-message">' . $error . '</p>';
+                        echo '<script>setTimeout(() => {document.querySelectorAll(".session-flash-error-message").forEach((element) => element.remove());}, 5000);</script>';
                     }
                     unset($_SESSION['errors']);
                 }
 
-                if(isset($_SESSION['success'])) {
+                if (isset($_SESSION['success'])) {
                     foreach ($_SESSION['success'] as $success) {
-                        echo '<p class="alert alert-success">' . $success . '</p>';
+                        echo '<p class="alert alert-success session-flash-success-message">' . $success . '</p>';
+                        echo '<script>setTimeout(() => {document.querySelectorAll(".session-flash-success-message").forEach((element) => element.remove());}, 5000);</script>';
                     }
                     unset($_SESSION['success']);
                 }
                 ?>
                 <?php
-                include("$action.php");?>
+                include("$action.php"); ?>
             </div>
 
 

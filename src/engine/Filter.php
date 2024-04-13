@@ -22,7 +22,7 @@ class Filter
     {
         $options = 0;
         if ($filter === FILTER_SANITIZE_NUMBER_FLOAT) {
-            $options = [FILTER_FLAG_ALLOW_FRACTION, FILTER_FLAG_ALLOW_THOUSAND];
+            $options = FILTER_FLAG_ALLOW_FRACTION;
         }
         $return = filter_input($type, $variableName, $filter, $options);
 

@@ -6,7 +6,7 @@ use ExpenseTracker\ExpenseCategoryList;
 use Permissions\PermissionsManager;
 
 $expenseCategoryList = new ExpenseCategoryList();
-$catList = $expenseCategoryList->getAllCategories();
+$catList = $expenseCategoryList->categoryReport();
 ?>
 <!-- Trigger Button -->
 <button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
@@ -28,6 +28,7 @@ $catList = $expenseCategoryList->getAllCategories();
                             <th>Category Id</th>
                             <th>Category Name</th>
                             <th>Category Budget</th>
+                            <th>Total Expenses in category</th>
                             <th>Date Created</th>
                             <th></th>
                         </tr>
@@ -37,13 +38,20 @@ $catList = $expenseCategoryList->getAllCategories();
                         foreach ($catList as $row): ?>
                             <tr>
                                 <td><?php
-                                    echo $row['expense_category_id'] ?></td>
+                                    echo $row['expense_category_id'] ?>
+                                </td>
                                 <td><?php
-                                    echo $row['expense_category_name'] ?></td>
+                                    echo $row['expense_category_name'] ?>
+                                </td>
                                 <td><?php
-                                    echo number_format((float) $row['amount'], 2, '.', '') ?></td>
+                                    echo number_format((float) $row['amount'], 2, '.', '') ?>
+                                </td>
                                 <td><?php
-                                    echo $date = date_format(new DateTime($row['created_at']), 'd-M-Y') ?></td>
+                                    echo number_format((float) $row['cat_expenses'], 2, '.', '') ?>
+                                </td>
+                                <td><?php
+                                    echo $date = date_format(new DateTime($row['created_at']), 'd-M-Y') ?>
+                                </td>
                                 <td>
                                     <?php if(PermissionsManager::isPermittedAction('edit_expense_category', $user)): ?>
                                         <button type="button" class="btn btn-info btn-xs editButton"
@@ -58,7 +66,10 @@ $catList = $expenseCategoryList->getAllCategories();
 
                                     <?php endif; ?>
                                     <?php if (PermissionsManager::isPermittedAction('delete_expense_category', $user) && !$row['is_default']): ?>
-                                        <button type="button" class="btn btn-danger btn-xs" data-bs-toggle="modal_delete_category"><span
+                                        <button type="button" class="btn btn-danger btn-xs deleteButton"
+                                                data-id="<?php echo $row['expense_category_id'] ?>"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteCategoryModal"><span
                                                 class='fa fa-trash'></span> Delete
                                         </button>
                                     <?php endif;?>
@@ -88,7 +99,7 @@ require_once 'modals.php';
         const editButtons = document.querySelectorAll('.editButton');
         const deleteButtons = document.querySelectorAll('.deleteButton');
         const editExpenseModal = document.getElementById('editCategoryModal');
-        const deleteModal = document.getElementById('deleteExpenseModal');
+        const deleteModal = document.getElementById('deleteCategoryModal');
 
         deleteButtons.forEach((button) => {
             button.addEventListener('click', function () {

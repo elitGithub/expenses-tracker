@@ -9,9 +9,32 @@ use ExpenseTracker\ExpenseCategoryList;
 $expenseCatList = new ExpenseCategoryList();
 $expenseCategory = new ExpenseCategory();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && $_POST['submit'] === 'Edit' && password_verify($_POST['formToken'], $_SESSION['formToken']['delete_category'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && password_verify($_POST['formToken'], $_SESSION['formToken']['delete_category'])) {
+    $category = new ExpenseCategory();
+    $categoryId = Filter::filterInput(INPUT_POST, 'category_id', FILTER_SANITIZE_NUMBER_INT);
+    if (empty($categoryId)) {
+        $_SESSION['errors'][] = 'Missing category id.';
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+    }
 
-    $_SESSION['errors'][] = 'Could not delete expense';
+    $category->getById((int)$categoryId);
+
+    try {
+        $result = $category->delete();
+    } catch (Exception $e) {
+        $_SESSION['errors'][] = $e->getMessage();
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        return;
+    }
+
+
+
+    if ($result) {
+        $_SESSION['success'] = 'Category deleted.';
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        return;
+    }
+    $_SESSION['errors'][] = 'Could not delete category';
     header('Location: ' . $_SERVER['HTTP_REFERER']);
     return;
 }

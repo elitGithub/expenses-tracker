@@ -17,6 +17,7 @@ $deleteExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
 
 $_SESSION['formToken']['add_new_category'] = password_hash($addNewCatToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['edit_category'] = password_hash($editCatToken, PASSWORD_DEFAULT);
+$_SESSION['formToken']['delete_category'] = password_hash($deleteCatToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['add_new_expense'] = password_hash($addNewExpenseToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['edit_expense'] = password_hash($editExpenseToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['delete_expense'] = password_hash($deleteExpenseToken, PASSWORD_DEFAULT);
@@ -217,11 +218,11 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
     <div class="modal fade" id="editCategoryModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                <div class="modal-header d-flex justify-content-between">
                     <h4 class="modal-title" id="addCategoryModalLabel">
                         <i class="fa fa-plus-circle fa-1x"></i> Update Category
                     </h4>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
                 </div>
                 <div class="modal-body">
                     <form action="index.php?action=update_expense_category" method="POST">
@@ -236,13 +237,13 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                         </div>
                         <div class="form-group">
                             <input type="checkbox" class="form-check-input" name="is_default" id="is_default">
-                            <label for="is_default">Is default category</label>
+                            <label for="is_default">Set this category as default</label>
                         </div>
                         <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($editCatToken); ?>">
                         <input type="hidden" name="category_id" id="category_id">
                         <div class="modal-footer">
-                            <input type="submit" name="submit" value="Edit" class="btn btn-primary">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <input type="submit" name="submit" value="Save" class="btn btn-primary">
                         </div>
                     </form>
                 </div>
@@ -261,7 +262,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                         </div>
                         <form method="POST" action="index.php?action=delete_category">
                             <div class="modal-body text-center">
-                                <h4>Are you sure you want to delete this category All expenses will be moved to the General category.</h4>
+                                <h4>Are you sure you want to delete this category All expenses will be moved to the category marked as default.</h4>
                                 <!-- Hidden input for CSRF protection -->
                                 <input type="hidden" id="category_id" name="category_id">
                                 <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($deleteCatToken); ?>">
