@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `%susers`
     `password`       VARCHAR(255)    NOT NULL,
     `created_by`     INT UNSIGNED    NOT NULL,
     `active`         TINYINT(1)      NOT NULL DEFAULT '1',
+    `is_admin`       VARCHAR(3)      NOT NULL DEFAULT 'Off',
     `last_login`     DATETIME        NULL,
     `last_update_at` DATE            NOT NULL,
     `created_at`     DATE            NOT NULL,

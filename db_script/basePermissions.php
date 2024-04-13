@@ -36,6 +36,14 @@ return $actions = [
         'description' => 'Right to edit expenses',
     ],
     [
+        'name'        => 'expense_report',
+        'description' => 'Right to view expenses report',
+    ],
+    [
+        'name'        => 'expense_category',
+        'description' => 'Right to view expenses categories report',
+    ],
+    [
         'name'        => 'delete_expense',
         'description' => 'Right to delete expenses',
     ],
@@ -78,5 +86,9 @@ return $actions = [
     [
         'name'        => 'export',
         'description' => 'Right to export',
+    ],
+    [
+        'name'        => 'edit_permissions',
+        'description' => 'Right to edit permissions',
     ],
 ];

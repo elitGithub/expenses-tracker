@@ -49,22 +49,23 @@ class UserModel
      * @return bool|int
      * @throws \Throwable
      */
-    public function createNew(string $email, string $userName, string $password, string $firstName, string $lastName, $createdBy, int $roleId)
+    public function createNew(string $email, string $userName, string $password, string $firstName, string $lastName, $createdBy, int $roleId, string $isAdmin): bool
     {
         if ($this->checkUniqueEmail($email) && $this->checkUniqueUserName($userName)) {
             $user = new User();
             $query = "INSERT INTO `$this->entityTable` (
-                     `email`, 
-                     `user_name`, 
-                     `first_name`, 
-                     `last_name`, 
-                     `password`, 
+                     `email`,
+                     `user_name`,
+                     `first_name`,
+                     `last_name`,
+                     `password`,
                      `created_by`,
                      `active`,
+                     `is_admin`,
                      `last_update_at`,
                      `created_at`)
-                                 VALUES (?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());";
-            $this->adb->pquery($query, [$email, $userName, $firstName, $lastName, $user->encryptPassword($password), $createdBy]);
+                                 VALUES (?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());";
+            $this->adb->pquery($query, [$email, $userName, $firstName, $lastName, $user->encryptPassword($password), $createdBy, ucfirst($isAdmin)]);
             $id = $this->adb->getLastInsertID();
             $this->adb->pquery("INSERT INTO `$this->userToRoleTable` (`user_id`, `role_id`) VALUES (?, ?)", [$id, $roleId]);
             if ($id) {
@@ -72,7 +73,8 @@ class UserModel
                                               ['userName' => $userName,
                                                'name' => $firstName . ' ' . $lastName,
                                                'active' => 1,
-                                               'role' => $roleId
+                                               'role' => $roleId,
+                                               'is_admin' => $isAdmin,
                                               ]);
             }
             return $id;
@@ -90,7 +92,7 @@ class UserModel
     public function getByEmailAndUserName(string $email, string $userName): ?array
     {
         $query = "SELECT *
-                     FROM `$this->entityTable`  
+                     FROM `$this->entityTable`
                      WHERE `email` = ? AND `user_name` = ? AND `active` = 1;";
         $res = $this->adb->preparedQuery($query, [$email, $userName]);
         return $this->adb->fetchByAssoc($res);

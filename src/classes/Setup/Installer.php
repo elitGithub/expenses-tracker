@@ -217,15 +217,17 @@ class Installer extends Setup
             throw new Exception('Passwords do not match');
         }
 
-        $createUser = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'));
+        $createUser = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'), 'On');
         if (!$createUser) {
             $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
             $createUser = $existUserData['user_id'] ?? false;
             $existUserData['role_id'] = Role::getRoleByUserId($createUser);
             if ($createUser) {
                 CacheSystemManager::writeUser($createUser, [
-                    'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'], 'active' => 1,
+                    'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'],
+                    'active'   => 1,
                     'role'     => $existUserData['role_id'],
+                    'is_admin' => 'On',
                 ]);
             }
         }
@@ -342,8 +344,8 @@ class Installer extends Setup
         PermissionsSeed::populateActionsTable($this->adb, $this->dbConfig['tables']['actions_table_name']);
         PermissionsSeed::populateRolesTable($this->adb, $this->dbConfig['tables']['roles_table_name']);
         PermissionsSeed::createRolePermissions($this->adb, $this->dbConfig['tables']['roles_table_name'],
-                                                  $this->dbConfig['tables']['actions_table_name'],
-                                                  $this->dbConfig['tables']['role_permissions_table_name']);
+                                               $this->dbConfig['tables']['actions_table_name'],
+                                               $this->dbConfig['tables']['role_permissions_table_name']);
         CacheSystemManager::createPermissionsFile($this->adb, $this->dbConfig['tables']['role_permissions_table_name']);
     }
 

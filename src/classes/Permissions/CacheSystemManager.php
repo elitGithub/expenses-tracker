@@ -266,7 +266,7 @@ class CacheSystemManager
      */
     public static function refreshUserInCache(User $user)
     {
-        self::writeUser($user->id, ['userName' =>  $user->user_name, 'name' => $user->first_name . ' ' . $user->last_name, 'active' => $user->active, 'role' => $user->roleid]);
+        self::writeUser($user->id, ['userName' =>  $user->user_name, 'name' => $user->first_name . ' ' . $user->last_name, 'active' => $user->active, 'role' => $user->roleid, 'is_admin' => $user->is_admin ?? 'Off']);
         $adb = PearDatabase::getInstance();
         self::createPermissionsFile($adb, $adb->getTablesConfig()['role_permissions_table_name']);
     }

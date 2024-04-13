@@ -69,6 +69,9 @@ class PermissionsManager
      */
     public static function isPermittedAction($action, User $user)
     {
+        if (self::isAdmin($user)) {
+            return true;
+        }
         if (!is_int($action)) {
             try {
                 $action = self::getActionId($action);
@@ -82,8 +85,17 @@ class PermissionsManager
             return false;
         }
         $permissions = self::getUserPrivileges($user->id);
-
         return $permissions['permissions'][$action] ?? false;
+    }
+
+    /**
+     * @param  \User  $user
+     *
+     * @return bool
+     */
+    public static function isAdmin(User $user): bool
+    {
+        return $user->is_admin === 'On';
     }
 
     /**

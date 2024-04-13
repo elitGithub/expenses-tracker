@@ -8,6 +8,9 @@ use Permissions\PermissionsManager;
 $expensesList = new ExpenseList();
 $rows = $expensesList->getExpenses();
 
+if (!PermissionsManager::isPermittedAction('expense_report', $user)) {
+    header('Location: index.php');
+}
 ?>
 <!-- Modal trigger button with Bootstrap 5 data attributes -->
 <button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addExpenseModal">

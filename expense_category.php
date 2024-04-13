@@ -7,6 +7,9 @@ use Permissions\PermissionsManager;
 
 $expenseCategoryList = new ExpenseCategoryList();
 $catList = $expenseCategoryList->categoryReport();
+if (!PermissionsManager::isPermittedAction('expense_category', $user)) {
+    header('Location: index.php');
+}
 ?>
 <!-- Trigger Button -->
 <button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
