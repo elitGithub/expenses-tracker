@@ -18,7 +18,7 @@ class DatabaseCreator
      * @param  string                  $dbName
      * @param  bool                    $create
      */
-    public function __construct(PearDatabase $database, string $dbName, bool $create = true)
+    public function __construct(PearDatabase $database, string $dbName, bool $create = false)
     {
         $this->database = $database;
         $this->dbName = $dbName;
@@ -39,7 +39,7 @@ class DatabaseCreator
             }
         }
 
-        $query = "CREATE DATABASE IF NOT EXISTS $this->dbName CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
+        $query = "CREATE DATABASE IF NOT EXISTS `$this->dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
         $result = $this->database->preparedQuery($query, [], true);
         return is_object($result);
     }
@@ -61,7 +61,7 @@ class DatabaseCreator
                 break;
             case 'pgsql':
             case 'pdo_pgsql':
-                $sql = 'SELECT 1 FROM pg_database WHERE datname = ?';
+                $sql = 'SELECT 1 FROM `pg_database` WHERE `datname` = ?';
                 break;
             case 'sqlite':
             case 'sqlite3':
@@ -71,7 +71,7 @@ class DatabaseCreator
                 break;
             case 'oci8':
             case 'pdo_oci':
-                $sql = 'SELECT 1 FROM all_databases WHERE name = ?';
+                $sql = 'SELECT 1 FROM `all_databases` WHERE `name` = ?';
                 break;
             // Add cases for other database types as necessary.
             default:

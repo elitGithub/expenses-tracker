@@ -95,10 +95,16 @@ CREATE TABLE IF NOT EXISTS `%sroles`
 (
     `role_id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `role_name` VARCHAR(200)    NOT NULL,
+    `parent_id` BIGINT UNSIGNED NULL,
     PRIMARY KEY (`role_id`),
-    UNIQUE INDEX `idx_role_name` (`role_name`)
+    UNIQUE INDEX `idx_role_name` (`role_name`),
+    INDEX `idx_parent_id` (`parent_id`),
+    CONSTRAINT `fk_parent_id`
+     FOREIGN KEY (`parent_id`) REFERENCES `%sroles` (`role_id`)
+            ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
+
 
 CREATE TABLE IF NOT EXISTS `%suser_to_role`
 (

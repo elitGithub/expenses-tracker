@@ -438,9 +438,9 @@ class Installer extends Setup
      */
     private function createDbAndTables(PearDatabase $masterDb)
     {
-        $createMyOwnDb = Filter::filterInput(INPUT_POST, 'createMyOwnDb', FILTER_VALIDATE_BOOLEAN, false);
+        $iHaveDb = Filter::filterInput(INPUT_POST, 'createMyOwnDb', FILTER_VALIDATE_BOOLEAN, false);
         $tablePrefix = Filter::filterInput(INPUT_POST, 'table_prefix', FILTER_SANITIZE_SPECIAL_CHARS, '');
-        $dbCreator = new DatabaseCreator($masterDb, $this->dbConfig['db_name'], !$createMyOwnDb);
+        $dbCreator = new DatabaseCreator($masterDb, $this->dbConfig['db_name'], !$iHaveDb);
 
         $dbCreated = $dbCreator->createDatabase();
         if (!$dbCreated) {
@@ -448,8 +448,8 @@ class Installer extends Setup
             throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
 
-        if (!$createMyOwnDb) {
-            $tablesFactory = new TableFactory($this->tablesSettings, $tablePrefix);
+        $tablesFactory = new TableFactory($this->tablesSettings, $tablePrefix);
+        if (!$iHaveDb) {
             $queries = $tablesFactory->getQueries();
             $this->adb = new PearDatabase($this->dbConfig['db_type'],
                                           $this->dbConfig['db_host'],
@@ -460,7 +460,10 @@ class Installer extends Setup
             foreach ($queries as $query) {
                 $this->adb->query($query);
             }
+            return;
         }
+
+        $tablesFactory->checkTablesExist($tablePrefix, $this->adb);
     }
 
 }

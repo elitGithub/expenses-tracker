@@ -202,10 +202,14 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <label for="new_expense_category_budget">Category Budget:</label>
                                     <input type="number" class="form-control" name="new_expense_category_budget" id="new_expense_category_budget" placeholder="Enter Category Budget" required>
                                 </div>
+                                <div class="form-group">
+                                    <input type="checkbox" <?php if (count($expenseCategories) < 1) echo 'checked=true'?> class="form-check-input" name="is_default" id="is_default">
+                                    <label for="is_default">Set this category as default</label>
+                                </div>
                                 <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($addNewCatToken); ?>">
                                 <div class="modal-footer">
-                                    <input type="submit" name="submit" value="Add" class="btn btn-primary">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <input type="submit" name="submit" value="Add" class="btn btn-primary">
                                 </div>
                             </form>
                         </div>

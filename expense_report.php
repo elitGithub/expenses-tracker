@@ -2,20 +2,25 @@
 
 declare(strict_types = 1);
 
+use ExpenseTracker\ExpenseCategoryList;
 use ExpenseTracker\ExpenseList;
 use Permissions\PermissionsManager;
 
 $expensesList = new ExpenseList();
 $rows = $expensesList->getExpenses();
-
+$categoryList = new ExpenseCategoryList();
 if (!PermissionsManager::isPermittedAction('expense_report', $user)) {
     header('Location: index.php');
 }
 ?>
+<?php if ($categoryList->countTotalCategoriesByTimeFrame() > 0): ?>
 <!-- Modal trigger button with Bootstrap 5 data attributes -->
 <button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
     <i class="fa fa-plus-circle fa-2x"></i> Enter Expenses
 </button>
+<?php else: ?>
+<h4>You have no expense categories, please add some, so we can follow your expenses.</h4>
+<?php endif ?>
 <div class="row">
     <div class="col-md-12">
         <!-- Advanced Tables -->

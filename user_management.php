@@ -10,7 +10,6 @@ if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
 }
 ?>
 
-?>
 <!-- Modal trigger button with Bootstrap 5 data attributes -->
 <button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addUserModal">
     <i class="fa fa-plus-circle fa-2x"></i> Add User

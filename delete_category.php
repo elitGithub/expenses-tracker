@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && password_verify($_POST['formToken']
 
 
     if ($result) {
-        $_SESSION['success'] = 'Category deleted.';
+        $_SESSION['success'][] = 'Category deleted.';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;
     }

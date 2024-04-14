@@ -6,6 +6,7 @@ namespace Models;
 
 use database\PearDatabase;
 use Permissions\CacheSystemManager;
+use Permissions\PermissionsManager;
 use User;
 
 /**
@@ -49,7 +50,7 @@ class UserModel
      * @return bool|int
      * @throws \Throwable
      */
-    public function createNew(string $email, string $userName, string $password, string $firstName, string $lastName, $createdBy, int $roleId, string $isAdmin): bool
+    public function createNew(string $email, string $userName, string $password, string $firstName, string $lastName, $createdBy, int $roleId, string $isAdmin)
     {
         if ($this->checkUniqueEmail($email) && $this->checkUniqueUserName($userName)) {
             $user = new User();
@@ -122,6 +123,22 @@ class UserModel
         $result = $this->adb->pquery("SELECT COUNT(*) AS `total` FROM `$this->entityTable` WHERE `user_name` = CAST(? AS BINARY) AND `deleted_at` IS NULL;",
                                      [$userName]);
         return ($this->adb->query_result($result, 0, 'total') < 1);
+    }
+
+    public function userCollection(User $currentUser): array
+    {
+        $query = "SELECT * FROM `$this->entityTable` WHERE `user_id` != $currentUser->id AND `active` = 1 AND `deleted_at` IS NULL";
+        if (!PermissionsManager::isAdmin($currentUser)) {
+            $query = "SELECT
+                        *
+                     FROM
+                         `$this->entityTable` `users`
+                     JOIN `$this->userToRoleTable` `user2role` ON `users`.`user_id` = `user2role`.`user_id`
+                     WHERE
+                         `users`.`user_id` != $currentUser->id AND
+                         `active` = 1 AND
+                         `deleted_at` IS NULL";
+        }
     }
 
 }

@@ -14,12 +14,6 @@ class PermissionsManager
 {
     private static array $permissions = [];
     private static array $_userPrivileges = [];
-    protected static array $hierarchyTree = [
-        'administrator' => ['manager', 'supervisor', 'user'],
-        'manager'       => ['supervisor', 'user'],
-        'supervisor'    => ['user'],
-        'user'          => [],
-    ];
 
 
     /**
@@ -47,17 +41,6 @@ class PermissionsManager
             }
         }
         return self::$_userPrivileges[$userId];
-    }
-
-    /**
-     * @param $userRole
-     * @param $targetRole
-     *
-     * @return bool
-     */
-    public static function isPermittedView($userRole, $targetRole): bool
-    {
-        return in_array($targetRole, self::$hierarchyTree[$userRole] ?? []);
     }
 
     /**

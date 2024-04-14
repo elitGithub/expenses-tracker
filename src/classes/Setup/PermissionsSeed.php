@@ -11,11 +11,11 @@ use database\PearDatabase;
  */
 class PermissionsSeed
 {
-    protected static array $baseRoles = [
-        'administrator',
-        'manager',
-        'supervisor',
-        'user',
+    protected static array $hierarchyTree = [
+        'administrator' => ['manager', 'supervisor', 'user'],
+        'manager'       => ['supervisor', 'user'],
+        'supervisor'    => ['user'],
+        'user'          => [],
     ];
 
     /**
@@ -42,10 +42,32 @@ class PermissionsSeed
      *
      * @return void
      */
-    public static function populateRolesTable(PearDatabase $adb, $tableName)
+    /**
+     * @param \database\PearDatabase  $adb
+     * @param  string                 $tableName
+     *
+     * @return void
+     */
+    public static function populateRolesTable(PearDatabase $adb, string $tableName)
     {
-        foreach (static::$baseRoles as $role) {
-            $adb->pquery("INSERT INTO `$tableName` (`role_name`) VALUES (?);", [$role]);
+        $roleIds = [];
+        foreach (static::$hierarchyTree as $role => $children) {
+            // Insert the parent role if it hasn't been inserted yet and get its id
+            if (!array_key_exists($role, $roleIds)) {
+                $adb->pquery("INSERT INTO `$tableName` (`role_name`) VALUES (?);", [$role]);
+                $roleIds[$role] = $adb->getLastInsertID();
+            }
+
+            // Insert children roles
+            foreach ($children as $child) {
+                if (!array_key_exists($child, $roleIds)) {
+                    $adb->pquery("INSERT INTO `$tableName` (`role_name`, `parent_id`) VALUES (?, ?);", [$child, $roleIds[$role]]);
+                    $roleIds[$child] = $adb->getLastInsertID(); // Get and store new child ID
+                } else {
+                    // Update the child's parent_id if it was inserted before as a parent
+                    $adb->pquery("UPDATE `$tableName` SET `parent_id` = ? WHERE `role_id` = ?;", [$roleIds[$role], $roleIds[$child]]);
+                }
+            }
         }
     }
 
@@ -65,7 +87,7 @@ class PermissionsSeed
         $getRoleIdQuery = "SELECT `role_id` FROM `$rolesTable` WHERE `role_name` = ?";
         $getActionIdQuery = "SELECT `action_id` FROM `$actionsTable` WHERE `action` = ?";
         $insertQuery = "INSERT INTO `$rolePermissionsTable` (`role_id`, `action_id`, `is_enabled`) VALUES (?, ?, ?)";
-        foreach (static::$baseRoles as $role) {
+        foreach (static::$hierarchyTree as $role => $children) {
             $getRoleIsResult = $adb->pquery($getRoleIdQuery, [$role]);
             $roleId = $adb->query_result($getRoleIsResult, 0, 'role_id');
             foreach ($actions as $action) {

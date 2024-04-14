@@ -29,7 +29,7 @@ $expenseList = new ExpenseList();
         $totalBudget = $expenseCategoryList->getBudgetForTimeFrame($timeframe);
         $totalExpenses = $expenseList->getExpensesByTimeFrame($timeframe);
         $totalCategories = $expenseCategoryList->countTotalCategoriesByTimeFrame($timeframe);
-        $selectedData = ['budget' => $totalBudget, 'expenses' => $totalExpenses, 'categories' => $totalCategories];
+        $selectedData = ['budget' => $totalBudget ?? 0, 'expenses' => $totalExpenses ?? 0, 'categories' => $totalCategories];
 
         // Generating Cards
         foreach ($selectedData as $key => $value) {

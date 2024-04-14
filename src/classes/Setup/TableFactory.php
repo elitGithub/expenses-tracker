@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Setup;
 
+use database\PearDatabase;
+
 /**
  *
  */
@@ -35,7 +37,7 @@ class TableFactory
      */
     private function generateQueries($prefix)
     {
-        $sqlFormatted = sprintf($this->sqlTemplate, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix,
+        $sqlFormatted = sprintf($this->sqlTemplate, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix, $prefix,
                                 $prefix, $prefix, $prefix);
         $sqlNormalized = str_replace("\r\n", "\n", $sqlFormatted); // Normalize newline characters
 
@@ -65,6 +67,25 @@ class TableFactory
                     // Update the system settings with the full table name
                     $this->systemSettings[$settingKey] = $matches[1];
                 }
+            }
+        }
+    }
+
+    /**
+     * @param  string                  $prefix
+     * @param  \database\PearDatabase  $adb
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function checkTablesExist(string $prefix, PearDatabase $adb)
+    {
+        $this->extractTableNames($prefix);
+
+        foreach ($this->systemSettings as $tableName) {
+            $exists = $adb->tableExists($tableName);
+            if (!$exists) {
+                throw new \Exception("Table $tableName does not exist, please make sure to create all tables in the database before proceeding");
             }
         }
     }
