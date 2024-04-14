@@ -8,6 +8,8 @@ use Permissions\PermissionsManager;
 if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
     header('Location: index.php');
 }
+
+\Permissions\Role::getChildRoles($user);
 ?>
 
 <!-- Modal trigger button with Bootstrap 5 data attributes -->
@@ -18,9 +20,9 @@ if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
     <div class="col-md-12">
         <!-- Advanced Tables -->
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="h3">
                 User Management
-                <div class="pull-right">Filter Report using the search</div>
+                <div class="h6 pull-right">Filter Report using the search</div>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">

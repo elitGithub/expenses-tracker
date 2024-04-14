@@ -13,7 +13,7 @@ class PreparedQMark2SqlValue
     /**
      * @param $vals
      */
-    public function __construct ($vals)
+    public function __construct($vals)
     {
         $this->ctr = 0;
         $this->vals = $vals;
@@ -24,7 +24,7 @@ class PreparedQMark2SqlValue
      *
      * @return mixed
      */
-    public function call ($matches)
+    public function call($matches)
     {
         /**
          * If ? is found as expected in regex used in function convert2sql

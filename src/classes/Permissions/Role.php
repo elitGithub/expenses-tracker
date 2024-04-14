@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Permissions;
 
 use database\PearDatabase;
+use User;
 
 /**
  *
@@ -27,11 +28,26 @@ class Role
         }
         $adb = PearDatabase::getInstance();
         $tables = $adb->getTablesConfig();
-        $query = "SELECT `role_id` FROM {$tables['roles_table_name']} WHERE `role_name` = ?";
+        $query = "SELECT `role_id` FROM `{$tables['roles_table_name']}` WHERE `role_name` = ?";
         $result = $adb->preparedQuery($query, [$roleName]);
         $roleId = $adb->query_result($result, 0, 'role_id');
         self::$roleIdByName[$roleName] = (int) $roleId;
         return self::$roleIdByName[$roleName];
+    }
+
+    public static function getChildRoles(User $user)
+    {
+        $adb = PearDatabase::getInstance();
+        $tables = $adb->getTablesConfig();
+        $pathQuery = "SELECT `path` FROM `{$tables['roles_table_name']}` WHERE role_id = ?";
+        $pathResult = $adb->pquery($pathQuery, [$user->role]);
+        $pathRow = $adb->query_result($pathResult, 'path');
+        $query = "SELECT * FROM `{$tables['roles_table_name']}` WHERE `path` LIKE '?';";
+
+        $res = $adb->pquery($query, [$pathRow]);
+        while ($row = $adb->fetchByAssoc($res)) {
+            var_dump($row);
+        }
     }
 
     /**

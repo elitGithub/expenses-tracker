@@ -42,30 +42,36 @@ class PermissionsSeed
      *
      * @return void
      */
-    /**
-     * @param \database\PearDatabase  $adb
-     * @param  string                 $tableName
-     *
-     * @return void
-     */
     public static function populateRolesTable(PearDatabase $adb, string $tableName)
     {
         $roleIds = [];
+        $rolePaths = [];
+
         foreach (static::$hierarchyTree as $role => $children) {
-            // Insert the parent role if it hasn't been inserted yet and get its id
+            // Insert the parent role if it hasn't been inserted yet and get its id and path
             if (!array_key_exists($role, $roleIds)) {
-                $adb->pquery("INSERT INTO `$tableName` (`role_name`) VALUES (?);", [$role]);
+                $adb->pquery("INSERT INTO `$tableName` (`role_name`, `parent_id`, `path`) VALUES (?, NULL, '');", [$role]);
                 $roleIds[$role] = $adb->getLastInsertID();
+                // After inserting, update the path with the new role_id
+                $rolePaths[$role] = $roleIds[$role] . '::';
+                $adb->pquery("UPDATE `$tableName` SET `path` = ? WHERE `role_id` = ?;", [$rolePaths[$role], $roleIds[$role]]);
             }
 
             // Insert children roles
             foreach ($children as $child) {
                 if (!array_key_exists($child, $roleIds)) {
-                    $adb->pquery("INSERT INTO `$tableName` (`role_name`, `parent_id`) VALUES (?, ?);", [$child, $roleIds[$role]]);
-                    $roleIds[$child] = $adb->getLastInsertID(); // Get and store new child ID
+                    $adb->pquery("INSERT INTO `$tableName` (`role_name`, `parent_id`, `path`) VALUES (?, ?, ?);",
+                                 [$child, $roleIds[$role], $rolePaths[$role]]);
+                    $roleIds[$child] = $adb->getLastInsertID();
+                    // Update path for the newly inserted child
+                    $rolePaths[$child] = $rolePaths[$role] . $roleIds[$child] . '::';
+                    $adb->pquery("UPDATE `$tableName` SET `path` = ? WHERE `role_id` = ?;", [$rolePaths[$child], $roleIds[$child]]);
                 } else {
-                    // Update the child's parent_id if it was inserted before as a parent
-                    $adb->pquery("UPDATE `$tableName` SET `parent_id` = ? WHERE `role_id` = ?;", [$roleIds[$role], $roleIds[$child]]);
+                    // Update the child's parent_id and path if it was inserted before as a parent
+                    $newPath = $rolePaths[$role] . $roleIds[$child] . '::';
+                    $adb->pquery("UPDATE `$tableName` SET `parent_id` = ?, `path` = ? WHERE `role_id` = ?;",
+                                 [$roleIds[$role], $newPath, $roleIds[$child]]);
+                    $rolePaths[$child] = $newPath;
                 }
             }
         }

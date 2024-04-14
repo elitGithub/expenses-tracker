@@ -59,7 +59,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
 
                                     <div class="form-group col-md-6">
                                         <label for="amount_spent">Amount Spent:</label>
-                                        <input type="text" class="form-control" name="amount_spent" id="amount_spent" placeholder="Please Enter Expense Amount :" required>
+                                        <input type="number" class="form-control" name="amount_spent" id="amount_spent" placeholder="Please Enter Expense Amount :" required>
                                     </div>
                                 </div>
 
@@ -78,8 +78,8 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                 <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($addNewExpenseToken); ?>">
 
                                 <div class="modal-footer">
-                                    <input type="submit" id="submit" name="submit" value="Add" class="btn btn-primary">
                                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel / Reset</button>
+                                    <input type="submit" id="submit" name="submit" value="Add" class="btn btn-primary">
                                 </div>
                             </form>
                         </div>
@@ -282,5 +282,66 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
         </div>
 
     <?php endif; ?>
+    <!-- /MANAGE CATEGORY MODALS   -->
+
+    <!-- MANAGE Users MODALS   -->
+    <?php if (PermissionsManager::isPermittedAction('add_user', $user)):?>
+        <div class="panel panel-default" id="add_new_user_modal">
+            <div class="panel-body">
+                <!-- Modal -->
+                <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header d-flex justify-content-between">
+                                <h4 class="modal-title" id="addUserModalLabel">
+                                    <i class="fa fa-plus-circle fa-1x"></i> Add User
+                                </h4>
+                                <!-- 'data-bs-dismiss' attribute for Bootstrap 5 -->
+                                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                    &times;
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="index.php?action=add_user" method="POST" enctype="multipart/form-data">
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <div class="form-group col-md-6">
+                                                <label for="user_name">Username:</label>
+                                                <input type="number" class="form-control" name="user_name" id="user_name" placeholder="Please Enter the username" required>
+                                            </div>
+                                            <label for="user_role">User role:</label>
+                                            <select class="form-control" name="user_role" id="user_role" required>
+                                                <option value="" selected disabled>Choose Role</option>
+                                                <?php echo join('', $expenseCategoryList->getAllCategories(true)) ?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label for="expense_description">Expense Description:</label>
+                                            <input type="text" class="form-control" name="expense_description" id="expense_description" placeholder="Please Enter Expense Description :" required>
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label for="expense_date">Date:</label>
+                                            <input type="date" class="form-control" name="expense_date" id="expense_date" required>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" name="formToken" value="<?php echo htmlspecialchars($addNewExpenseToken); ?>">
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel / Reset</button>
+                                        <input type="submit" id="submit" name="submit" value="Add" class="btn btn-primary">
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif ?>
 </div>
 <!-- End Modals-->

@@ -1800,7 +1800,7 @@ if (!defined('_ADODB_LAYER')) {
 			if ($this->_queryID === true) {
 				$rsclass = $this->rsPrefix . 'empty';
 				$rs = (class_exists($rsclass)) ? new $rsclass() : new ADORecordSet_empty();
-
+var_dump($rs);
 				return $rs;
 			}
 

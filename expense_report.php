@@ -16,18 +16,18 @@ if (!PermissionsManager::isPermittedAction('expense_report', $user)) {
 <?php if ($categoryList->countTotalCategoriesByTimeFrame() > 0): ?>
 <!-- Modal trigger button with Bootstrap 5 data attributes -->
 <button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
-    <i class="fa fa-plus-circle fa-2x"></i> Enter Expenses
+    <i class="fa fa-plus-circle fa-2x"></i> Add Expenses
 </button>
 <?php else: ?>
-<h4>You have no expense categories, please add some, so we can follow your expenses.</h4>
+<h3>You have no expense categories, please add some, so we can follow your expenses.</h3>
 <?php endif ?>
 <div class="row">
     <div class="col-md-12">
         <!-- Advanced Tables -->
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="h3">
                 Expense Categories
-                <div class="pull-right">Filter Report using the search</div>
+                <div class="h6 pull-right">Filter Report using the search</div>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
