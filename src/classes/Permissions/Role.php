@@ -42,7 +42,7 @@ class Role
         $pathQuery = "SELECT `path` FROM `{$tables['roles_table_name']}` WHERE role_id = ?";
         $pathResult = $adb->pquery($pathQuery, [$user->role]);
         $pathRow = $adb->query_result($pathResult, 'path');
-        $query = "SELECT * FROM `{$tables['roles_table_name']}` WHERE `path` LIKE '?';";
+        $query = "SELECT * FROM `{$tables['roles_table_name']}` WHERE `path` LIKE ?;";
 
         $res = $adb->pquery($query, [$pathRow]);
         while ($row = $adb->fetchByAssoc($res)) {
