@@ -155,15 +155,26 @@ class Installer extends Setup
      *
      * @param  array|null  $setup
      *
-     * @throws \Throwable
      */
     public function startInstall(array $setup = null)
     {
         global $adb, $dbConfig, $default_language;
         $useRootUserForSystem = Filter::filterInput(INPUT_POST, 'useSameUser', FILTER_VALIDATE_BOOLEAN, false);
-        $masterDb = $this->setUpMasterDB($setup);
+        try {
 
-        $this->createDbAndTables($masterDb);
+            $masterDb = $this->setUpMasterDB($setup);
+        } catch (Throwable $exception) {
+            http_response_code(418);
+            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+        }
+
+        try {
+
+            $this->createDbAndTables($masterDb);
+        } catch (Throwable $exception) {
+            http_response_code(418);
+            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+        }
 
         if (!$useRootUserForSystem) {
             // Now that we have tables, let's check for the user:
@@ -175,24 +186,36 @@ class Installer extends Setup
             }
             $userQuery = 'SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = ?) AS "exists";';
             $result = $masterDb->preparedQuery($userQuery, [$this->dbConfig['db_user']]);
-            if (!$masterDb->query_result($result, 0, 'exists')) {
-                $sqlCreateUser = "CREATE USER IF NOT EXISTS '{$this->dbConfig['db_user']}'@'{$this->dbConfig['db_host']}' IDENTIFIED BY '{$this->dbConfig['db_pass']}';";
-                $masterDb->preparedQuery($sqlCreateUser, [], true);
-                $sqlGrantPrivileges = "GRANT SELECT, INSERT, UPDATE, DELETE ON `{$this->dbConfig['db_name']}`.* TO '{$this->dbConfig['db_user']}'@'{$this->dbConfig['db_host']}';";
-                $result = $masterDb->query($sqlGrantPrivileges);
-                $masterDb->preparedQuery('FLUSH PRIVILEGES;');
+            try {
+                if (!$masterDb->query_result($result, 0, 'exists')) {
+                    $sqlCreateUser = "CREATE USER IF NOT EXISTS '{$this->dbConfig['db_user']}'@'{$this->dbConfig['db_host']}' IDENTIFIED BY '{$this->dbConfig['db_pass']}';";
+                    $masterDb->preparedQuery($sqlCreateUser, [], true);
+                    $sqlGrantPrivileges = "GRANT SELECT, INSERT, UPDATE, DELETE ON `{$this->dbConfig['db_name']}`.* TO '{$this->dbConfig['db_user']}'@'{$this->dbConfig['db_host']}';";
+                    $result = $masterDb->query($sqlGrantPrivileges);
+                    $masterDb->preparedQuery('FLUSH PRIVILEGES;');
+                }
+            } catch (Throwable $exception) {
+                http_response_code(503);
+                return json_encode(['success' => false, 'message' => $exception->getMessage()]);
             }
+
         }
 
         $this->dbConfig['tables'] = $this->tablesSettings;
         $dbConfig = $this->dbConfig;
 
-        $this->adb = new PearDatabase($this->dbConfig['db_type'],
-                                      $this->dbConfig['db_host'],
-                                      $this->dbConfig['db_name'],
-                                      $this->dbConfig['db_user'],
-                                      $this->dbConfig['db_pass'],
-                                      $this->dbConfig['db_port']);
+        try {
+            $this->adb = new PearDatabase($this->dbConfig['db_type'],
+                                          $this->dbConfig['db_host'],
+                                          $this->dbConfig['db_name'],
+                                          $this->dbConfig['db_user'],
+                                          $this->dbConfig['db_pass'],
+                                          $this->dbConfig['db_port']);
+        } catch (Throwable $exception) {
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+        }
+
         try {
             $this->adb->connect();
             global $adb;
@@ -200,12 +223,27 @@ class Installer extends Setup
         } catch (Throwable $exception) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
-            http_response_code(418);
-            throw new Exception($exception->getMessage());
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
         }
-        $this->connectCache();
+        try {
+            $this->connectCache();
+        } catch (Throwable $exception) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+        }
         $this->createConfigFiles();
-        $this->installPermissions();
+        try {
+
+            $this->installPermissions();
+        } catch (Throwable $exception) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+        }
         $userModel = new UserModel();
 
         $email = Filter::filterInput(INPUT_POST, 'admin_email', FILTER_SANITIZE_SPECIAL_CHARS);
@@ -217,37 +255,53 @@ class Installer extends Setup
         if (is_null($password) || is_null($confirmPassword)) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
-            http_response_code(418);
-            throw new Exception('Please make sure you typed password and confirm password');
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => 'Please make sure you typed password and confirm password']);
         }
 
         if (strcmp($password, $confirmPassword) !== 0) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
             http_response_code(418);
-            throw new Exception('Passwords do not match');
+            return json_encode(['success' => false, 'message' => 'Passwords do not match']);
         }
 
-        $createUser = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'), 'On');
-        if (!$createUser) {
-            $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
-            $createUser = $existUserData['user_id'] ?? false;
-            $existUserData['role_id'] = Role::getRoleByUserId($createUser);
-            if ($createUser) {
-                CacheSystemManager::writeUser($createUser, [
-                    'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'],
-                    'active'   => 1,
-                    'role'     => $existUserData['role_id'],
-                    'is_admin' => 'On',
-                ]);
-            }
+        try {
+
+            $createUser = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'), 'On');
+        } catch (Throwable $exception) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
         }
+        try {
+            if (!$createUser) {
+                $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
+                $createUser = $existUserData['user_id'] ?? false;
+                $existUserData['role_id'] = Role::getRoleByUserId($createUser);
+                if ($createUser) {
+                    CacheSystemManager::writeUser($createUser, [
+                        'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'],
+                        'active'   => 1,
+                        'role'     => $existUserData['role_id'],
+                        'is_admin' => 'On',
+                    ]);
+                }
+            }
+        } catch (Throwable $exception) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+        }
+
 
         if (!$createUser) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
-            http_response_code(418);
-            throw new Exception('Could not create admin user');
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => 'Could not create admin user']);
         }
 
         try {
@@ -259,21 +313,22 @@ class Installer extends Setup
             unlink($includesFile);
             unlink($dbConfigFile);
             unlink($userManagementFile);
-            echo sprintf(
+            http_response_code(500);
+            return json_encode(['success' => false, 'message' => sprintf(
                 '<div class="alert alert-danger alert-dismissible fade show mt-2">%s%s</div>',
                 '<h4 class="alert-heading">Could not create private or public keys files.</h4>',
                 '<p> For security reasons, the installation has been rolled back. Please make sure you can run shell commands, or alternatively, create the folder system/data/storage/jwt/,
          and run the following commands in the command line: shell_exec("openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048");
                                                              shell_exec("openssl rsa -pubout -in private_key.pem -out public_key.pem");</p>'
-            );
-            die;
+            )]);
         }
 
         $user = new User($createUser);
         $user->login($userName, $password);
         $user->retrieveUserInfoFromFile();
         JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
-        return 'redirect';
+        http_response_code(200);
+        return json_encode(['success' => true]);
     }
 
     /**
@@ -384,7 +439,6 @@ class Installer extends Setup
         }
 
         if (!is_string($this->dbConfig['db_type']) || strlen($this->dbConfig['db_type']) < 1) {
-            http_response_code(418);
             throw new Exception('Please select a database type.');
         }
 
@@ -467,7 +521,6 @@ class Installer extends Setup
             $this->logger->critical('Exception trying to create database');
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
-            http_response_code(418);
             throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
 
