@@ -437,10 +437,11 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
         </div>
     </section>
 </main>
-<script defer src="../assets/js/install.js"></script>
-<script defer src="../assets/js/install_step_one.js"></script>
-<script defer src="../assets/js/install_step_two.js"></script>
-<script defer src="../assets/js/install_step_three.js"></script>
+<script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="../assets/js/install.js"></script>
+<script src="../assets/js/install_step_one.js"></script>
+<script src="../assets/js/install_step_two.js"></script>
+<script src="../assets/js/install_step_three.js"></script>
 </body>
 
 </html>
