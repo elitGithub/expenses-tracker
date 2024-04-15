@@ -34,6 +34,11 @@ if (DEBUG) {
 
 $system = new System();
 $installer = new Installer($system);
+
+if (isset($_POST['sql_server']) && isset($_POST['sql_type']) && isset($_POST['admin_password'])) {
+    die($installer->startInstall());
+}
+
 ?>
 
 
@@ -66,9 +71,7 @@ $installer = new Installer($system);
         </div>
     </div>
 </nav>
-<?php
-if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST['admin_password'])) {
-?>
+
 <main role="main">
     <section id="content">
         <div class="container shadow-lg p-5 mt-5 bg-light-subtle">
@@ -413,18 +416,6 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                 </div>
                 <!-- end previous / next buttons -->
             </form>
-            <?php
-            } else { ?>
-                <div class="row" id="done">
-                    <div class="col-12">
-                        <h3 class="mb-3">Installation</h3>
-                        <?php
-                        echo $installer->startInstall();
-                        ?>
-                    </div>
-                </div>
-                <?php
-            } ?>
             <div class="control">
                 <?php
                 $installer->checkFilesystemPermissions();

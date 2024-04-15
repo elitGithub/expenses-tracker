@@ -91,7 +91,7 @@ function nextStep() {
         .then(data => {
             console.log('response', data);
             if (data.success) {
-                window.location.href = response.url;
+                window.location.href = data.url;
             }
         })
         .catch(error => {

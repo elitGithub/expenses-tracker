@@ -50,7 +50,7 @@ class PermissionsSeed
         foreach (static::$hierarchyTree as $role => $children) {
             // Insert the parent role if it hasn't been inserted yet and get its id and path
             if (!array_key_exists($role, $roleIds)) {
-                $adb->pquery("INSERT INTO `$tableName` (`role_name`, `parent_id`, `path`) VALUES (?, NULL, '');", [$role]);
+                $adb->pquery("INSERT INTO `$tableName` (`role_name`, `parent_id`, `path`) VALUES (?, NULL, '') ON DUPLICATE KEY UPDATE `role_name` = ?;", [$role, $role]);
                 $roleIds[$role] = $adb->getLastInsertID();
                 // After inserting, update the path with the new role_id
                 $rolePaths[$role] = $roleIds[$role] . '::';
@@ -60,8 +60,8 @@ class PermissionsSeed
             // Insert children roles
             foreach ($children as $child) {
                 if (!array_key_exists($child, $roleIds)) {
-                    $adb->pquery("INSERT INTO `$tableName` (`role_name`, `parent_id`, `path`) VALUES (?, ?, ?);",
-                                 [$child, $roleIds[$role], $rolePaths[$role]]);
+                    $adb->pquery("INSERT INTO `$tableName` (`role_name`, `parent_id`, `path`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `role_name` = ?, `parent_id` = ?, `path` = ?;",
+                                 [$child, $roleIds[$role], $rolePaths[$role], $child, $roleIds[$role], $rolePaths[$role]]);
                     $roleIds[$child] = $adb->getLastInsertID();
                     // Update path for the newly inserted child
                     $rolePaths[$child] = $rolePaths[$role] . $roleIds[$child] . '::';

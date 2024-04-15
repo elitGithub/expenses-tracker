@@ -71,12 +71,7 @@ class CacheSystemManager
                 return;
 
             case 'default':
-                $key =  mb_substr($key, 0, 15);
-                $newData = [
-                    $key => 0,
-                    'token' => $data,
-                ];
-                self::writeFile($key, $newData, $expiration);
+                self::writeFile($key, $data, $expiration);
                 return;
             default:
                 throw new Exception('Unsupported backend specified.');
@@ -93,7 +88,7 @@ class CacheSystemManager
     private static function writeFile($key, array $data, $expiration = null)
     {
         $fileName = EXTR_ROOT_DIR . '/system/data/' . $key .'.txt';
-        file_put_contents($fileName, serialize($data));
+        $res = file_put_contents($fileName, serialize($data));
         if (is_int($expiration)) {
             $expiryFile =  EXTR_ROOT_DIR . '/system/data/' . 'expirations.php';
 
@@ -156,12 +151,7 @@ class CacheSystemManager
                 }
 
             case 'default':
-                $key =  mb_substr($key, 0, 15);
-                $newData = [
-                    $key => 0,
-                    'token' => $data,
-                ];
-                self::writeFile($key, $newData, $expiration);
+                self::writeFile($key, $data, $expiration);
                 return true;
 
             default:
@@ -287,7 +277,7 @@ class CacheSystemManager
             $rolePermissionsArray[] = $row;
         }
         $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY;
-        self::hashWrite($key, self::PERMISSION_HASH_KEY, $rolePermissionsArray);
+        self::hashWrite($key,self::PERMISSION_HASH_KEY, $rolePermissionsArray);
         $result = file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php',
                           '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
         if ($result === false) {

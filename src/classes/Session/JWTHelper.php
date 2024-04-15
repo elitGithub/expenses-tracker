@@ -487,8 +487,12 @@ class JWTHelper
     private static function addToBlacklist($token)
     {
         $storedValue = self::$jwt_configuration['expired_token_prefix'] . $token;
-
-        CacheSystemManager::write($storedValue, $token, 86400);
+// $key, $data, ?int $expiration = null
+        $storedValue = mb_substr($storedValue, 0, 70);
+        $data = [
+            'token' => $token,
+        ];
+        CacheSystemManager::write($storedValue, $data, 86400);
     }
 
     /**

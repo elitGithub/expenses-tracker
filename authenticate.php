@@ -15,8 +15,8 @@ if (!file_exists('system/installation_includes.php')) {
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Collect and sanitize the input
-    $username = Filter::filterInput(INPUT_POST, 'username', FILTER_SANITIZE_STRING);
-    $password = Filter::filterInput(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
+    $username = Filter::filterInput(INPUT_POST, 'username', FILTER_SANITIZE_SPECIAL_CHARS);
+    $password = Filter::filterInput(INPUT_POST, 'password', FILTER_SANITIZE_SPECIAL_CHARS);
 
     $user = new User();
     if ($_SESSION['formToken']['login'] !== $app_unique_key) {

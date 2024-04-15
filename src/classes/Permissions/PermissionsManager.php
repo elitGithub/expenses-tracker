@@ -29,7 +29,7 @@ class PermissionsManager
         }
 
         $userData = CacheSystemManager::readUser($userId);
-        if ($userData['active'] !== 1) {
+        if (!is_array($userData) || $userData['active'] !== 1) {
             throw new \Exception('Inactive user');
         }
 

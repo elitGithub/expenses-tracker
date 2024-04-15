@@ -236,7 +236,6 @@ class Installer extends Setup
         }
         $this->createConfigFiles();
         try {
-
             $this->installPermissions();
         } catch (Throwable $exception) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
@@ -334,7 +333,7 @@ class Installer extends Setup
         $user->retrieveUserInfoFromFile(true);
         JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
         http_response_code(200);
-        return json_encode(['success' => true]);
+        return json_encode(['success' => true, 'url' => '/']);
     }
 
     /**
