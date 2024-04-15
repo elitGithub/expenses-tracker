@@ -53,8 +53,11 @@ function updateFormState() {
     const currentInputs = document.querySelector(`[data-form-section="${currentSection}"] [data-step="${currentStep}"]`).querySelectorAll('input, select, textarea');
     currentInputs.forEach(input => {
         // Adjust this logic based on how your formState keys are structured and related to input names
-        // check if the input has data-default-* attribute and set the value to that, otherwise set it to empty value
-        formState[input.name] = input.value || input.getAttribute('data-default-value');
+        // check if the input has data-default-value attribute and set the value to that, otherwise set it to empty value
+        const dataDefaultValue = input.getAttribute('data-default-value');
+        const updatedValue = input.value || dataDefaultValue;
+        formState[input.name] = updatedValue;
+        input.value = updatedValue;
     });
 }
 
@@ -73,7 +76,37 @@ function nextStep() {
         return updateVisibility();
     }
 
-    form.submit();
+
+    fetch(form.getAttribute('action'), {
+        method: form.getAttribute('method'),
+        body: new FormData(form)
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Error: ' + response.status);
+            }
+        })
+        .then(data => {
+            console.log('response', data);
+            if (data.success) {
+                window.location.href = response.url;
+            }
+        })
+        .catch(error => {
+            console.error('error', error);
+
+            const errorElement = document.createElement('div');
+            errorElement.classList.add('alert', 'alert-danger');
+            errorElement.textContent = error.message;
+            form.append(errorElement);
+
+            setTimeout(() => {
+                errorElement.remove();
+            }, 5000);
+        });
+
     updateVisibility();
     return; // End the navigation if there are no more sections/steps
 }
