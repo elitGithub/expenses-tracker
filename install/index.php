@@ -419,11 +419,7 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                     <div class="col-12">
                         <h3 class="mb-3">Installation</h3>
                         <?php
-                        try {
-                            echo $installer->startInstall();
-                        } catch (Exception $e) {
-                            echo "><strong>Error:</strong> {$e->getMessage()}. Please go <a id='goBackInstall' href=>Back and review the installation information.</a>" . "</p>\n";
-                        }
+                        echo $installer->startInstall();
                         ?>
                     </div>
                 </div>

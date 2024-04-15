@@ -75,6 +75,9 @@ class Role
      */
     public static function getRoleByUserId($userId)
     {
+        if (!$userId) {
+            return false;
+        }
         if (isset(self::$userToRole[$userId])) {
             return self::$userToRole[$userId];
         }

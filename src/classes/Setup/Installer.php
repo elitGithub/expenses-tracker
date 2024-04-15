@@ -278,6 +278,12 @@ class Installer extends Setup
         try {
             if (!$createUser) {
                 $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
+                if (!$existUserData) {
+                    $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+                    unlink($includesFile);
+                    http_response_code(500);
+                    return json_encode(['success' => false, 'message' => 'Cannot create user']);
+                }
                 $createUser = $existUserData['user_id'] ?? false;
                 $existUserData['role_id'] = Role::getRoleByUserId($createUser);
                 if ($createUser) {
@@ -325,7 +331,7 @@ class Installer extends Setup
 
         $user = new User($createUser);
         $user->login($userName, $password);
-        $user->retrieveUserInfoFromFile();
+        $user->retrieveUserInfoFromFile(true);
         JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
         http_response_code(200);
         return json_encode(['success' => true]);
