@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 
 use Permissions\PermissionsManager;
+use Permissions\Role;
 
 if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
     header('Location: index.php');
 }
 
-\Permissions\Role::getChildRoles($user);
 ?>
 
 <!-- Modal trigger button with Bootstrap 5 data attributes -->
@@ -38,7 +38,7 @@ if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
                         </thead>
                         <tbody>
 <!--                        --><?php
-//                        foreach ($rows as $row): ?>
+//                        foreach ($users as $row): ?>
 <!--                            <tr>-->
 <!--                                <td>--><?php
 //                                    echo $row['expense_category_name']; ?><!--</td>-->
@@ -91,3 +91,32 @@ if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
 
 require_once 'modals.php';
 ?>
+<script>
+  const toggleUserPassword = document.getElementById('toggleUserPassword');
+  const toggleRetypePassword = document.getElementById('toggleRetypePassword');
+  const showUserPassword = document.getElementById('showUserPassword');
+  const showRetypePassword = document.getElementById('showRetypePassword');
+  const adminPassword = document.getElementById('password');
+  const passwordRetype = document.getElementById('password_retype');
+  toggleUserPassword?.addEventListener('click', () => {
+    if (adminPassword.type === 'password') {
+      adminPassword.type = 'text';
+      showAdminPassword.className = 'fa fa-eye-slash';
+    } else {
+      adminPassword.type = 'password';
+      showAdminPassword.className = 'fa fa-eye';
+    }
+  });
+  toggleRetypePassword?.addEventListener('click', () => {
+    if (passwordRetype.type === 'password') {
+      passwordRetype.type = 'text';
+      showRetypePassword.className = 'fa fa-eye-slash';
+    } else {
+      passwordRetype.type = 'password';
+      showRetypePassword.className = 'fa fa-eye';
+    }
+  });
+
+
+</script>
+

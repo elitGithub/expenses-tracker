@@ -17,7 +17,7 @@ if (!file_exists('system/installation_includes.php')) {
 
 require_once 'header.php';
 $action = Filter::filterInput(INPUT_GET, 'action', FILTER_SANITIZE_SPECIAL_CHARS, 'home');
-if (!is_file("$action.php")) {
+if (!is_file("actions/$action.php")) {
     $action = 'home';
 }
 ?>
@@ -45,7 +45,7 @@ if (!is_file("$action.php")) {
                 }
                 ?>
                 <?php
-                include("$action.php"); ?>
+                include("actions/$action.php"); ?>
             </div>
 
 

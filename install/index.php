@@ -421,15 +421,10 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                         <?php
                         try {
                             $installer->startInstall();
-                            echo "<p class=\"alert alert-success\">
-                Wow, it looks like the installation worked like a charm. This is pretty cool, isn't it? :-)
-            </p>
-
-            <p>
-                You can visit <a href=\"../index.php\">your version of Expect Tracker.</a>
+                            echo ">your version of Expect Tracker.</a>
             </p>";
                         } catch (Exception $e) {
-                            echo "<p class=\"alert alert-danger\"><strong>Error:</strong> {$e->getMessage()}. Please go <a id='goBackInstall' href=\"../index.php\">Back and review the installation information.</a>" . "</p>\n";
+                            echo "><strong>Error:</strong> {$e->getMessage()}. Please go <a id='goBackInstall' href=>Back and review the installation information.</a>" . "</p>\n";
                         }
                         ?>
                     </div>

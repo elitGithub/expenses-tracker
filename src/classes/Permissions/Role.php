@@ -14,6 +14,7 @@ class Role
 {
     private static array $roleIdByName = [];
     private static array $userToRole   = [];
+    private static array $systemRoles  = [];
 
     /**
      * @param  string  $roleName
@@ -35,19 +36,35 @@ class Role
         return self::$roleIdByName[$roleName];
     }
 
-    public static function getChildRoles(User $user)
+    /**
+     * @param  \User  $user
+     * @param  bool   $returnHtml
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public static function getChildRoles(User $user, bool $returnHtml = false): array
     {
+        if (count(self::$systemRoles)) {
+            return $returnHtml ? self::$systemRoles['options'] : self::$systemRoles['list'];
+        }
         $adb = PearDatabase::getInstance();
         $tables = $adb->getTablesConfig();
         $pathQuery = "SELECT `path` FROM `{$tables['roles_table_name']}` WHERE role_id = ?";
         $pathResult = $adb->pquery($pathQuery, [$user->role]);
         $pathRow = $adb->query_result($pathResult, 'path');
-        $query = "SELECT * FROM `{$tables['roles_table_name']}` WHERE `path` LIKE ?;";
-
-        $res = $adb->pquery($query, [$pathRow]);
-        while ($row = $adb->fetchByAssoc($res)) {
-            var_dump($row);
+        $where = ' ';
+        // Admin can see their own role, too.
+        if (!PermissionsManager::isAdmin($user)) {
+            $where = ' AND `role_id` != ' . $user->role;
         }
+        $query = "SELECT * FROM `{$tables['roles_table_name']}` WHERE `path` LIKE ? $where;";
+        $res = $adb->pquery($query, ["%$pathRow%"]);
+        while ($row = $adb->fetchByAssoc($res)) {
+            self::$systemRoles['list'][] = $row;
+            self::$systemRoles['options'][] = "<option value='{$row['role_id']}'>{$row['role_name']}</option>";
+        }
+        return $returnHtml ? self::$systemRoles['options'] : self::$systemRoles['list'];
     }
 
     /**
