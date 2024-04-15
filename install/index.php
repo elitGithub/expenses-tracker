@@ -420,9 +420,7 @@ if (!isset($_POST['sql_server']) && !isset($_POST['sql_type']) && !isset($_POST[
                         <h3 class="mb-3">Installation</h3>
                         <?php
                         try {
-                            $installer->startInstall();
-                            echo ">your version of Expect Tracker.</a>
-            </p>";
+                            echo $installer->startInstall();
                         } catch (Exception $e) {
                             echo "><strong>Error:</strong> {$e->getMessage()}. Please go <a id='goBackInstall' href=>Back and review the installation information.</a>" . "</p>\n";
                         }

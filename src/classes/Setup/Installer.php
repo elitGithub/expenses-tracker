@@ -155,7 +155,7 @@ class Installer extends Setup
      *
      * @throws \Throwable
      */
-    public function startInstall(array $setup = null): void
+    public function startInstall(array $setup = null)
     {
         global $adb, $dbConfig, $default_language;
         $useRootUserForSystem = Filter::filterInput(INPUT_POST, 'useSameUser', FILTER_VALIDATE_BOOLEAN, false);
@@ -196,6 +196,8 @@ class Installer extends Setup
             global $adb;
             $adb = $this->adb;
         } catch (Throwable $exception) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
             throw new Exception($exception->getMessage());
         }
         $this->connectCache();
@@ -210,10 +212,14 @@ class Installer extends Setup
         $password = Filter::filterInput(INPUT_POST, 'admin_password', FILTER_SANITIZE_SPECIAL_CHARS);
         $confirmPassword = Filter::filterInput(INPUT_POST, 'password_retype', FILTER_SANITIZE_SPECIAL_CHARS);
         if (is_null($password) || is_null($confirmPassword)) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
             throw new Exception('Please make sure you typed password and confirm password');
         }
 
         if (strcmp($password, $confirmPassword) !== 0) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
             throw new Exception('Passwords do not match');
         }
 
@@ -233,6 +239,8 @@ class Installer extends Setup
         }
 
         if (!$createUser) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
             throw new Exception('Could not create admin user');
         }
 
@@ -259,6 +267,7 @@ class Installer extends Setup
         $user->login($userName, $password);
         $user->retrieveUserInfoFromFile();
         JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
+        return 'redirect';
     }
 
     /**
@@ -424,6 +433,8 @@ class Installer extends Setup
             $adb = $masterDb;
             $this->adb = $masterDb;
         } catch (Throwable $exception) {
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
             $this->logger->critical('Exception trying to connect to DB', ['exception' => $exception]);
             throw new Exception($exception->getMessage());
         }
@@ -445,6 +456,8 @@ class Installer extends Setup
         $dbCreated = $dbCreator->createDatabase();
         if (!$dbCreated) {
             $this->logger->critical('Exception trying to create database');
+            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+            unlink($includesFile);
             throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
 
