@@ -78,24 +78,28 @@ class Installer extends Setup
     public function checkBasicStuff(): void
     {
         if (!$this->checkMinimumPhpVersion()) {
+            http_response_code(418);
             throw new Exception(
                 sprintf('Sorry, but you need PHP %s or later!', System::VERSION_MINIMUM_PHP)
             );
         }
 
         if (!function_exists('date_default_timezone_set')) {
+            http_response_code(418);
             throw new Exception(
                 'Sorry, but setting a default timezone does not work in your environment!'
             );
         }
 
         if (!$this->system->checkDatabase()) {
+            http_response_code(418);
             throw new Exception(
                 'No supported database detected!'
             );
         }
 
         if (!$this->system->checkRequiredExtensions()) {
+            http_response_code(418);
             throw new Exception(
                 sprintf(
                     'Some required PHP extensions are missing: %s',
@@ -105,9 +109,7 @@ class Installer extends Setup
         }
 
         if (!$this->system->checkInstallation()) {
-            throw new Exception(
-                'Expenses Tracker is already installed!'
-            );
+            header('Location: /');
         }
     }
 
@@ -198,6 +200,7 @@ class Installer extends Setup
         } catch (Throwable $exception) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
+            http_response_code(418);
             throw new Exception($exception->getMessage());
         }
         $this->connectCache();
@@ -214,12 +217,14 @@ class Installer extends Setup
         if (is_null($password) || is_null($confirmPassword)) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
+            http_response_code(418);
             throw new Exception('Please make sure you typed password and confirm password');
         }
 
         if (strcmp($password, $confirmPassword) !== 0) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
+            http_response_code(418);
             throw new Exception('Passwords do not match');
         }
 
@@ -241,6 +246,7 @@ class Installer extends Setup
         if (!$createUser) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
+            http_response_code(418);
             throw new Exception('Could not create admin user');
         }
 
@@ -378,6 +384,7 @@ class Installer extends Setup
         }
 
         if (!is_string($this->dbConfig['db_type']) || strlen($this->dbConfig['db_type']) < 1) {
+            http_response_code(418);
             throw new Exception('Please select a database type.');
         }
 
@@ -414,6 +421,7 @@ class Installer extends Setup
                 $setup['dbServer'] ?? $this->dbConfig['db_host']
             );
             if (is_null($this->dbConfig['db_host'])) {
+                http_response_code(418);
                 throw new Exception('Please add a SQLite database filename.');
             }
         }
@@ -436,6 +444,7 @@ class Installer extends Setup
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
             $this->logger->critical('Exception trying to connect to DB', ['exception' => $exception]);
+            http_response_code(418);
             throw new Exception($exception->getMessage());
         }
         return $masterDb;
@@ -458,6 +467,7 @@ class Installer extends Setup
             $this->logger->critical('Exception trying to create database');
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
+            http_response_code(418);
             throw new Exception("Looks like the database doesn't exist. Please create it or make sure that the root user may create databases.");
         }
 
