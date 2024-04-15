@@ -278,6 +278,12 @@ class Installer extends Setup
         try {
             if (!$createUser) {
                 $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
+                if (!$existUserData) {
+                    $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+                    unlink($includesFile);
+                    http_response_code(500);
+                    return json_encode(['success' => false, 'message' => 'Cannot create user']);
+                }
                 $createUser = $existUserData['user_id'] ?? false;
                 $existUserData['role_id'] = Role::getRoleByUserId($createUser);
                 if ($createUser) {
