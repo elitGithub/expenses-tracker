@@ -90,12 +90,21 @@ function nextStep() {
         })
         .then(data => {
             console.log('response', data);
-            // if (data.success) {
-            //     window.location.href = response.url;
-            // }
+            if (data.success) {
+                window.location.href = response.url;
+            }
         })
         .catch(error => {
             console.error('error', error);
+
+            const errorElement = document.createElement('div');
+            errorElement.classList.add('alert', 'alert-danger');
+            errorElement.textContent = error.message;
+            form.append(errorElement);
+
+            setTimeout(() => {
+                errorElement.remove();
+            }, 5000);
         });
 
     updateVisibility();
