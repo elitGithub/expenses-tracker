@@ -288,8 +288,11 @@ class CacheSystemManager
         }
         $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY;
         self::hashWrite($key, self::PERMISSION_HASH_KEY, $rolePermissionsArray);
-        file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php',
+        $result = file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php',
                           '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
+        if ($result === false) {
+            throw new Exception('Unable to write permissions file.');
+        }
     }
 
     /**

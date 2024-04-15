@@ -154,7 +154,7 @@ class User
     /**
      * @return void
      */
-    public function retrieveUserInfoFromFile()
+    public function retrieveUserInfoFromFile($ajax = false)
     {
         if (!$this->id && $this->session->sessionHasKey('authenticated_user_id')) {
             $this->id = $this->session->sessionReadKey('authenticated_user_id');
@@ -168,6 +168,9 @@ class User
                 $this->permissions[$actionId] = $isEnabled;
             }
         } catch (Throwable $exception) {
+            if ($ajax) {
+                die(json_encode(['success' => false, 'message' => $exception->getMessage()]));
+            }
             die('Privileges not found.');
         }
     }

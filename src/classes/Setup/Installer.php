@@ -331,7 +331,7 @@ class Installer extends Setup
 
         $user = new User($createUser);
         $user->login($userName, $password);
-        $user->retrieveUserInfoFromFile();
+        $user->retrieveUserInfoFromFile(true);
         JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
         http_response_code(200);
         return json_encode(['success' => true]);
