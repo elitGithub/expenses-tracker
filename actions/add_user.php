@@ -3,13 +3,11 @@
 declare(strict_types = 1);
 
 use Core\Upload;
-use ExpenseTracker\Expense;
 use Models\UserModel;
 use Permissions\PermissionsManager;
 use Permissions\Role;
 
 
-$expense = new Expense();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && PermissionsManager::isPermittedAction('add_user', $user) && password_verify($_POST['formToken'], $_SESSION['formToken']['add_user_token'])) {
     $userModel = new UserModel();
     $userName = Filter::filterInput(INPUT_POST, 'user_name', FILTER_SANITIZE_SPECIAL_CHARS);

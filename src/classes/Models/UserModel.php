@@ -81,6 +81,7 @@ class UserModel
             return $id;
         }
 
+        $_SESSION['errors'][] = 'User already exists.';
         return false;
     }
 

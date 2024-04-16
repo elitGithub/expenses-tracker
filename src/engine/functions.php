@@ -205,7 +205,7 @@ function is_really_writable($file)
      * write a file then read it. Bah...
      */
     if (is_dir($file)) {
-        $file = rtrim($file, '/') . '/' . md5((string)mt_rand());
+        $file = rtrim($file, '/') . '/' . md5((string) mt_rand());
         if (($fp = @fopen($file, 'ab')) === false) {
             return false;
         }
@@ -219,5 +219,22 @@ function is_really_writable($file)
     }
 
     fclose($fp);
-    return TRUE;
+    return true;
+}
+
+function &get_mimes()
+{
+    static $_mimes;
+
+    if (empty($_mimes)) {
+        $_mimes = file_exists(EXTR_ROOT_DIR . '/system/mimes.php')
+            ? include(EXTR_ROOT_DIR . '/system/mimes.php')
+            : [];
+
+        if (file_exists(EXTR_ROOT_DIR . '/config/' . ENVIRONMENT . '/mimes.php')) {
+            $_mimes = array_merge($_mimes, include(EXTR_ROOT_DIR . '/config/' . ENVIRONMENT . '/mimes.php'));
+        }
+    }
+
+    return $_mimes;
 }

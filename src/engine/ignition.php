@@ -19,6 +19,8 @@ const USER_AVATARS_UPLOAD_DIR = EXTR_ROOT_DIR . '/system/user/images/';
 const SITE_IMAGES_UPLOAD_DIR = EXTR_ROOT_DIR . '/system/user/attachments/';
 const USER_AVATARS_FILE_URL = EXTR_ROOT_DIR . '/system/user/images/';
 
+const ENVIRONMENT = 'production';
+
 const ALLOWED_MIME_TYPES = [
     'jpg' => 'image/jpeg',
     'png' => 'image/png',

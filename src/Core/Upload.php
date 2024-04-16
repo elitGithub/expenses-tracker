@@ -94,9 +94,15 @@ class Upload
      *
      * @var    string
      */
-    protected string $file_name    = '';
-    protected string $upload_path  = '';
-    public bool      $mod_mime_fix = true;
+    protected string $file_name   = '';
+    protected string $upload_path = '';
+    /**
+     * MIME types list
+     *
+     * @var    array
+     */
+    protected array $_mimes       = [];
+    public bool     $mod_mime_fix = true;
     /**
      * Force filename extension to lowercase
      *
@@ -120,6 +126,7 @@ class Upload
     public function __construct()
     {
         $this->security = new Security();
+        $this->_mimes =& get_mimes();
     }
 
     /**
@@ -142,11 +149,6 @@ class Upload
      */
     private function upload(string $field = 'image'): bool
     {
-        if (!($_FILES['error'] === UPLOAD_ERR_OK)) {
-            $_SESSION['errors'][] = self::UPLOAD_ERRORS[$_FILES['error']];
-            return false;
-        }
-
         $_file = null;
         if (isset($_FILES[$field])) {
             $_file = $_FILES[$field];
@@ -202,7 +204,6 @@ class Upload
                     $_SESSION['errors'][] = self::UPLOAD_ERRORS[UPLOAD_ERR_NO_FILE];
                     break;
             }
-
             return false;
         }
 
@@ -586,12 +587,14 @@ class Upload
 
         $ext = strtolower(ltrim($this->file_ext, '.'));
 
-        if (!in_array($ext, ALLOWED_MIME_TYPES, true)) {
+        if (!in_array($ext, ALLOWED_MIME_TYPES, true) && !isset(ALLOWED_MIME_TYPES[$ext])) {
+            $_SESSION['errors'][] = 'Not allowed mime type ' . $ext;
             return false;
         }
 
         // Images get some additional checks
         if (in_array($ext, ['gif', 'jpg', 'jpeg', 'jpe', 'png'], true) && @getimagesize($this->file_temp) === false) {
+            $_SESSION['errors'][] = 'Not allowed mime type ' . $ext;
             return false;
         }
 
