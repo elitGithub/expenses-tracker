@@ -7,6 +7,6 @@
 ----
 
 Backend:
-1. Finish admin user set up ----- DONE
+1. Finish admin user set up -- DONE
 2. Finish the installation set up -- DONE
-3. StartInstall method too much repeated code, simplify
+3. StartInstall method too much repeated code, simplify -- DONE

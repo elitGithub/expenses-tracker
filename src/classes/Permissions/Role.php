@@ -68,6 +68,21 @@ class Role
     }
 
     /**
+     * @param  int  $roleId
+     *
+     * @return array|mixed|string|string[]|null
+     * @throws \Exception
+     */
+    public static function validateRole(int $roleId)
+    {
+        $adb = PearDatabase::getInstance();
+        $tables = $adb->getTablesConfig();
+        $query = "SELECT `role_name` FROM `{$tables['roles_table_name']}` WHERE role_id = ?";
+        $result = $adb->preparedQuery($query, [$roleId]);
+        return $adb->query_result($result, 0, 'role_name');
+    }
+
+    /**
      * @param $userId
      *
      * @return int|mixed

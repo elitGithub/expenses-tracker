@@ -151,6 +151,20 @@ class Installer extends Setup
     }
 
     /**
+     * @param  int          $code
+     * @param  bool         $success
+     * @param  string       $message
+     * @param  string|null  $url
+     *
+     * @return false|string
+     */
+    private function jsonResponse(int $code, bool $success, string $message, ?string $url = null)
+    {
+        http_response_code($code);
+        return json_encode(['success' => $success, 'message' => $message, 'url' => $url]);
+    }
+
+    /**
      * Starts the installation.
      *
      * @param  array|null  $setup
@@ -164,16 +178,16 @@ class Installer extends Setup
 
             $masterDb = $this->setUpMasterDB($setup);
         } catch (Throwable $exception) {
-            http_response_code(418);
-            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+            $this->unlinkInstallationFiles();
+            return $this->jsonResponse(418, false, $exception->getMessage());
         }
 
         try {
 
             $this->createDbAndTables($masterDb);
         } catch (Throwable $exception) {
-            http_response_code(418);
-            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+            $this->unlinkInstallationFiles();
+            return $this->jsonResponse(418, false, $exception->getMessage());
         }
 
         if (!$useRootUserForSystem) {
@@ -195,8 +209,8 @@ class Installer extends Setup
                     $masterDb->preparedQuery('FLUSH PRIVILEGES;');
                 }
             } catch (Throwable $exception) {
-                http_response_code(503);
-                return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+                $this->unlinkInstallationFiles();
+                return $this->jsonResponse(503, false, $exception->getMessage());
             }
 
         }
@@ -212,8 +226,8 @@ class Installer extends Setup
                                           $this->dbConfig['db_pass'],
                                           $this->dbConfig['db_port']);
         } catch (Throwable $exception) {
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+            $this->unlinkInstallationFiles();
+            return $this->jsonResponse(500, false, $exception->getMessage());
         }
 
         try {
@@ -223,16 +237,13 @@ class Installer extends Setup
         } catch (Throwable $exception) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+            return $this->jsonResponse(500, false, $exception->getMessage());
         }
         try {
             $this->connectCache();
         } catch (Throwable $exception) {
-            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
-            unlink($includesFile);
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+            $this->unlinkInstallationFiles();
+            return $this->jsonResponse(500, false, $exception->getMessage());
         }
         $this->createConfigFiles();
         try {
@@ -240,100 +251,54 @@ class Installer extends Setup
         } catch (Throwable $exception) {
             $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
             unlink($includesFile);
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
-        }
-        $userModel = new UserModel();
-
-        $email = Filter::filterInput(INPUT_POST, 'admin_email', FILTER_SANITIZE_SPECIAL_CHARS);
-        $userName = Filter::filterInput(INPUT_POST, 'admin_user', FILTER_SANITIZE_SPECIAL_CHARS);
-        $firstName = Filter::filterInput(INPUT_POST, 'admin_first_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
-        $lastName = Filter::filterInput(INPUT_POST, 'admin_last_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
-        $password = Filter::filterInput(INPUT_POST, 'admin_password', FILTER_SANITIZE_SPECIAL_CHARS);
-        $confirmPassword = Filter::filterInput(INPUT_POST, 'password_retype', FILTER_SANITIZE_SPECIAL_CHARS);
-        if (is_null($password) || is_null($confirmPassword)) {
-            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
-            unlink($includesFile);
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => 'Please make sure you typed password and confirm password']);
-        }
-
-        if (strcmp($password, $confirmPassword) !== 0) {
-            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
-            unlink($includesFile);
-            http_response_code(418);
-            return json_encode(['success' => false, 'message' => 'Passwords do not match']);
-        }
-
-        try {
-
-            $createUser = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'), 'On');
-        } catch (Throwable $exception) {
-            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
-            unlink($includesFile);
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
+            return $this->jsonResponse(500, false, $exception->getMessage());
         }
         try {
-            if (!$createUser) {
-                $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
-                if (!$existUserData) {
-                    $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
-                    unlink($includesFile);
-                    http_response_code(500);
-                    return json_encode(['success' => false, 'message' => 'Cannot create user']);
-                }
-                $createUser = $existUserData['user_id'] ?? false;
-                $existUserData['role_id'] = Role::getRoleByUserId($createUser);
-                if ($createUser) {
-                    CacheSystemManager::writeUser($createUser, [
-                        'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'],
-                        'active'   => 1,
-                        'role'     => $existUserData['role_id'],
-                        'is_admin' => 'On',
-                    ]);
-                }
-            }
+            $userName = Filter::filterInput(INPUT_POST, 'admin_user', FILTER_SANITIZE_SPECIAL_CHARS);
+            $password = Filter::filterInput(INPUT_POST, 'admin_password', FILTER_SANITIZE_SPECIAL_CHARS);
+            $userId = $this->createUser($userName, $password);
         } catch (Throwable $exception) {
-            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
-            unlink($includesFile);
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => $exception->getMessage()]);
-        }
-
-
-        if (!$createUser) {
-            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
-            unlink($includesFile);
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => 'Could not create admin user']);
+            $this->unlinkInstallationFiles();
+            return $this->jsonResponse($exception->getCode(), false, $exception->getMessage());
         }
 
         try {
             $this->system->generateJwtKeys();
         } catch (Throwable $exception) {
-            $dbConfigFile = EXTR_ROOT_DIR . '/system/config/database.php';
-            $userManagementFile = EXTR_ROOT_DIR . '/system/user/permissions.php';
-            $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
-            unlink($includesFile);
-            unlink($dbConfigFile);
-            unlink($userManagementFile);
-            http_response_code(500);
-            return json_encode(['success' => false, 'message' => sprintf(
+            $this->unlinkInstallationFiles();
+            return $this->jsonResponse(500, false, sprintf(
                 '<div class="alert alert-danger alert-dismissible fade show mt-2">%s%s</div>',
                 '<h4 class="alert-heading">Could not create private or public keys files.</h4>',
                 '<p> For security reasons, the installation has been rolled back. Please make sure you can run shell commands, or alternatively, create the folder system/data/storage/jwt/,
          and run the following commands in the command line: shell_exec("openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048");
                                                              shell_exec("openssl rsa -pubout -in private_key.pem -out public_key.pem");</p>'
-            )]);
+            ));
         }
 
-        $user = new User($createUser);
+        $user = new User($userId);
         $user->login($userName, $password);
         $user->retrieveUserInfoFromFile(true);
         JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
-        http_response_code(200);
-        return json_encode(['success' => true, 'url' => '/']);
+        return $this->jsonResponse(200, true, '', '/');
+    }
+
+    /**
+     * @return void
+     */
+    private function unlinkInstallationFiles()
+    {
+        $dbConfigFile = EXTR_ROOT_DIR . '/system/config/database.php';
+        $userManagementFile = EXTR_ROOT_DIR . '/system/user/permissions.php';
+        $includesFile = EXTR_ROOT_DIR . '/system/installation_includes.php';
+        if (is_file($includesFile)) {
+            unlink($includesFile);
+        }
+        if (is_file($dbConfigFile)) {
+            unlink($dbConfigFile);
+        }
+        if (is_file($userManagementFile)) {
+            unlink($userManagementFile);
+        }
     }
 
     /**
@@ -546,5 +511,54 @@ class Installer extends Setup
 
         $tablesFactory->checkTablesExist($tablePrefix, $this->adb);
     }
+
+    /**
+     * @param $userName
+     * @param $password
+     *
+     * @return bool|int|mixed
+     * @throws \Throwable
+     */
+    private function createUser($userName, $password) {
+        $userModel = new UserModel();
+
+        $email = Filter::filterInput(INPUT_POST, 'admin_email', FILTER_SANITIZE_SPECIAL_CHARS);
+        $firstName = Filter::filterInput(INPUT_POST, 'admin_first_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $lastName = Filter::filterInput(INPUT_POST, 'admin_last_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
+        $confirmPassword = Filter::filterInput(INPUT_POST, 'password_retype', FILTER_SANITIZE_SPECIAL_CHARS);
+        if (is_null($password) || is_null($confirmPassword)) {
+            throw new Exception('Please make sure you typed password and confirm password', 500);
+        }
+
+        if (strcmp($password, $confirmPassword) !== 0) {
+            throw new Exception('Passwords do not match', 500);
+        }
+
+        $userId = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'), 'On');
+        if (!$userId) {
+            $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
+            if (!$existUserData) {
+                throw new Exception('Cannot create user', 500);
+            }
+            $userId = $existUserData['user_id'] ?? false;
+            $existUserData['role_id'] = Role::getRoleByUserId($userId);
+            if ($userId) {
+                CacheSystemManager::writeUser($userId, [
+                    'userName' => $userName, 'name' => $existUserData['first_name'] . ' ' . $existUserData['last_name'],
+                    'active'   => 1,
+                    'role'     => $existUserData['role_id'],
+                    'is_admin' => 'On',
+                ]);
+            }
+        }
+
+
+        if (!$userId) {
+            throw new Exception('Could not create admin user', 500);
+        }
+
+        return $userId;
+    }
+
 
 }

@@ -174,14 +174,6 @@ class System
     }
 
     /**
-     * @return string
-     */
-    public static function getApiVersion(): string
-    {
-        return self::VERSION_API;
-    }
-
-    /**
      * @return bool
      */
     public function checkDatabase(): bool
