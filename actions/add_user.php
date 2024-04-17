@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     }
 
     try {
-        $userId = $userModel->createNew($email, $userName, $password, $firstName, $lastName, (int) $user->id, (int) $roleId, $isAdmin ? 'On' : 'Off');
+        $userId = $userModel->createNew($email, $userName, $password, $firstName, $lastName, (int) $current_user->id, (int) $roleId, $isAdmin ? 'On' : 'Off');
     } catch (Throwable $e) {
         $_SESSION['errors'][] = $e->getMessage();
         header('Location: ' . $_SERVER['HTTP_REFERER']);

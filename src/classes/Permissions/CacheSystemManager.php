@@ -270,19 +270,25 @@ class CacheSystemManager
      */
     public static function createPermissionsFile(PearDatabase $adb, string $rolePermissionsTable)
     {
-        global $permissionsConfig;
+
         $rolePermRes = $adb->query("SELECT * FROM `$rolePermissionsTable`;");
         $rolePermissionsArray = [];
         while ($row = $adb->fetchByAssoc($rolePermRes)) {
             $rolePermissionsArray[] = $row;
         }
-        $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY;
-        self::hashWrite($key,self::PERMISSION_HASH_KEY, $rolePermissionsArray);
+        self::refreshPermissionsInCache($rolePermissionsArray);
         $result = file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php',
                           '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
         if ($result === false) {
             throw new Exception('Unable to write permissions file.');
         }
+    }
+
+    public static function refreshPermissionsInCache(array $rolePermissionsArray)
+    {
+        global $permissionsConfig;
+        $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY;
+        self::hashWrite($key,self::PERMISSION_HASH_KEY, $rolePermissionsArray);
     }
 
     /**

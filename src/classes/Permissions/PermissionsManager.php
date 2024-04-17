@@ -102,6 +102,47 @@ class PermissionsManager
         return $adb->query_result($result, 0, 'action_id');
     }
 
+    /**
+     * @param $roleId
+     * @param $actionId
+     * @param $isEnabled
+     *
+     * @return bool
+     */
+    public static function updateActionForRole($roleId, $actionId, $isEnabled): bool
+    {
+        $adb = PearDatabase::getInstance();
+        $tables = $adb->getTablesConfig();
+        $query = "UPDATE `{$tables['role_permissions_table_name']}` SET `is_enabled` = ? WHERE `role_id` = ? AND `action_id` = ?";
+        $result = $adb->pquery($query, [$isEnabled, $roleId, $actionId]);
+        if (!$result) {
+            return false;
+        }
+
+
+        return true;
+    }
+
+    /**
+     * @return void
+     */
+    public static function refreshPermissionsInCache()
+    {
+        $adb = PearDatabase::getInstance();
+        $tables = $adb->getTablesConfig();
+        $rolePermRes = $adb->query("SELECT * FROM `{$tables['role_permissions_table_name']}`;");
+        $rolePermissionsArray = [];
+        while ($row = $adb->fetchByAssoc($rolePermRes)) {
+            $rolePermissionsArray[] = $row;
+        }
+        CacheSystemManager::refreshPermissionsInCache($rolePermissionsArray);
+    }
+
+    /**
+     * @param  int  $roleId
+     *
+     * @return array
+     */
     public static function listAllPermissionsForRole(int $roleId): array
     {
         $adb = PearDatabase::getInstance();
