@@ -169,8 +169,16 @@ to protect sensitive data and prevent unauthorized access.
 ### Pre-Installation Conditions
 
 * Ensure your database system (MySQL, PostgreSQL, MariaDB) is installed.
-* Create a database user with permissions to create databases and tables.
-* For security, use a separate database user for the system with only read and write permissions to the specified
+* Make sure you have openSSL installed, and you can create private and public keys. 
+* Some database administrators disable shell_exec and exec functions. If these functions are disabled in your system, please run the following two commands inside the directory system/data/storage/jwt:
+* ``shell_exec("openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048");
+  shell_exec("openssl rsa -pubout -in private_key.pem -out public_key.pem')``
+* You should see two files called 'private_key.pem' and 'public_key.pem'.
+* If your script can run shell_exec - then you don't need to run the above two commands.
+* Please note that this instance is the **only** instance Expense Tracker will run any shell commands.
+* Create a user with permissions to create databases and tables.
+* For security,
+  it is advisable to use a separate database user for the system with only read and write permissions to the specified
   database and tables.
 
 ### Installation
@@ -181,5 +189,109 @@ Access your site (e.g., http://yourdomain.com/) and follow the on-screen instruc
 
 ### Manual Installation
 
-1. Create a Database: Name it expense_tracker or another name of your choosing.
-2. Create Tables: Refer to the placeholder section for table creation scripts (as tables are still to be defined).
+#### Database Setup:
+
+1. Create a Database with the name of your choosing.
+Create Tables:
+   Refer to the file table_creation_script.sql under db_script folder for reference to the required table structure.
+   The tables you need are: 
+* expense_category
+* expenses
+* users
+* history
+* actions
+* roles
+* user_to_role
+* role_permissions
+
+2. File and Configuration Setup:
+*   Under the config folder, create database.php.
+*   Under the user folder, create permissions.php.
+
+3. Create the following files under the system directory:
+Under the config folder create `database.php`
+Under the user folder create `permissions.php`;
+4. Set the contents of `database.php` to the following variable:
+`$dbConfig= [
+'db_user' => '',
+  'db_pass' => '',
+  'db_host' => '',
+  'db_port' => ,
+  'db_name' => '',
+  'db_type' => '',
+  'log_sql' => true,
+  'tables' => [
+    'expense_category_table_name' => '',
+    'expenses_table_name' => '',
+    'users_table_name' => '',
+    'history_table_name' => '',
+    'actions_table_name' => '',
+    'roles_table_name' => '',
+    'role_permissions_table_name' => '',
+    'user_to_role_table_name' => '',
+  ],
+];`
+
+5. The vales of this array are used in the system so they must be correct. 
+`db_user`: this is the user that connects to the database and has read and write permissions. 
+`db_pass`: user password
+`db_host`: the database address.
+   Commonly, 127.0.0.1 is used (as the database is on the same server)
+`db_port`: Port for connection to the database, default for Mysql is 3006
+`db_name`: your database name (we use expense_tracker as the default)
+`db_type`: On of the following supported database drivers: `mysqli`, `pgsql`, `sqlite3`, `sqlsrv`, `db2`, `oci8`.
+`log_sql`: Whether the system should log SQL and defaults to true.
+`tables`: this array contains the actual table names (since expense tracker supports custom table naming). An example can be found in the `db_script/tableSettings.php` file.
+
+#### Cache Configuration:
+
+1. Choose Cache Backend: Decide on the backend to use for caching (Redis or Memcached). You may use a 'default' option so the system just writes the permissions to files, but it is not recommended.
+Decide on the backend to use for caching (redis or memcached): 
+#### Redis Configuration (if using Redis):
+* Host (default 127.0.0.1)
+* Port (default 6379)
+* Authentication password (if any)
+#### Memcached Configuration (if using Memcached):
+* Host (default 127.0.0.1)
+* Port (default 11211)
+* Persistence identifier (a unique name for your connection)
+
+Under the `system/user/` folder, create `permissions.php` file, with the following variable:
+`$permissionsConfig= [
+'writing_key' => '',
+'backend' => '',
+];`
+
+1. The 'writing_key' is an 18 character random string.
+2. The backend is either redis, memcached, or default (not recommended)
+3. If using Redis, add this variable to the `permissions.php` file:
+`$redisConfig=[
+   'host'           => '',
+   'readTimeout'    => 2.5,
+   'connectTimeout' => 2.5,
+   'auth'           => '',
+   'port'           => '',
+   'persistent'     => true,
+   ]`
+Host is your Redis host, the default is 127.0.0.1.
+Auth is the password, and some redis installations do not require one.
+Port is your redis port, default 6379.
+4. If using memcached, add this variable to the `permissions.php` file:
+`$memcachedConfig=[
+   'host'         => ''
+   'persist_name' => '',
+   'port'         => ''',
+]`
+
+### Final installation step:
+1. Under the system folder, create the file `installation_includes.php`
+2. Add a require_once statement for the database file:
+`require_once('system/config/database.php');` Or use the full path for absolute values.
+3. Add another require_once statement for the permissions file: `require_once('system/user/permissions.php')`
+4. Add the global app variables:
+`$app_unique_key="";
+   $systemVersion="1.0.0";
+   $enableCaptchaCode=true;
+   `
+5. the App unique key is a 16 character random string.
+
