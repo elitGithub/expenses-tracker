@@ -29,8 +29,9 @@ class User
     /**
      * @var \database\PearDatabase
      */
-    protected PearDatabase $adb;
+    protected ?PearDatabase $adb = null;
     protected array        $permissions = [];
+    protected $tables = null;
 
     /**
      * @param  int  $id
@@ -40,11 +41,30 @@ class User
         if ($id) {
             $this->id = $id;
         }
-        $this->adb = PearDatabase::getInstance();
-        $tables = $this->adb->getTablesConfig();
-        $this->entityTable = $tables['users_table_name'];
-        $this->roleTable = $tables['user_to_role_table_name'];
+
         $this->session = new SessionWrapper();
+    }
+
+    /**
+     * @return \database\PearDatabase|null
+     */
+    public function database(): ?PearDatabase
+    {
+        if (is_null($this->adb)) {
+            $this->adb = PearDatabase::getInstance();
+        }
+
+        return $this->adb;
+    }
+
+    /**
+     * @return void
+     */
+    public function tables()
+    {
+        $this->tables = $this->database()->getTablesConfig();
+        $this->entityTable = $this->tables['users_table_name'];
+        $this->roleTable = $this->tables['user_to_role_table_name'];
     }
 
     /**
@@ -90,14 +110,15 @@ class User
     public function login($userName, $password): bool
     {
         global $default_language;
+        $this->tables();
         $query = "SELECT * FROM `$this->entityTable` WHERE CAST(`user_name` AS BINARY) = ?";
-        $result = $this->adb->requirePsSingleResult($query, [$userName]);
+        $result = $this->database()->requirePsSingleResult($query, [$userName]);
 
         if (!$result) {
             return false;
         }
 
-        $row = $this->adb->fetchByAssoc($result);
+        $row = $this->database()->fetchByAssoc($result);
 
         if ((bool) $row['active'] !== true) {
             return false;
@@ -111,6 +132,7 @@ class User
 
         $this->roleid = Role::getRoleByUserId($this->id);
         CacheSystemManager::refreshUserInCache($this);
+        PermissionsManager::refreshPermissionsInCache();
         $this->retrieveUserInfoFromFile();
 
         $this->session->sessionAddKey('authenticated_user_language', $default_language);
@@ -188,13 +210,14 @@ class User
         }
 
         $instance = new self($id);
+        $instance->tables();
         $query = "SELECT * FROM `$instance->entityTable` WHERE user_id = ?";
-        $result = $instance->adb->pquery($query, [$id]);
-        if (!$result || $instance->adb->num_rows($result) === 0) {
+        $result = $instance->database()->pquery($query, [$id]);
+        if (!$result || $instance->database()->num_rows($result) === 0) {
             return null;
         }
 
-        $row = $instance->adb->fetchByAssoc($result);
+        $row = $instance->database()->fetchByAssoc($result);
         $row['roleid'] = Role::getRoleByUserId($id);
         $instance->initFromRow($row);
         return $instance;
@@ -212,14 +235,14 @@ class User
             $_SESSION['errors'][] = 'Please make sure you typed password and confirm password';
             return false;
         }
-
+        $this->tables();
         $query = "UPDATE `$this->entityTable` SET `password` = ? WHERE `user_id` = ?";
-        $result = $this->adb->pquery($query, [$this->encryptPassword($password), $this->id]);
+        $result = $this->database()->pquery($query, [$this->encryptPassword($password), $this->id]);
         if (!$result) {
             return false;
         }
 
-        return $this->adb->getAffectedRowCount($result) > 0;
+        return $this->database()->getAffectedRowCount($result) > 0;
     }
 
 
@@ -245,7 +268,7 @@ class User
      */
     private function updateLastLogin()
     {
-        $this->adb->pquery("UPDATE `{$this->entityTable}` SET `last_login` = CONVERT_TZ(NOW(), 'SYSTEM','+00:00')  WHERE `user_id` = ?;", [$this->id]);
+        $this->database()->pquery("UPDATE `{$this->entityTable}` SET `last_login` = CONVERT_TZ(NOW(), 'SYSTEM','+00:00')  WHERE `user_id` = ?;", [$this->id]);
     }
 
 

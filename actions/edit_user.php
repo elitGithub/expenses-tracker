@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     $isAdmin = Filter::filterInput(INPUT_POST, 'is_admin', FILTER_VALIDATE_BOOLEAN, false);
     $uploadPhoto = Filter::filterInput(INPUT_POST, 'upload_user_photo', FILTER_VALIDATE_BOOLEAN, false);
     $active = Filter::filterInput(INPUT_POST, 'active', FILTER_VALIDATE_BOOLEAN, false);
-
+    $isAdmin = $isAdmin ? 'On' : 'Off';
 
     try {
         $validRole = Role::validateRole((int)$roleId);
@@ -74,7 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
         if (!PermissionsManager::isAdmin($current_user)) {
             $isAdmin = $user->is_admin;
         }
-        $success = $userModel->updateUser($user, (int)$roleId, $email, $firstName, $lastName, $active, $isAdmin ? 'On' : 'Off');
+
+        $success = $userModel->updateUser($user, (int)$roleId, $email, $firstName, $lastName, $active, $isAdmin);
     } catch (Throwable $e) {
         $_SESSION['errors'][] = $e->getMessage();
         header('Location: ' . $_SERVER['HTTP_REFERER']);

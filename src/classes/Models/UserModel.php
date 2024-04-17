@@ -16,7 +16,8 @@ class UserModel
 {
     protected string       $entityTable;
     protected string       $userToRoleTable;
-    protected PearDatabase $adb;
+    protected ?PearDatabase $adb = null;
+
 
     public function __construct()
     {
@@ -129,16 +130,17 @@ class UserModel
      */
     public function updateUser(User $user, int $roleId, string $email, string $firstName, string $lastName, $active, string $isAdmin): bool
     {
-        $query = "UPDATE 
-                      `$this->entityTable` 
-                  SET 
-                      `email` = ?, 
+        $query = "UPDATE
+                      `$this->entityTable`
+                  SET
+                      `email` = ?,
                       `first_name` = ?,
-                      `last_name` = ?, 
+                      `last_name` = ?,
                       `active` = ?,
-                      `is_admin` = ?, 
+                      `is_admin` = ?,
                       `last_update_at` = CURRENT_TIMESTAMP()
                   WHERE `user_id` = ?; ";
+
         $result = $this->adb->pquery($query, [$email, $firstName, $lastName, $active, $isAdmin, $user->id]);
         if (!$result) {
             return false;

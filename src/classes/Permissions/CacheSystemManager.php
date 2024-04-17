@@ -284,6 +284,12 @@ class CacheSystemManager
         }
     }
 
+    /**
+     * @param  array  $rolePermissionsArray
+     *
+     * @return void
+     * @throws \Throwable
+     */
     public static function refreshPermissionsInCache(array $rolePermissionsArray)
     {
         global $permissionsConfig;
