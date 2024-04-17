@@ -2,11 +2,14 @@
 
 declare(strict_types = 1);
 
+namespace engine;
+
 use database\PearDatabase;
 use Permissions\CacheSystemManager;
 use Permissions\PermissionsManager;
 use Permissions\Role;
 use Session\SessionWrapper;
+use Throwable;
 
 /**
  *
@@ -170,6 +173,53 @@ class User
     public function encryptPassword(string $password): ?string
     {
         return password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    /**
+     * @param  int|null  $id
+     *
+     * @return \engine\User|null
+     * @throws \Exception
+     */
+    public static function getUserById(?int $id = null): ?User
+    {
+        if (is_null($id)) {
+            return null;
+        }
+
+        $instance = new self($id);
+        $query = "SELECT * FROM `$instance->entityTable` WHERE user_id = ?";
+        $result = $instance->adb->pquery($query, [$id]);
+        if (!$result || $instance->adb->num_rows($result) === 0) {
+            return null;
+        }
+
+        $row = $instance->adb->fetchByAssoc($result);
+        $row['roleid'] = Role::getRoleByUserId($id);
+        $instance->initFromRow($row);
+        return $instance;
+    }
+
+    /**
+     * @param  string  $password
+     * @param  string  $confirmPassword
+     *
+     * @return bool
+     */
+    public function changePassword(string $password, string $confirmPassword): bool
+    {
+        if (!strcmp($password, $confirmPassword)) {
+            $_SESSION['errors'][] = 'Please make sure you typed password and confirm password';
+            return false;
+        }
+
+        $query = "UPDATE `$this->entityTable` SET `password` = ? WHERE `user_id` = ?";
+        $result = $this->adb->pquery($query, [$this->encryptPassword($password), $this->id]);
+        if (!$result) {
+            return false;
+        }
+
+        return $this->adb->getAffectedRowCount($result) > 0;
     }
 
 

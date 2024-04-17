@@ -29,7 +29,7 @@ if (!JWTHelper::checkJWT()) {
 }
 
 
-$current_user = new User();
+$current_user = new engine\User();
 $current_user->retrieveUserInfoFromFile();
 ?>
 

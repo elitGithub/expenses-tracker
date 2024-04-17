@@ -7,7 +7,7 @@ namespace Session;
 use Namshi\JOSE\SimpleJWS;
 use Permissions\CacheSystemManager;
 use Throwable;
-use User;
+use engine\User;
 
 /**
  * Wrapper around Namshi\JOSE for custom JWT usage

@@ -2,11 +2,12 @@
 
 declare(strict_types = 1);
 
+use Core\UniqueIdsGenerator;
 use ExpenseTracker\ExpenseCategoryList;
 use Permissions\PermissionsManager;
 use Permissions\Role;
 
-$uniqueIdGenerator = new \Core\UniqueIdsGenerator();
+$uniqueIdGenerator = new UniqueIdsGenerator();
 
 $addNewCatToken = $uniqueIdGenerator->generateTrueRandomString();
 $editCatToken = $uniqueIdGenerator->generateTrueRandomString();
@@ -15,6 +16,7 @@ $addNewExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
 $editExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
 $deleteExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
 $addUserToken = $uniqueIdGenerator->generateTrueRandomString();
+$editUserToken = $uniqueIdGenerator->generateTrueRandomString();
 
 
 $_SESSION['formToken']['add_new_category'] = password_hash($addNewCatToken, PASSWORD_DEFAULT);
@@ -24,6 +26,7 @@ $_SESSION['formToken']['add_new_expense'] = password_hash($addNewExpenseToken, P
 $_SESSION['formToken']['edit_expense'] = password_hash($editExpenseToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['delete_expense'] = password_hash($deleteExpenseToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['add_user_token'] = password_hash($addUserToken, PASSWORD_DEFAULT);
+$_SESSION['formToken']['edit_user_token'] = password_hash($editUserToken, PASSWORD_DEFAULT);
 
 $expenseCategoryList = new ExpenseCategoryList();
 $expenseCategories = $expenseCategoryList->getAllCategories();
@@ -386,8 +389,8 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     if (PermissionsManager::isAdmin($current_user)): ?>
                                         <div class="row">
                                             <div class="form-group">
-                                                <input type="checkbox" class="form-check-input" name="is_admin" id="is_admin">
-                                                <label for="is_admin">Make user admin</label>
+                                                <input type="checkbox" class="form-check-input" name="is_admin" id="add_user_is_admin">
+                                                <label for="add_user_is_admin">Make user admin</label>
                                             </div>
                                         </div>
                                     <?php
@@ -399,6 +402,117 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel / Reset</button>
                                         <input type="submit" id="add_user_submit" name="submit" value="Add" class="btn btn-primary">
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php
+    endif ?>
+    <?php if (PermissionsManager::isPermittedAction('edit_user', $current_user)): ?>
+        <div class="panel panel-default" id="edit_user_modal">
+            <div class="panel-body">
+                <!-- Modal -->
+                <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header d-flex justify-content-between">
+                                <h4 class="modal-title" id="editUserModalLabel">
+                                    <i class="fa fa-edit fa-1x"></i> Edit User
+                                </h4>
+                                <!-- 'data-bs-dismiss' attribute for Bootstrap 5 -->
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="index.php?action=edit_user" method="POST"  enctype="multipart/form-data">
+                                    <div class="row">
+                                        <div class="mb-3">
+                                            <label for="edit_user_photo" class="form-label">Change user profile picture</label>
+                                            <input class="form-control" name="user_photo" type="file" id="edit_user_photo">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label for="edit_user_name">Username:</label>
+                                            <input type="text" class="form-control" name="user_name" id="edit_user_name"
+                                                   placeholder="Please Enter the username" disabled="disabled">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="edit_user_email">User email:</label>
+                                            <input type="email" class="form-control" name="email" id="edit_user_email" placeholder="Please Enter user email"
+                                                   required>
+                                        </div>
+                                        <div class="form-group col-md-12">
+                                            <label for="edit_user_role">User role:</label>
+                                            <select class="form-control" name="user_role" id="edit_user_role" required>
+                                                <option value="" selected disabled>Choose Role</option>
+                                                <?php
+                                                echo join('', Role::getChildRoles($current_user, true)) ?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label for="edit_first_name">User first name:</label>
+                                            <input type="text" class="form-control" name="first_name" id="edit_first_name"
+                                                   placeholder="Please Enter first name" required>
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label for="edit_last_name">User last name:</label>
+                                            <input type="text" class="form-control" name="last_name" id="edit_last_name"
+                                                   placeholder="Please Enter last name" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label for="change_password">User password:</label>
+                                            <div class="input-group" id="show_edit_user_password">
+                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="change_password" class="form-control">
+                                                <span class="input-group-text cursor-pointer" id="toggleChangeUserPassword"><i class="fa fa-eye" id="showChangeUserPassword"></i></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label for="retype_change_password">Retype password:</label>
+                                            <div class="input-group" id="show_retype_change_password">
+                                                <input type="password" autocomplete="off" name="password_retype" id="retype_change_password" minlength="8"
+                                                       class="form-control">
+                                                <span class="input-group-text cursor-pointer" id="toggleRetypeChangePassword"><i class="fa fa-eye"
+                                                                                                                           id="showChangeRetypePassword"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <?php
+                                    if (PermissionsManager::isAdmin($current_user)): ?>
+                                        <div class="row">
+                                            <div class="form-group">
+                                                <input type="checkbox" class="form-check-input" name="is_admin" id="edit_is_admin">
+                                                <label for="edit_is_admin">Make user admin</label>
+                                            </div>
+                                        </div>
+                                    <?php
+                                    endif; ?>
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <input type="checkbox" class="form-check-input" name="active" id="edit_is_active">
+                                            <label for="edit_is_active">Active</label>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="formToken" value="<?php
+                                    echo htmlspecialchars($editUserToken); ?>">
+                                    <input type="hidden" name="userId" id="edit_user_id">
+                                    <input type="hidden" id="edit_user_upload_user_photo" name="upload_user_photo" value="">
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel / Reset</button>
+                                        <input type="submit" id="edit_user_submit" name="submit" value="Save" class="btn btn-primary">
                                     </div>
                                 </form>
                             </div>

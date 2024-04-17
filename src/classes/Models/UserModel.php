@@ -7,7 +7,7 @@ namespace Models;
 use database\PearDatabase;
 use Permissions\CacheSystemManager;
 use Permissions\PermissionsManager;
-use User;
+use engine\User;
 
 /**
  * User Model for storage
@@ -29,23 +29,12 @@ class UserModel
     /**
      * @param  string  $email
      * @param  string  $userName
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    public function existsByEmailOrUserName(string $email, string $userName): bool
-    {
-        return !$this->checkUniqueEmail($email) || !$this->checkUniqueUserName($userName);
-    }
-
-    /**
-     * @param  string  $email
-     * @param  string  $userName
      * @param  string  $password
      * @param  string  $firstName
      * @param  string  $lastName
      * @param          $createdBy
      * @param  int     $roleId
+     * @param  string  $isAdmin
      *
      * @return bool|int
      * @throws \Throwable
@@ -126,20 +115,48 @@ class UserModel
         return ($this->adb->query_result($result, 0, 'total') < 1);
     }
 
-    public function userCollection(User $currentUser): array
+    /**
+     * @param  \engine\User  $user
+     * @param  int           $roleId
+     * @param  string        $email
+     * @param  string        $firstName
+     * @param  string        $lastName
+     * @param                $active
+     * @param  string        $isAdmin
+     *
+     * @return bool
+     * @throws \Throwable
+     */
+    public function updateUser(User $user, int $roleId, string $email, string $firstName, string $lastName, $active, string $isAdmin): bool
     {
-        $query = "SELECT * FROM `$this->entityTable` WHERE `user_id` != $currentUser->id AND `active` = 1 AND `deleted_at` IS NULL";
-        if (!PermissionsManager::isAdmin($currentUser)) {
-            $query = "SELECT
-                        *
-                     FROM
-                         `$this->entityTable` `users`
-                     JOIN `$this->userToRoleTable` `user2role` ON `users`.`user_id` = `user2role`.`user_id`
-                     WHERE
-                         `users`.`user_id` != $currentUser->id AND
-                         `active` = 1 AND
-                         `deleted_at` IS NULL";
+        $query = "UPDATE 
+                      `$this->entityTable` 
+                  SET 
+                      `email` = ?, 
+                      `first_name` = ?,
+                      `last_name` = ?, 
+                      `active` = ?,
+                      `is_admin` = ?, 
+                      `last_update_at` = CURRENT_TIMESTAMP()
+                  WHERE `user_id` = ?; ";
+        $result = $this->adb->pquery($query, [$email, $firstName, $lastName, $active, $isAdmin, $user->id]);
+        if (!$result) {
+            return false;
         }
+
+        $roleQuery = "UPDATE `$this->userToRoleTable` SET `role_id` = ? WHERE `user_id` = ?;";
+        $result = $this->adb->pquery($roleQuery, [$roleId, $user->id]);
+        if (!$result) {
+            return false;
+        }
+        CacheSystemManager::writeUser($user->id, [
+            'userName' => $user->user_name, 'name' => $user->first_name . ' ' . $user->last_name,
+            'active'   => 1,
+            'role'     => $roleId,
+            'is_admin' => 'On',
+        ]);
+
+        return true;
     }
 
 }

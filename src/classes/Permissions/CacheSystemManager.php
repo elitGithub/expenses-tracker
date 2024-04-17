@@ -8,7 +8,7 @@ use database\PearDatabase;
 use Exception;
 use Memcached;
 use Redis;
-use User;
+use engine\User;
 
 global $permissionsConfig, $redisConfig, $memcachedConfig;
 require_once 'system/user/permissions.php';

@@ -34,9 +34,9 @@ $expenseList = new ExpenseList();
         // Generating Cards
         foreach ($selectedData as $key => $value) {
             echo "<div class='col'><div class='card'><div class='card-body'>";
-            echo "<h5 class='card-title'>" . ucfirst($key) . "</h5>";
-            echo "<p class='card-text'>" . $value . "</p>";
-            echo "</div></div></div>";
+            echo "<h5 class='card-title'>" . ucfirst($key) . '</h5>';
+            echo "<p class='card-text'>" . $value . '</p>';
+            echo '</div></div></div>';
         }
         ?>
     </div>

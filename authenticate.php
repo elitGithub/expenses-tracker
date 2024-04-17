@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = Filter::filterInput(INPUT_POST, 'username', FILTER_SANITIZE_SPECIAL_CHARS);
     $password = Filter::filterInput(INPUT_POST, 'password', FILTER_SANITIZE_SPECIAL_CHARS);
 
-    $user = new User();
+    $user = new engine\User();
     if ($_SESSION['formToken']['login'] !== $app_unique_key) {
         $_SESSION['error'] = 'Error: missing required token';
         header('Location: login.php');

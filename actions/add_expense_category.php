@@ -9,7 +9,9 @@ use Permissions\PermissionsManager;
 $expenseCategory = new ExpenseCategory();
 
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && PermissionsManager::isPermittedAction('add_expense_category', $user) && password_verify($_POST['formToken'], $_SESSION['formToken']['add_new_category'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
+    PermissionsManager::isPermittedAction('add_expense_category', $current_user) &&
+    password_verify($_POST['formToken'], $_SESSION['formToken']['add_new_category'])) {
     $name = Filter::filterInput(INPUT_POST, 'new_expense_category_name', FILTER_SANITIZE_SPECIAL_CHARS);
     $amount = Filter::filterInput(INPUT_POST, 'new_expense_category_budget', FILTER_SANITIZE_NUMBER_FLOAT);
     $isDefault = Filter::filterInput(INPUT_POST, 'is_default', FILTER_VALIDATE_BOOLEAN, false);

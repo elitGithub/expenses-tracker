@@ -9,6 +9,7 @@ if (!file_exists('system/installation_includes.php')) {
 }
 
 use Core\System;
+use engine\User;
 use Session\JWTHelper;
 
 $current_user = new User();

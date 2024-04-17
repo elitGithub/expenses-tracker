@@ -3,11 +3,14 @@
 declare(strict_types = 1);
 
 use ExpenseTracker\Expense;
+use Permissions\PermissionsManager;
 
 
 $expense = new Expense();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && password_verify($_POST['formToken'], $_SESSION['formToken']['delete_expense'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
+    PermissionsManager::isPermittedAction('delete_expense', $current_user) &&
+    password_verify($_POST['formToken'], $_SESSION['formToken']['delete_expense'])) {
     $expenseId = Filter::filterInput(INPUT_POST, 'expense_id', FILTER_SANITIZE_NUMBER_INT);
     if (empty($expenseId)) {
         $_SESSION['errors'][] = 'Missing expense id.';

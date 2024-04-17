@@ -9,7 +9,6 @@ use Permissions\PermissionsManager;
 if (!PermissionsManager::isPermittedAction('view_user_management', $current_user)) {
     header('Location: index.php');
 }
-// user_id, email, user_name, first_name, last_name, created_by, active, is_admin, created_at
 $userList = new UsersList();
 $collection = $userList->loadUserList($current_user);
 ?>
@@ -42,6 +41,11 @@ $collection = $userList->loadUserList($current_user);
                                 <th>Is Admin</th> <?php
                             endif; ?>
                             <th>Created At</th>
+                            <?php
+                            if (PermissionsManager::isPermittedAction('edit_user', $current_user)): ?>
+                                <th>Actions</th>
+                            <?php
+                            endif; ?>
                         </tr>
                         </thead>
                         <tbody>
@@ -80,6 +84,37 @@ $collection = $userList->loadUserList($current_user);
                                     <?php
                                     echo $user->created_at ?>
                                 </td>
+
+                                <?php
+                                if (PermissionsManager::isPermittedAction('edit_user', $current_user)): ?>
+                                    <td>
+                                        <button type="button" class="btn btn-info btn-xs editButton"
+                                                data-id="<?php echo $user->user_id ?>"
+                                                data-role_id="<?php echo $user->role_id ?>"
+                                                data-first_name="<?php echo htmlspecialchars($user->first_name) ?>"
+                                                data-last_name="<?php echo htmlspecialchars($user->last_name) ?>"
+                                                data-email="<?php echo $user->email ?>"
+                                                data-userName="<?php echo $user->user_name ?>"
+                                                data-active="<?php echo $user->active ?>"
+                                                data-is_admin="<?php echo $user->is_admin ?>"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editUserModal">
+                                            <span class='fa fa-pencil'></span> Edit
+                                        </button>
+                                        <?php if (PermissionsManager::isPermittedAction('delete_user', $current_user) &&
+                                                  !PermissionsManager::isAdmin($user)):?>
+                                            <button type="button" class="btn btn-danger btn-xs deleteButton"
+                                                    data-id="<?php echo $user->user_id ?>"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteUserModal"><span
+                                                        class='fa fa-trash'></span> Delete
+                                            </button>
+                                        <?php
+                                        endif; ?>
+                                    </td>
+
+                                <?php
+                                endif; ?>
                             </tr>
                         <?php
                         endforeach;
@@ -98,13 +133,50 @@ $collection = $userList->loadUserList($current_user);
 require_once 'modals.php';
 ?>
 <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const editButtons = document.querySelectorAll('.editButton');
+    const deleteButtons = document.querySelectorAll('.deleteButton');
+    const editUserModal = document.getElementById('editUserModal');
+    const deleteUserModal = document.getElementById('deleteUserModal');
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener('click', function () {
+        deleteUserModal.querySelector('#del_user_id').value = this.getAttribute('data-id');
+      });
+    });
+
+    editButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const userId = this.getAttribute('data-id');
+        const roleId = this.getAttribute('data-role_id');
+        const userName = this.getAttribute('data-userName');
+        const userEmail = this.getAttribute('data-email');
+        const firstName = this.getAttribute('data-first_name');
+        const lastName = this.getAttribute('data-last_name');
+        const active = this.getAttribute('data-active');
+        const isAdmin = this.getAttribute('data-is_admin');
+
+        editUserModal.querySelector('#edit_user_id').value = userId;
+        editUserModal.querySelector('#edit_user_name').value = userName;
+        editUserModal.querySelector('#edit_user_email').value = userEmail;
+        editUserModal.querySelector('#edit_user_role').value = roleId;
+        editUserModal.querySelector('#edit_first_name').value = firstName;
+        editUserModal.querySelector('#edit_last_name').value = lastName;
+        editUserModal.querySelector('#edit_is_active').checked = active;
+        editUserModal.querySelector('#edit_is_admin').checked = isAdmin === 'On';
+      });
+    });
+  });
+
+
   document.addEventListener('DOMContentLoaded', () => {
-    const toggleUserPassword = document.getElementById('toggleUserPassword');
-    const toggleRetypePassword = document.getElementById('toggleRetypePassword');
-    const showUserPassword = document.getElementById('showUserPassword');
-    const showRetypePassword = document.getElementById('showRetypePassword');
-    const adminPassword = document.getElementById('password');
-    const passwordRetype = document.getElementById('password_retype');
+    const toggleUserPassword = document.getElementById('toggleChangeUserPassword');
+    const toggleRetypePassword = document.getElementById('toggleRetypeChangePassword');
+    const showUserPassword = document.getElementById('showChangeUserPassword');
+    const showRetypePassword = document.getElementById('showChangeRetypePassword');
+    const adminPassword = document.getElementById('change_password');
+    const passwordRetype = document.getElementById('retype_change_password');
+
     toggleUserPassword?.addEventListener('click', () => {
       if (adminPassword.type === 'password') {
         adminPassword.type = 'text';
@@ -125,6 +197,10 @@ require_once 'modals.php';
     });
 
     document.getElementById('user_photo').addEventListener('change', (ev) => {
+      document.querySelector('#upload_user_photo').value = ev.target.files.length;
+    });
+
+    document.getElementById('edit_user_upload_user_photo').addEventListener('change', (ev) => {
       document.querySelector('#upload_user_photo').value = ev.target.files.length;
     });
   });

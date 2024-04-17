@@ -10,7 +10,9 @@ use Permissions\PermissionsManager;
 $expenseCatList = new ExpenseCategoryList();
 $expenseCategory = new ExpenseCategory();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && PermissionsManager::isPermittedAction('delete_expense_category', $user) && password_verify($_POST['formToken'], $_SESSION['formToken']['delete_category'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
+    PermissionsManager::isPermittedAction('delete_expense_category', $current_user) &&
+    password_verify($_POST['formToken'], $_SESSION['formToken']['delete_category'])) {
     $category = new ExpenseCategory();
     $categoryId = Filter::filterInput(INPUT_POST, 'category_id', FILTER_SANITIZE_NUMBER_INT);
     if (empty($categoryId)) {

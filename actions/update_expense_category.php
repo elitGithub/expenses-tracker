@@ -6,7 +6,9 @@ use ExpenseTracker\ExpenseCategory;
 use Permissions\PermissionsManager;
 
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && PermissionsManager::isPermittedAction('edit_expense_category', $user) && password_verify($_POST['formToken'], $_SESSION['formToken']['edit_category'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
+    PermissionsManager::isPermittedAction('edit_expense_category', $current_user) &&
+    password_verify($_POST['formToken'], $_SESSION['formToken']['edit_category'])) {
     $category = new ExpenseCategory();
     $categoryId = Filter::filterInput(INPUT_POST, 'category_id', FILTER_SANITIZE_NUMBER_INT);
     if (empty($categoryId)) {
@@ -18,8 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && PermissionsManager::isPermittedActi
     $budget = Filter::filterInput(INPUT_POST, 'expense_category_budget', FILTER_SANITIZE_NUMBER_FLOAT, 0.00);
     $isDefault = Filter::filterInput(INPUT_POST, 'is_default', FILTER_VALIDATE_BOOLEAN, false);
 
-    $category->expense_category_name = $name;
-    $category->amount = $budget;
+    $category->expense_category_name = trim($name);
+    $category->amount = (float)$budget;
     $category->is_default = $isDefault;
     $result = $category->update();
 

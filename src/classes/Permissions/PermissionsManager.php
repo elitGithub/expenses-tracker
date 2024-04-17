@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Permissions;
 
 use database\PearDatabase;
-use User;
+use engine\User;
 
 /**
  * Permission manager

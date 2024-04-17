@@ -16,7 +16,7 @@ use Permissions\Role;
 use Redis;
 use Session\JWTHelper;
 use Throwable;
-use User;
+use engine\User;
 
 /**
  *

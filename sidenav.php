@@ -25,6 +25,16 @@ use Permissions\PermissionsManager;
                 if (!isset($_GET['action']) || $action === 'home') echo 'class="active-menu"' ?>><i class="fa fa-dashboard fa-2x"></i> Dashboard</a>
             </li>
             <?php
+            if (PermissionsManager::isPermittedAction('expense_category', $current_user)):
+                ?>
+                <li>
+                    <a href="?action=expense_category" <?php
+                    if (isset($_GET['action']) && $action === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x"
+                                                                                                                   aria-hidden="true"></i>
+                        Expenses By Category</a>
+                </li>
+            <?php endif; ?>
+            <?php
             if (PermissionsManager::isPermittedAction('expense_report', $current_user)):
             ?>
             <li>
@@ -33,16 +43,6 @@ use Permissions\PermissionsManager;
                         class='fa fa-keyboard-o fa-2x'></i> Expenses Report</a>
             </li>
            <?php endif; ?>
-            <?php
-            if (PermissionsManager::isPermittedAction('expense_category', $current_user)):
-            ?>
-            <li>
-                <a href="?action=expense_category" <?php
-                if (isset($_GET['action']) && $action === 'expense_category') echo 'class="active-menu"' ?>><i class="fa fa-cog fa-2x"
-                                                                                                               aria-hidden="true"></i>
-                    Expenses By Category</a>
-            </li>
-            <?php endif; ?>
             <?php
             if (PermissionsManager::isPermittedAction('view_user_management', $current_user)):
                 ?>

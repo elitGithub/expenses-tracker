@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Permissions;
 
 use database\PearDatabase;
-use User;
+use engine\User;
 
 /**
  *
@@ -37,13 +37,14 @@ class Role
     }
 
     /**
-     * @param  \User  $user
-     * @param  bool   $returnHtml
+     * @param  \engine\User  $user
+     * @param  bool          $returnHtml
+     * @param  null          $selected
      *
      * @return array
      * @throws \Exception
      */
-    public static function getChildRoles(User $user, bool $returnHtml = false): array
+    public static function getChildRoles(User $user, bool $returnHtml = false, $selected = null): array
     {
         if (count(self::$systemRoles)) {
             return $returnHtml ? self::$systemRoles['options'] : self::$systemRoles['list'];
