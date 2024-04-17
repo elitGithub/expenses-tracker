@@ -450,3 +450,20 @@ body {
 		border-radius: 0;
 	}
 }
+
+/* DATATABLES */
+.dt-container > div:first-child {
+	margin-block: 20px 30px !important;
+}
+
+.dt-container .dt-search {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.dt-container .table > :not(caption) > * > * {
+	padding: 0.7rem 0.7rem;
+	text-align: initial !important;
+}
+/* EO DATATABLES */

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use ExpenseTracker\ExpenseCategoryList;
 use Permissions\PermissionsManager;
@@ -15,9 +15,9 @@ $expenseCategoryList = new ExpenseCategoryList();
 $catList = $expenseCategoryList->categoryReport();
 
 ?>
-<!-- Trigger Button -->
-<button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-    <i class="fa fa-plus-circle fa-2x"></i> Add Category
+
+<button class="btn btn-primary btn-sm search-prepend me-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+    <i class="fa fa-plus-circle"></i> Add Category
 </button>
 
 <div class="row">
@@ -25,66 +25,58 @@ $catList = $expenseCategoryList->categoryReport();
         <!-- Advanced Tables -->
         <div class="panel panel-default">
             <div class="h3">
-                Category List
+                <h2>
+                    Category List
+                </h2>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                         <thead>
-                        <tr>
-                            <th>Category Id</th>
-                            <th>Category Name</th>
-                            <th>Category Budget</th>
-                            <th>Total Expenses in category</th>
-                            <th>Date Created</th>
-                            <th></th>
-                        </tr>
+                            <tr>
+                                <th>Category Id</th>
+                                <th>Category Name</th>
+                                <th>Category Budget</th>
+                                <th>Total Expenses in category</th>
+                                <th>Date Created</th>
+                                <th></th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <?php
-                        foreach ($catList as $row): ?>
-                            <tr <?php if ((float)$row['cat_expenses'] >= (float) $row['amount']) echo 'class="bg-color-red"'?>>
-                                <td><?php
-                                    echo $row['expense_category_id'] ?>
-                                </td>
-                                <td><?php
-                                    echo $row['expense_category_name'] ?>
-                                </td>
-                                <td><?php
-                                    echo number_format((float) $row['amount'], 2, '.', '') ?>
-                                </td>
-                                <td><?php
-                                    echo number_format((float) $row['cat_expenses'], 2, '.', '') ?>
-                                </td>
-                                <td><?php
-                                    echo $date = date_format(new DateTime($row['created_at']), 'd-M-Y') ?>
-                                </td>
-                                <td>
-                                    <?php if(PermissionsManager::isPermittedAction('edit_expense_category', $current_user)): ?>
-                                        <button type="button" class="btn btn-info btn-xs editButton"
-                                                data-id="<?php echo $row['expense_category_id'] ?>"
-                                                data-name="<?php echo htmlspecialchars($row['expense_category_name']); ?>"
-                                                data-amount="<?php echo htmlspecialchars($row['amount']); ?>"
-                                                data-default="<?php echo htmlspecialchars($row['is_default']); ?>"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editCategoryModal">
-                                            <span class='fa fa-pencil'></span> Edit
-                                        </button>
+                            <?php
+                            foreach ($catList as $row) : ?>
+                                <tr <?php if ((float)$row['cat_expenses'] >= (float) $row['amount']) echo 'class="bg-color-red"' ?>>
+                                    <td><?php
+                                        echo $row['expense_category_id'] ?>
+                                    </td>
+                                    <td><?php
+                                        echo $row['expense_category_name'] ?>
+                                    </td>
+                                    <td><?php
+                                        echo number_format((float) $row['amount'], 2, '.', '') ?>
+                                    </td>
+                                    <td><?php
+                                        echo number_format((float) $row['cat_expenses'], 2, '.', '') ?>
+                                    </td>
+                                    <td><?php
+                                        echo $date = date_format(new DateTime($row['created_at']), 'd-M-Y') ?>
+                                    </td>
+                                    <td>
+                                        <?php if (PermissionsManager::isPermittedAction('edit_expense_category', $current_user)) : ?>
+                                            <button type="button" class="btn btn-info btn-xs editButton" data-id="<?php echo $row['expense_category_id'] ?>" data-name="<?php echo htmlspecialchars($row['expense_category_name']); ?>" data-amount="<?php echo htmlspecialchars($row['amount']); ?>" data-default="<?php echo htmlspecialchars($row['is_default']); ?>" data-bs-toggle="modal" data-bs-target="#editCategoryModal">
+                                                <span class='fa fa-pencil'></span> Edit
+                                            </button>
 
-                                    <?php endif; ?>
-                                    <?php if (PermissionsManager::isPermittedAction('delete_expense_category', $current_user) && !$row['is_default']): ?>
-                                        <button type="button" class="btn btn-danger btn-xs deleteButton"
-                                                data-id="<?php echo $row['expense_category_id'] ?>"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteCategoryModal"><span
-                                                class='fa fa-trash'></span> Delete
-                                        </button>
-                                    <?php endif;?>
-                                </td>
-                            </tr>
-                        <?php
-                        endforeach;
-                        ?>
+                                        <?php endif; ?>
+                                        <?php if (PermissionsManager::isPermittedAction('delete_expense_category', $current_user) && !$row['is_default']) : ?>
+                                            <button type="button" class="btn btn-danger btn-xs deleteButton" data-id="<?php echo $row['expense_category_id'] ?>" data-bs-toggle="modal" data-bs-target="#deleteCategoryModal"><span class='fa fa-trash'></span> Delete
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php
+                            endforeach;
+                            ?>
                         </tbody>
                     </table>
                 </div>
@@ -102,14 +94,14 @@ require_once 'modals.php';
 ?>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const editButtons = document.querySelectorAll('.editButton');
         const deleteButtons = document.querySelectorAll('.deleteButton');
         const editExpenseModal = document.getElementById('editCategoryModal');
         const deleteModal = document.getElementById('deleteCategoryModal');
 
         deleteButtons.forEach((button) => {
-            button.addEventListener('click', function () {
+            button.addEventListener('click', function() {
                 deleteModal.querySelector('#del_category_id').value = this.getAttribute('data-id');
             });
         });
@@ -127,6 +119,12 @@ require_once 'modals.php';
                 editExpenseModal.querySelector('#is_default').checked = Number(isDefault) === 1;
             });
         });
+
+        setTimeout(() => {
+            // Add a div next to the search input
+            const searchInput = document.querySelector('.dt-search');
+            const searchPrepend = document.querySelector('.search-prepend');
+            searchInput.insertAdjacentElement('afterbegin', searchPrepend);
+        }, 0);
     });
 </script>
-
