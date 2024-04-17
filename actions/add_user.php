@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && PermissionsManager::isPermittedActi
     $confirmPassword = Filter::filterInput(INPUT_POST, 'password_retype', FILTER_SANITIZE_SPECIAL_CHARS);
     $roleId = Filter::filterInput(INPUT_POST, 'user_role', FILTER_VALIDATE_INT);
     $isAdmin = Filter::filterInput(INPUT_POST, 'is_admin', FILTER_VALIDATE_BOOLEAN, false);
+    $uploadPhoto = Filter::filterInput(INPUT_POST, 'upload_user_photo', FILTER_VALIDATE_BOOLEAN, false);
 
     if (is_null($password) || is_null($confirmPassword)) {
         $_SESSION['errors'][] = 'Please make sure you typed password and confirm password';
@@ -60,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && PermissionsManager::isPermittedActi
         return;
     }
 
-    if (isset($_FILES['user_photo'])) {
+    if (isset($_FILES['user_photo']) && $uploadPhoto) {
         $uploader = new Upload();
         $fileUpload = $uploader->uploadUserAvatar($userId);
         if ($fileUpload) {

@@ -139,7 +139,7 @@ class Upload
     {
         $this->overWriteFileIfExists = true;
         $this->_file_name_override = $userId . '_avatar';
-        return $this->upload($field);
+        return $this->upload($field, true);
     }
 
     /**
@@ -147,7 +147,7 @@ class Upload
      *
      * @return bool
      */
-    private function upload(string $field = 'image'): bool
+    private function upload(string $field = 'image', $isUserAvatar = false): bool
     {
         $_file = null;
         if (isset($_FILES[$field])) {
@@ -172,7 +172,7 @@ class Upload
         }
 
         // Is the upload path valid?
-        if (!$this->validate_upload_path()) {
+        if (!$this->validate_upload_path($isUserAvatar)) {
             return false;
         }
 

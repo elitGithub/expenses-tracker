@@ -29,8 +29,8 @@ if (!JWTHelper::checkJWT()) {
 }
 
 
-$user = new User();
-$user->retrieveUserInfoFromFile();
+$current_user = new User();
+$current_user->retrieveUserInfoFromFile();
 ?>
 
 

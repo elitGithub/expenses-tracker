@@ -10,7 +10,14 @@ use Permissions\PermissionsManager;
     <div class="sidebar-collapse">
         <ul class="nav metismenu" id="main-menu">
             <li class="text-center">
-                <img src="assets/img/find_user.png" class="user-image img-responsive" alt=""/>
+                <?php
+                $src = fileExists(USER_AVATARS_UPLOAD_DIR, $current_user->id . '_avatar');
+                $src = USER_AVATARS_FILE_URL . $src;
+                if (!$src) {
+                    $src = 'assets/img/find_user.png';
+                }
+                ?>
+                <img src="<?php echo $src?>" class="user-image img-responsive" alt=""/>
             </li>
             <li>
                 <a href='index.php' <?php
@@ -18,7 +25,7 @@ use Permissions\PermissionsManager;
                 if (!isset($_GET['action']) || $action === 'home') echo 'class="active-menu"' ?>><i class="fa fa-dashboard fa-2x"></i> Dashboard</a>
             </li>
             <?php
-            if (PermissionsManager::isPermittedAction('expense_report', $user)):
+            if (PermissionsManager::isPermittedAction('expense_report', $current_user)):
             ?>
             <li>
                 <a href="?action=expense_report" <?php
@@ -27,7 +34,7 @@ use Permissions\PermissionsManager;
             </li>
            <?php endif; ?>
             <?php
-            if (PermissionsManager::isPermittedAction('expense_category', $user)):
+            if (PermissionsManager::isPermittedAction('expense_category', $current_user)):
             ?>
             <li>
                 <a href="?action=expense_category" <?php
@@ -37,7 +44,7 @@ use Permissions\PermissionsManager;
             </li>
             <?php endif; ?>
             <?php
-            if (PermissionsManager::isPermittedAction('view_user_management', $user)):
+            if (PermissionsManager::isPermittedAction('view_user_management', $current_user)):
                 ?>
                 <li><a href="?action=user_management" <?php
                     if ($action === 'user_management') echo 'class="active-menu"' ?>><i
@@ -46,7 +53,7 @@ use Permissions\PermissionsManager;
             <?php
             endif; ?>
             <?php
-            if (PermissionsManager::isAdmin($user)):
+            if (PermissionsManager::isAdmin($current_user)):
                 ?>
                 <li><a href="?action=manage_permissions" <?php
                     if ($action === 'manage_permissions') echo 'class="active-menu"' ?>><i

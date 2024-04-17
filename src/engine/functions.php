@@ -238,3 +238,38 @@ function &get_mimes()
 
     return $_mimes;
 }
+
+/**
+ * @param $items_list
+ *
+ * @return string
+ */
+function generateQuestionMarks($items_list): string
+{
+    // array_map will call the function specified in the first parameter for every element of the list in second parameter
+    if (is_array($items_list)) {
+        return implode(',', array_map(fn($v) => '?', $items_list));
+    } else {
+        return implode(',', array_map(fn($v) => '?', explode(',', $items_list)));
+    }
+}
+
+/**
+ * @param $directory
+ * @param $fileName
+ *
+ * @return false|string
+ */
+function fileExists($directory, $fileName) {
+    // Construct the search pattern
+    $pattern = $directory . '/' . $fileName . '.*';
+
+    // Use glob to find files matching the pattern
+    $files = glob($pattern);
+
+    // Check if any files were found
+    if ($files) {
+        return basename($files[0]);
+    }
+    return false;
+}

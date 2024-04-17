@@ -3,13 +3,15 @@
 declare(strict_types = 1);
 
 
+use engine\UsersList;
 use Permissions\PermissionsManager;
-use Permissions\Role;
 
-if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
+if (!PermissionsManager::isPermittedAction('view_user_management', $current_user)) {
     header('Location: index.php');
 }
-
+// user_id, email, user_name, first_name, last_name, created_by, active, is_admin, created_at
+$userList = new UsersList();
+$collection = $userList->loadUserList($current_user);
 ?>
 
 <!-- Modal trigger button with Bootstrap 5 data attributes -->
@@ -29,55 +31,59 @@ if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
                     <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                         <thead>
                         <tr>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
+                            <th>User ID</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>User Name</th>
+                            <th>Created By</th>
+                            <th>Active</th>
+                            <?php
+                            if (PermissionsManager::isAdmin($current_user)): ?>
+                                <th>Is Admin</th> <?php
+                            endif; ?>
+                            <th>Created At</th>
                         </tr>
                         </thead>
                         <tbody>
-<!--                        --><?php
-//                        foreach ($users as $row): ?>
-<!--                            <tr>-->
-<!--                                <td>--><?php
-//                                    echo $row['expense_category_name']; ?><!--</td>-->
-<!--                                <td>--><?php
-//                                    echo $row['amount_spent']; ?><!--</td>-->
-<!--                                <td>--><?php
-//                                    echo $row['expense_description']; ?><!--</td>-->
-<!--                                <td>--><?php
-//                                    echo $row['expense_date']; ?><!--</td>-->
-<!--                                <td>-->
-<!--                                    --><?php
-//                                    if (PermissionsManager::isPermittedAction('edit_expense', $user)): ?>
-<!--                                        <button type="button" class="btn btn-info btn-xs editButton"-->
-<!--                                                data-id="--><?php //echo $row['expense_id']; ?><!--"-->
-<!--                                                data-expense-category-id="--><?php //echo $row['expense_category_id']; ?><!--"-->
-<!--                                                data-description="--><?php //echo htmlspecialchars($row['expense_description']); ?><!--"-->
-<!--                                                data-amount="--><?php //echo htmlspecialchars($row['amount_spent']); ?><!--"-->
-<!--                                                data-date="--><?php //echo htmlspecialchars($row['created_at']); ?><!--"-->
-<!--                                                data-bs-toggle="modal"-->
-<!--                                                data-bs-target="#editExpenseModal">-->
-<!--                                            <span class='fa fa-pencil'></span> Edit-->
-<!--                                        </button>-->
-<!--                                    --><?php
-//                                    endif; ?>
-<!--                                    --><?php
-//                                    if (PermissionsManager::isPermittedAction('delete_expense', $user)): ?>
-<!--                                        <button type="button" class="btn btn-danger btn-xs deleteButton"-->
-<!--                                                data-id="--><?php //echo $row['expense_id']; ?><!--"-->
-<!--                                                data-bs-toggle="modal"-->
-<!--                                                data-bs-target="#deleteExpenseModal"><span-->
-<!--                                                class='fa fa-trash'></span> Delete-->
-<!--                                        </button>-->
-<!--                                    --><?php
-//                                    endif; ?>
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                        --><?php
-//                        endforeach;
-//                        ?>
+                        <?php
+                        foreach ($collection as $user): ?>
+                            <tr>
+                                <td><?php
+                                    echo $user->user_id; ?></td>
+                                <td><?php
+                                    echo $user->email; ?></td>
+                                <td><?php
+                                    echo $user->user_name; ?></td>
+                                <td><?php
+                                    echo $user->first_name . ' ' . $user->last_name; ?></td>
+                                <td><?php
+                                    echo $user->creator; ?></td>
+                                <td>
+                                    <?php
+                                    if ($user->active === '1'): ?>
+                                        <p class="bg-success-subtle">Active</p>
+                                    <?php
+                                    else: ?>
+                                        <p>Inactive</p>
+                                    <?php
+                                    endif ?>
+                                </td>
+                                <?php
+                                if (PermissionsManager::isAdmin($current_user)): ?>
+                                    <td>
+                                        <?php
+                                        echo $user->is_admin; ?>
+                                    </td>
+                                <?php
+                                endif; ?>
+                                <td>
+                                    <?php
+                                    echo $user->created_at ?>
+                                </td>
+                            </tr>
+                        <?php
+                        endforeach;
+                        ?>
                         </tbody>
                     </table>
                 </div>
@@ -92,31 +98,35 @@ if (!PermissionsManager::isPermittedAction('view_user_management', $user)) {
 require_once 'modals.php';
 ?>
 <script>
-  const toggleUserPassword = document.getElementById('toggleUserPassword');
-  const toggleRetypePassword = document.getElementById('toggleRetypePassword');
-  const showUserPassword = document.getElementById('showUserPassword');
-  const showRetypePassword = document.getElementById('showRetypePassword');
-  const adminPassword = document.getElementById('password');
-  const passwordRetype = document.getElementById('password_retype');
-  toggleUserPassword?.addEventListener('click', () => {
-    if (adminPassword.type === 'password') {
-      adminPassword.type = 'text';
-      showAdminPassword.className = 'fa fa-eye-slash';
-    } else {
-      adminPassword.type = 'password';
-      showAdminPassword.className = 'fa fa-eye';
-    }
-  });
-  toggleRetypePassword?.addEventListener('click', () => {
-    if (passwordRetype.type === 'password') {
-      passwordRetype.type = 'text';
-      showRetypePassword.className = 'fa fa-eye-slash';
-    } else {
-      passwordRetype.type = 'password';
-      showRetypePassword.className = 'fa fa-eye';
-    }
-  });
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleUserPassword = document.getElementById('toggleUserPassword');
+    const toggleRetypePassword = document.getElementById('toggleRetypePassword');
+    const showUserPassword = document.getElementById('showUserPassword');
+    const showRetypePassword = document.getElementById('showRetypePassword');
+    const adminPassword = document.getElementById('password');
+    const passwordRetype = document.getElementById('password_retype');
+    toggleUserPassword?.addEventListener('click', () => {
+      if (adminPassword.type === 'password') {
+        adminPassword.type = 'text';
+        showAdminPassword.className = 'fa fa-eye-slash';
+      } else {
+        adminPassword.type = 'password';
+        showAdminPassword.className = 'fa fa-eye';
+      }
+    });
+    toggleRetypePassword?.addEventListener('click', () => {
+      if (passwordRetype.type === 'password') {
+        passwordRetype.type = 'text';
+        showRetypePassword.className = 'fa fa-eye-slash';
+      } else {
+        passwordRetype.type = 'password';
+        showRetypePassword.className = 'fa fa-eye';
+      }
+    });
 
-
+    document.getElementById('user_photo').addEventListener('change', (ev) => {
+      document.querySelector('#upload_user_photo').value = ev.target.files.length;
+    });
+  });
 </script>
 

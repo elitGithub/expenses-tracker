@@ -11,8 +11,8 @@ if (!file_exists('system/installation_includes.php')) {
 use Core\System;
 use Session\JWTHelper;
 
-$user = new User();
-if ($user->isLoggedIn()) {
+$current_user = new User();
+if ($current_user->isLoggedIn()) {
     header('Location: index.php');
 }
 $_SESSION['formToken']['login'] = $app_unique_key;

@@ -13,7 +13,7 @@ use Session\SessionWrapper;
  */
 class User
 {
-    public ?int $id = null;
+    public ?int           $id = null;
     public SessionWrapper $session;
     /**
      * @var mixed
@@ -26,8 +26,8 @@ class User
     /**
      * @var \database\PearDatabase
      */
-    protected PearDatabase   $adb;
-    protected array          $permissions = [];
+    protected PearDatabase $adb;
+    protected array        $permissions = [];
 
     /**
      * @param  int  $id
@@ -66,28 +66,16 @@ class User
     }
 
     /**
-     * @return \User
-     * @throws \Exception
+     * @param $row
+     *
+     * @return void
      */
-    public static function getActiveAdminUser(): User
+    public function initFromRow($row)
     {
-        $adb = PearDatabase::getInstance();
-        $tables = $adb->getTablesConfig();
-        $query = "SELECT * FROM
-             `{$tables['users_table_name']}`
-                 LEFT JOIN `{$tables['user_to_role_table_name']}` ON
-                     `{$tables['users_table_name']}`.user_id = `{$tables['user_to_role_table_name']}`.user_id
-                LEFT JOIN `{$tables['roles_table_name']}` ON
-                `{$tables['roles_table_name']}`.role_id = `{$tables['user_to_role_table_name']}`.role_id
-                WHERE `{$tables['roles_table_name']}`.role_id = ? LIMIT 1";
-        $exists = $adb->pquery($query, [Role::getRoleIdByName('administrator')]);
-
-        if (!$exists || !$adb->num_rows($exists)) {
-            throw new Exception('No active admin user');
+        $this->id = (int) $row['user_id'];
+        foreach ($row as $key => $userInfo) {
+            $this->$key = $userInfo;
         }
-        $user = new User($adb->query_result($exists, 0, 'user_id'));
-        $user->retrieveUserInfoFromFile();
-        return $user;
     }
 
     /**
@@ -115,10 +103,9 @@ class User
         if (!password_verify($password, $row['password'])) {
             return false;
         }
-        $this->id = $row['user_id'];
-        foreach ($row as $key => $userInfo) {
-            $this->$key = $userInfo;
-        }
+
+        $this->initFromRow($row);
+
         $this->roleid = Role::getRoleByUserId($this->id);
         CacheSystemManager::refreshUserInCache($this);
         $this->retrieveUserInfoFromFile();
@@ -208,7 +195,7 @@ class User
      */
     private function updateLastLogin()
     {
-        $this->adb->pquery("UPDATE  `{$this->entityTable}` SET `last_login` = CONVERT_TZ(NOW(), 'SYSTEM','+00:00')  WHERE `user_id` = ?;", [$this->id]);
+        $this->adb->pquery("UPDATE `{$this->entityTable}` SET `last_login` = CONVERT_TZ(NOW(), 'SYSTEM','+00:00')  WHERE `user_id` = ?;", [$this->id]);
     }
 
 

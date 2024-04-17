@@ -9,7 +9,7 @@ use Permissions\PermissionsManager;
 $expensesList = new ExpenseList();
 $rows = $expensesList->getExpenses();
 $categoryList = new ExpenseCategoryList();
-if (!PermissionsManager::isPermittedAction('expense_report', $user)) {
+if (!PermissionsManager::isPermittedAction('expense_report', $current_user)) {
     header('Location: index.php');
 }
 ?>
@@ -19,7 +19,7 @@ if (!PermissionsManager::isPermittedAction('expense_report', $user)) {
     <i class="fa fa-plus-circle fa-2x"></i> Add Expenses
 </button>
 <?php else: ?>
-<h3>You have no expense categories, please add some, so we can follow your expenses.</h3>
+<h5>You have no expense categories, please add some, so we can follow your expenses.</h5>
 <?php endif ?>
 <div class="row">
     <div class="col-md-12">
@@ -55,7 +55,7 @@ if (!PermissionsManager::isPermittedAction('expense_report', $user)) {
                                     echo $row['expense_date']; ?></td>
                                 <td>
                                     <?php
-                                    if (PermissionsManager::isPermittedAction('edit_expense', $user)): ?>
+                                    if (PermissionsManager::isPermittedAction('edit_expense', $current_user)): ?>
                                         <button type="button" class="btn btn-info btn-xs editButton"
                                                 data-id="<?php echo $row['expense_id']; ?>"
                                                 data-expense-category-id="<?php echo $row['expense_category_id']; ?>"
@@ -69,7 +69,7 @@ if (!PermissionsManager::isPermittedAction('expense_report', $user)) {
                                     <?php
                                     endif; ?>
                                     <?php
-                                    if (PermissionsManager::isPermittedAction('delete_expense', $user)): ?>
+                                    if (PermissionsManager::isPermittedAction('delete_expense', $current_user)): ?>
                                         <button type="button" class="btn btn-danger btn-xs deleteButton"
                                                 data-id="<?php echo $row['expense_id']; ?>"
                                                 data-bs-toggle="modal"
@@ -106,7 +106,7 @@ require_once 'modals.php';
 
         deleteButtons.forEach((button) => {
             button.addEventListener('click', function () {
-                deleteModal.querySelector('#expense_id').value = this.getAttribute('data-id');
+                deleteModal.querySelector('#del_expense_id').value = this.getAttribute('data-id');
             });
         });
 

@@ -6,7 +6,7 @@ use ExpenseTracker\ExpenseCategoryList;
 use Permissions\PermissionsManager;
 
 
-if (!PermissionsManager::isPermittedAction('expense_category', $user)) {
+if (!PermissionsManager::isPermittedAction('expense_category', $current_user)) {
     header('Location: index.php');
 }
 
@@ -59,7 +59,7 @@ $catList = $expenseCategoryList->categoryReport();
                                     echo $date = date_format(new DateTime($row['created_at']), 'd-M-Y') ?>
                                 </td>
                                 <td>
-                                    <?php if(PermissionsManager::isPermittedAction('edit_expense_category', $user)): ?>
+                                    <?php if(PermissionsManager::isPermittedAction('edit_expense_category', $current_user)): ?>
                                         <button type="button" class="btn btn-info btn-xs editButton"
                                                 data-id="<?php echo $row['expense_category_id'] ?>"
                                                 data-name="<?php echo htmlspecialchars($row['expense_category_name']); ?>"
@@ -71,7 +71,7 @@ $catList = $expenseCategoryList->categoryReport();
                                         </button>
 
                                     <?php endif; ?>
-                                    <?php if (PermissionsManager::isPermittedAction('delete_expense_category', $user) && !$row['is_default']): ?>
+                                    <?php if (PermissionsManager::isPermittedAction('delete_expense_category', $current_user) && !$row['is_default']): ?>
                                         <button type="button" class="btn btn-danger btn-xs deleteButton"
                                                 data-id="<?php echo $row['expense_category_id'] ?>"
                                                 data-bs-toggle="modal"
@@ -109,7 +109,7 @@ require_once 'modals.php';
 
         deleteButtons.forEach((button) => {
             button.addEventListener('click', function () {
-                deleteModal.querySelector('#category_id').value = this.getAttribute('data-id');
+                deleteModal.querySelector('#del_category_id').value = this.getAttribute('data-id');
             });
         });
 

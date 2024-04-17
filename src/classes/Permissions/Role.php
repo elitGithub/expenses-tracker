@@ -53,13 +53,15 @@ class Role
         $pathQuery = "SELECT `path` FROM `{$tables['roles_table_name']}` WHERE role_id = ?";
         $pathResult = $adb->pquery($pathQuery, [$user->role]);
         $pathRow = $adb->query_result($pathResult, 'path');
-        $where = ' ';
-        // Admin can see their own role, too.
-        if (!PermissionsManager::isAdmin($user)) {
-            $where = ' AND `role_id` != ' . $user->role;
+
+        $query = "SELECT * FROM `{$tables['roles_table_name']}` WHERE `path` LIKE ? AND `role_id` != $user->role;";
+        $params = ["%$pathRow%"];
+
+        if (PermissionsManager::isAdmin($user)) {
+            $query = "SELECT * FROM `{$tables['roles_table_name']}`";
+            $params = [];
         }
-        $query = "SELECT * FROM `{$tables['roles_table_name']}` WHERE `path` LIKE ? $where;";
-        $res = $adb->pquery($query, ["%$pathRow%"]);
+        $res = $adb->pquery($query, $params);
         while ($row = $adb->fetchByAssoc($res)) {
             self::$systemRoles['list'][] = $row;
             self::$systemRoles['options'][] = "<option value='{$row['role_id']}'>{$row['role_name']}</option>";
