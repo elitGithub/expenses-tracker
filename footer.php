@@ -1,10 +1,10 @@
-
 <script defer>
-    $(document).ready(function () {
+    $(document).ready(function() {
         let table = new DataTable('#dataTables-example');
+
         new MetisMenu("#main-menu");
     });
-
 </script>
 </body>
+
 </html>

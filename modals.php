@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Core\UniqueIdsGenerator;
 use ExpenseTracker\ExpenseCategoryList;
@@ -36,7 +36,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
 <!--  Modals-->
 <div class="d-flex d-row justify-content-between">
     <!-- MANAGE EXPENSE MODALS   -->
-    <?php if (PermissionsManager::isPermittedAction('add_expense', $current_user) && count($expenseCategories) > 0): ?>
+    <?php if (PermissionsManager::isPermittedAction('add_expense', $current_user) && count($expenseCategories) > 0) : ?>
         <div class="panel panel-default" id="add_new_expense_modal">
             <div class="panel-body">
                 <!-- Modal -->
@@ -64,16 +64,14 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
 
                                         <div class="form-group col-md-6">
                                             <label for="add_expense_amount_spent">Amount Spent:</label>
-                                            <input type="number" class="form-control" name="amount_spent" id="add_expense_amount_spent"
-                                                   placeholder="Please Enter Expense Amount :" required>
+                                            <input type="number" class="form-control" name="amount_spent" id="add_expense_amount_spent" placeholder="Please Enter Expense Amount :" required>
                                         </div>
                                     </div>
 
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label for="add_expense_description">Expense Description:</label>
-                                            <input type="text" class="form-control" name="expense_description" id="add_expense_description"
-                                                   placeholder="Please Enter Expense Description :" required>
+                                            <input type="text" class="form-control" name="expense_description" id="add_expense_description" placeholder="Please Enter Expense Description :" required>
                                         </div>
 
                                         <div class="form-group col-md-6">
@@ -83,7 +81,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     </div>
 
                                     <input type="hidden" name="formToken" value="<?php
-                                    echo htmlspecialchars($addNewExpenseToken); ?>">
+                                                                                    echo htmlspecialchars($addNewExpenseToken); ?>">
 
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel / Reset</button>
@@ -98,7 +96,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
         </div>
     <?php
     endif; ?>
-    <?php if (PermissionsManager::isPermittedAction('edit_expense', $current_user)): ?>
+    <?php if (PermissionsManager::isPermittedAction('edit_expense', $current_user)) : ?>
         <div class="panel-body">
             <!-- Modal -->
             <div class="modal fade" id="editExpenseModal" aria-hidden="true" aria-labelledby="myModalLabel">
@@ -126,16 +124,14 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
 
                                     <div class="form-group col-md-6">
                                         <label for="amount_spent">Amount Spent:</label>
-                                        <input type="text" class="form-control" name="amount_spent" id="amount_spent"
-                                               placeholder="Please Enter Expense Amount :" required>
+                                        <input type="text" class="form-control" name="amount_spent" id="amount_spent" placeholder="Please Enter Expense Amount :" required>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label for="expense_description">Expense Description:</label>
-                                        <input type="text" class="form-control" name="expense_description" id="expense_description"
-                                               placeholder="Please Enter Expense Description :" required>
+                                        <input type="text" class="form-control" name="expense_description" id="expense_description" placeholder="Please Enter Expense Description :" required>
                                     </div>
 
                                     <div class="form-group col-md-6">
@@ -145,7 +141,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                 </div>
 
                                 <input type="hidden" name="formToken" value="<?php
-                                echo htmlspecialchars($editExpenseToken); ?>">
+                                                                                echo htmlspecialchars($editExpenseToken); ?>">
                                 <input type="hidden" id="expense_id" name="expense_id">
 
                                 <div class="modal-footer">
@@ -160,7 +156,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
         </div>
     <?php
     endif; ?>
-    <?php if (PermissionsManager::isPermittedAction('delete_expense', $current_user)): ?>
+    <?php if (PermissionsManager::isPermittedAction('delete_expense', $current_user)) : ?>
         <div class="panel panel-default" id="modal_delete_expense">
             <div class="modal fade" id="deleteExpenseModal" tabindex="-1" aria-labelledby="deleteExpenseModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
@@ -175,7 +171,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                 <!-- Hidden input for CSRF protection -->
                                 <input type="hidden" id="del_expense_id" name="expense_id">
                                 <input type="hidden" name="formToken" value="<?php
-                                echo htmlspecialchars($deleteExpenseToken); ?>">
+                                                                                echo htmlspecialchars($deleteExpenseToken); ?>">
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -192,11 +188,11 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
     <!-- /MANAGE EXPENSE MODALS   -->
 
     <!-- MANAGE CATEGORY MODALS   -->
-    <?php if (PermissionsManager::isPermittedAction('add_expense_category', $current_user)): ?>
+    <?php if (PermissionsManager::isPermittedAction('add_expense_category', $current_user)) : ?>
         <div class="panel panel-default" id="add_new_category_modal">
             <!-- Modal Structure -->
             <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="Add category modal" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header d-flex justify-content-between">
                             <h4 class="modal-title" id="addCategoryModalLabel">
@@ -204,40 +200,37 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                             </h4>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
-                            <form action="index.php?action=add_expense_category" method="POST">
-                                <div class="form-group">
+                        <form action="index.php?action=add_expense_category" method="POST">
+                            <div class="modal-body">
+                                <div class="form-group mb-3">
                                     <label for="new_expense_category_name">Category Name:</label>
-                                    <input type="text" class="form-control" name="new_expense_category_name" id="new_expense_category_name"
-                                           placeholder="Enter Category Name" required>
+                                    <input type="text" class="form-control mt-2" name="new_expense_category_name" id="new_expense_category_name" placeholder="Enter Category Name" required>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="new_expense_category_budget">Category Budget:</label>
-                                    <input type="number" class="form-control" name="new_expense_category_budget" id="new_expense_category_budget"
-                                           placeholder="Enter Category Budget" required>
+                                    <input type="number" class="form-control mt-2" name="new_expense_category_budget" id="new_expense_category_budget" placeholder="Enter Category Budget" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <input type="checkbox" <?php
-                                    if (count($expenseCategories) < 1) echo 'checked=true' ?> class="form-check-input" name="is_default"
-                                           id="new_expense_category_is_default">
+                                                            if (count($expenseCategories) < 1) echo 'checked=true' ?> class="form-check-input" name="is_default" id="new_expense_category_is_default">
                                     <label for="new_expense_category_is_default">Set this category as default</label>
                                 </div>
                                 <input type="hidden" name="formToken" value="<?php
-                                echo htmlspecialchars($addNewCatToken); ?>">
+                                                                                echo htmlspecialchars($addNewCatToken); ?>">
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <input type="submit" name="submit" value="Add" class="btn btn-primary">
+                                    <button type="submit" class="btn btn-primary">Add Category</button>
                                 </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     <?php
     endif; ?>
-    <?php if (PermissionsManager::isPermittedAction('edit_expense_category', $current_user)): ?>
+    <?php if (PermissionsManager::isPermittedAction('edit_expense_category', $current_user)) : ?>
         <div class="modal fade" id="editCategoryModal" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -263,7 +256,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                 <label for="is_default">Set this category as default</label>
                             </div>
                             <input type="hidden" name="formToken" value="<?php
-                            echo htmlspecialchars($editCatToken); ?>">
+                                                                            echo htmlspecialchars($editCatToken); ?>">
                             <input type="hidden" name="category_id" id="category_id">
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -276,7 +269,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
         </div>
     <?php
     endif; ?>
-    <?php if (PermissionsManager::isPermittedAction('delete_expense_category', $current_user)): ?>
+    <?php if (PermissionsManager::isPermittedAction('delete_expense_category', $current_user)) : ?>
         <div class="panel panel-default" id="modal_delete_expense">
             <div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
@@ -291,7 +284,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                 <!-- Hidden input for CSRF protection -->
                                 <input type="hidden" id="del_category_id" name="category_id">
                                 <input type="hidden" name="formToken" value="<?php
-                                echo htmlspecialchars($deleteCatToken); ?>">
+                                                                                echo htmlspecialchars($deleteCatToken); ?>">
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -308,7 +301,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
     <!-- /MANAGE CATEGORY MODALS   -->
 
     <!-- MANAGE Users MODALS   -->
-    <?php if (PermissionsManager::isPermittedAction('add_user', $current_user)): ?>
+    <?php if (PermissionsManager::isPermittedAction('add_user', $current_user)) : ?>
         <div class="panel panel-default" id="add_new_user_modal">
             <div class="panel-body">
                 <!-- Modal -->
@@ -323,7 +316,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form action="index.php?action=add_user" method="POST"  enctype="multipart/form-data">
+                                <form action="index.php?action=add_user" method="POST" enctype="multipart/form-data">
                                     <div class="row">
                                         <div class="mb-3">
                                             <label for="user_photo" class="form-label">Add user profile picture</label>
@@ -333,13 +326,11 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label for="user_name">Username:</label>
-                                            <input type="text" class="form-control" name="user_name" id="user_name"
-                                                   placeholder="Please Enter the username" required>
+                                            <input type="text" class="form-control" name="user_name" id="user_name" placeholder="Please Enter the username" required>
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label for="email">User email:</label>
-                                            <input type="email" class="form-control" name="email" id="email" placeholder="Please Enter user email"
-                                                   required>
+                                            <input type="email" class="form-control" name="email" id="email" placeholder="Please Enter user email" required>
                                         </div>
                                         <div class="form-group col-md-12">
                                             <label for="user_role">User role:</label>
@@ -354,14 +345,12 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label for="first_name">User first name:</label>
-                                            <input type="text" class="form-control" name="first_name" id="first_name"
-                                                   placeholder="Please Enter first name" required>
+                                            <input type="text" class="form-control" name="first_name" id="first_name" placeholder="Please Enter first name" required>
                                         </div>
 
                                         <div class="form-group col-md-6">
                                             <label for="last_name">User last name:</label>
-                                            <input type="text" class="form-control" name="last_name" id="last_name"
-                                                   placeholder="Please Enter last name" required>
+                                            <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Please Enter last name" required>
                                         </div>
                                     </div>
 
@@ -377,16 +366,14 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                         <div class="form-group col-md-6">
                                             <label for="password_retype">Retype password:</label>
                                             <div class="input-group" id="show_retype_password">
-                                                <input type="password" autocomplete="off" name="password_retype" id="password_retype" minlength="8"
-                                                       class="form-control" required>
-                                                <span class="input-group-text cursor-pointer" id="toggleRetypePassword"><i class="fa fa-eye"
-                                                                                                                           id="showRetypePassword"></i></span>
+                                                <input type="password" autocomplete="off" name="password_retype" id="password_retype" minlength="8" class="form-control" required>
+                                                <span class="input-group-text cursor-pointer" id="toggleRetypePassword"><i class="fa fa-eye" id="showRetypePassword"></i></span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <?php
-                                    if (PermissionsManager::isAdmin($current_user)): ?>
+                                    if (PermissionsManager::isAdmin($current_user)) : ?>
                                         <div class="row">
                                             <div class="form-group">
                                                 <input type="checkbox" class="form-check-input" name="is_admin" id="add_user_is_admin">
@@ -396,7 +383,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <?php
                                     endif; ?>
                                     <input type="hidden" name="formToken" value="<?php
-                                    echo htmlspecialchars($addUserToken); ?>">
+                                                                                    echo htmlspecialchars($addUserToken); ?>">
                                     <input type="hidden" id="upload_user_photo" name="upload_user_photo" value="">
 
                                     <div class="modal-footer">
@@ -412,7 +399,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
         </div>
     <?php
     endif ?>
-    <?php if (PermissionsManager::isPermittedAction('edit_user', $current_user)): ?>
+    <?php if (PermissionsManager::isPermittedAction('edit_user', $current_user)) : ?>
         <div class="panel panel-default" id="edit_user_modal">
             <div class="panel-body">
                 <!-- Modal -->
@@ -427,7 +414,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form action="index.php?action=edit_user" method="POST"  enctype="multipart/form-data">
+                                <form action="index.php?action=edit_user" method="POST" enctype="multipart/form-data">
                                     <div class="row">
                                         <div class="mb-3">
                                             <label for="edit_user_photo" class="form-label">Change user profile picture</label>
@@ -437,13 +424,11 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label for="edit_user_name">Username:</label>
-                                            <input type="text" class="form-control" name="user_name" id="edit_user_name"
-                                                   placeholder="Please Enter the username" disabled="disabled">
+                                            <input type="text" class="form-control" name="user_name" id="edit_user_name" placeholder="Please Enter the username" disabled="disabled">
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label for="edit_user_email">User email:</label>
-                                            <input type="email" class="form-control" name="email" id="edit_user_email" placeholder="Please Enter user email"
-                                                   required>
+                                            <input type="email" class="form-control" name="email" id="edit_user_email" placeholder="Please Enter user email" required>
                                         </div>
                                         <div class="form-group col-md-12">
                                             <label for="edit_user_role">User role:</label>
@@ -458,14 +443,12 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="row">
                                         <div class="form-group col-md-6">
                                             <label for="edit_first_name">User first name:</label>
-                                            <input type="text" class="form-control" name="first_name" id="edit_first_name"
-                                                   placeholder="Please Enter first name" required>
+                                            <input type="text" class="form-control" name="first_name" id="edit_first_name" placeholder="Please Enter first name" required>
                                         </div>
 
                                         <div class="form-group col-md-6">
                                             <label for="edit_last_name">User last name:</label>
-                                            <input type="text" class="form-control" name="last_name" id="edit_last_name"
-                                                   placeholder="Please Enter last name" required>
+                                            <input type="text" class="form-control" name="last_name" id="edit_last_name" placeholder="Please Enter last name" required>
                                         </div>
                                     </div>
 
@@ -481,16 +464,14 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                         <div class="form-group col-md-6">
                                             <label for="retype_change_password">Retype password:</label>
                                             <div class="input-group" id="show_retype_change_password">
-                                                <input type="password" autocomplete="off" name="password_retype" id="retype_change_password" minlength="8"
-                                                       class="form-control">
-                                                <span class="input-group-text cursor-pointer" id="toggleRetypeChangePassword"><i class="fa fa-eye"
-                                                                                                                           id="showChangeRetypePassword"></i></span>
+                                                <input type="password" autocomplete="off" name="password_retype" id="retype_change_password" minlength="8" class="form-control">
+                                                <span class="input-group-text cursor-pointer" id="toggleRetypeChangePassword"><i class="fa fa-eye" id="showChangeRetypePassword"></i></span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <?php
-                                    if (PermissionsManager::isAdmin($current_user)): ?>
+                                    if (PermissionsManager::isAdmin($current_user)) : ?>
                                         <div class="row">
                                             <div class="form-group">
                                                 <input type="checkbox" class="form-check-input" name="is_admin" id="edit_is_admin">
@@ -506,7 +487,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                         </div>
                                     </div>
                                     <input type="hidden" name="formToken" value="<?php
-                                    echo htmlspecialchars($editUserToken); ?>">
+                                                                                    echo htmlspecialchars($editUserToken); ?>">
                                     <input type="hidden" name="userId" id="edit_user_id">
                                     <input type="hidden" id="edit_user_upload_user_photo" name="upload_user_photo" value="">
 
