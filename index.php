@@ -25,8 +25,8 @@ if (!is_file("actions/$action.php")) {
     <?php
     require_once 'sidenav.php' ?>
     <div id="page-wrapper">
-        <div id="page-inner">
-            <div class="container-md py-3" id="page-container">
+        <div id="container-md py-3">
+            <div class="page-inner" id="page-container">
                 <?php
                 if (isset($_SESSION['errors'])) {
                     foreach ($_SESSION['errors'] as $error) {

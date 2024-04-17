@@ -34,6 +34,7 @@ $collection = $userList->loadUserList($current_user);
                             <th>Email</th>
                             <th>Username</th>
                             <th>User Name</th>
+                            <th>User Role</th>
                             <th>Created By</th>
                             <th>Active</th>
                             <?php
@@ -61,10 +62,14 @@ $collection = $userList->loadUserList($current_user);
                                 <td><?php
                                     echo $user->first_name . ' ' . $user->last_name; ?></td>
                                 <td><?php
+                                echo $user->role_name;
+                                    ?>
+                                </td>
+                                <td><?php
                                     echo $user->creator; ?></td>
                                 <td>
                                     <?php
-                                    if ($user->active === '1'): ?>
+                                    if ((int)$user->active === 1): ?>
                                         <p class="bg-success-subtle">Active</p>
                                     <?php
                                     else: ?>
@@ -200,8 +205,8 @@ require_once 'modals.php';
       document.querySelector('#upload_user_photo').value = ev.target.files.length;
     });
 
-    document.getElementById('edit_user_upload_user_photo').addEventListener('change', (ev) => {
-      document.querySelector('#upload_user_photo').value = ev.target.files.length;
+    document.getElementById('edit_user_photo').addEventListener('change', (ev) => {
+      document.querySelector('#edit_user_upload_user_photo').value = ev.target.files.length;
     });
   });
 </script>

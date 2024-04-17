@@ -36,7 +36,7 @@ class PermissionsManager
         $permissions = CacheSystemManager::readPermissions();
         self::$_userPrivileges[$userId]['user_data'] = $userData;
         foreach ($permissions as $permission) {
-            if ((int)$permission['role_id'] === (int)$userId) {
+            if ((int)$permission['role_id'] === (int)$userData['role']) {
                 self::$_userPrivileges[$userId]['permissions'][$permission['action_id']] = $permission['is_enabled'];
             }
         }
@@ -148,7 +148,7 @@ class PermissionsManager
         $adb = PearDatabase::getInstance();
         $tables = $adb->getTablesConfig();
         $query = "SELECT * FROM `{$tables['actions_table_name']}` AS `actions`
-                          JOIN `{$tables['role_permissions_table_name']}` rp on `actions`.action_id = rp.action_id  
+                          JOIN `{$tables['role_permissions_table_name']}` rp on `actions`.action_id = rp.action_id
                           WHERE `role_id` = ?";
         $result = $adb->pquery($query, [$roleId]);
         if (!$result || !$adb->num_rows($result)) {
