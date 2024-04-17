@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use Core\Upload;
+use engine\History;
 use Models\UserModel;
 use Permissions\PermissionsManager;
 use Permissions\Role;
@@ -71,7 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
         }
     }
     $_SESSION['success'][] = 'New user created successfully.';
-
+    $historyData = [
+        'user_name' => $userName,
+        'email' => $email,
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'role_id' => $roleId,
+        'is_admin' => $isAdmin,
+    ];
+    History::logTrack('User', $userId, 'add_user', $current_user->id, json_encode($historyData));
     header('Location: ' . $_SERVER['HTTP_REFERER']);
     return;
 

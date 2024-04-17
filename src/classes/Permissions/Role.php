@@ -64,10 +64,20 @@ class Role
         }
         $res = $adb->pquery($query, $params);
         while ($row = $adb->fetchByAssoc($res)) {
+            $selected = ((int) $row['role_id'] === (int) $selected) ? 'selected' : '';
             self::$systemRoles['list'][] = $row;
-            self::$systemRoles['options'][] = "<option value='{$row['role_id']}'>{$row['role_name']}</option>";
+            self::$systemRoles['options'][] = "<option $selected value='{$row['role_id']}'>{$row['role_name']}</option>";
         }
         return $returnHtml ? self::$systemRoles['options'] : self::$systemRoles['list'];
+    }
+
+    public static function getRoleById($id)
+    {
+        $adb = PearDatabase::getInstance();
+        $tables = $adb->getTablesConfig();
+        $query = "SELECT * FROM `{$tables['roles_table_name']}` WHERE role_id = ?";
+        $result = $adb->preparedQuery($query, [$id]);
+        return $adb->query_result($result, 0, 'role_name');
     }
 
     /**

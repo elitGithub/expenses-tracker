@@ -103,7 +103,7 @@ $current_user->retrieveUserInfoFromFile();
                         <i class="fa fa-user fa-2x"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                        <li class="dropdown-header">Hello, <?php echo $user->name ?></li>
+                        <li class="dropdown-header">Hello, <?php echo $current_user->name ?></li>
                         <li><a class="dropdown-item" href="#">Change Password</a></li>
                         <li>
                             <hr class="dropdown-divider">

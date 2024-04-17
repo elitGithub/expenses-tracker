@@ -323,7 +323,7 @@ class Security
     /**
      * Do Never Allowed
      *
-     * @used-by    CI_Security::xss_clean()
+     *  ::xss_clean()
      *
      * @param  string
      *
@@ -363,7 +363,6 @@ class Security
      *
      * Callback method for xss_clean() to remove naughty HTML elements.
      *
-     * @used-by    CI_Security::xss_clean()
      *
      * @param  array  $matches
      *
@@ -447,7 +446,6 @@ class Security
      * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
      * PHP 5.2+ on image tag heavy strings.
      *
-     * @used-by    CI_Security::xss_clean()
      *
      * @param  array  $match
      *
@@ -471,7 +469,6 @@ class Security
     /**
      * Attribute Conversion
      *
-     * @used-by    CI_Security::xss_clean()
      *
      * @param  array  $match
      *
@@ -487,8 +484,6 @@ class Security
      *
      * Filters tag attributes for consistency and safety.
      *
-     * @used-by    CI_Security::_js_img_removal()
-     * @used-by    CI_Security::_js_link_removal()
      *
      * @param  string  $str
      *
@@ -512,7 +507,6 @@ class Security
      * Callback method for xss_clean() to remove whitespace from
      * things like 'j a v a s c r i p t'.
      *
-     * @used-by    CI_Security::xss_clean()
      *
      * @param  array  $matches
      *
@@ -526,7 +520,6 @@ class Security
     /**
      * HTML Entity Decode Callback
      *
-     * @used-by    CI_Security::xss_clean()
      *
      * @param  array  $match
      *
@@ -554,8 +547,6 @@ class Security
      * This limits the PCRE backtracks, making it more performance friendly
      * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
      * PHP 5.2+ on link-heavy strings.
-     *
-     * @used-by    CI_Security::xss_clean()
      *
      * @param  array  $match
      *

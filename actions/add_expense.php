@@ -2,6 +2,7 @@
 
 declare(strict_types = 1);
 
+use engine\History;
 use ExpenseTracker\Expense;
 use Permissions\PermissionsManager;
 
@@ -18,6 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     $expenseId = $expense->add($description, $date, (float) $amount, (int) $categoryId);
 
     if ($expenseId > 0) {
+        $historyData = [
+            'expenseId'   => $expenseId,
+            'description' => $description,
+            'amount'      => $amount,
+            'categoryId'  => $categoryId,
+            'date'        => $date,
+        ];
+        History::logTrack('Expense', $expenseId, 'add_expense', $current_user->id, json_encode($historyData));
         $_SESSION['success'][] = 'Successfully created a new expense with ID ' . $expenseId;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;

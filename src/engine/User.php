@@ -208,7 +208,7 @@ class User
      */
     public function changePassword(string $password, string $confirmPassword): bool
     {
-        if (!strcmp($password, $confirmPassword)) {
+        if ($password !== $confirmPassword) {
             $_SESSION['errors'][] = 'Please make sure you typed password and confirm password';
             return false;
         }

@@ -37,11 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
         }
 
         $changePassword = $user->changePassword($password, $confirmPassword);
+        if ($changePassword) {
+            $_SESSION['success'][] = 'Password changed successfully';
+        }
         if (!$changePassword) {
             $_SESSION['errors'][] = 'Passwords not changed';
         }
-
-
     }
 
 
@@ -52,7 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     $roleId = Filter::filterInput(INPUT_POST, 'user_role', FILTER_VALIDATE_INT);
     $isAdmin = Filter::filterInput(INPUT_POST, 'is_admin', FILTER_VALIDATE_BOOLEAN, false);
     $uploadPhoto = Filter::filterInput(INPUT_POST, 'upload_user_photo', FILTER_VALIDATE_BOOLEAN, false);
-    $active = Filter::filterInput(INPUT_POST, 'active', FILTER_VALIDATE_BOOLEAN, true);
+    $active = Filter::filterInput(INPUT_POST, 'active', FILTER_VALIDATE_BOOLEAN, false);
+
 
     try {
         $validRole = Role::validateRole((int)$roleId);

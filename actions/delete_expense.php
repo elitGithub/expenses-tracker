@@ -2,6 +2,7 @@
 
 declare(strict_types = 1);
 
+use engine\History;
 use ExpenseTracker\Expense;
 use Permissions\PermissionsManager;
 
@@ -19,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     $result = $expense->delete((int)$expenseId);
 
     if ($result > 0) {
+        History::logTrack('Expense', $expenseId, 'delete_expense', $current_user->id, json_encode([]));
         $_SESSION['success'][] = 'Successfully deleted an expense with ID ' . $expenseId;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;

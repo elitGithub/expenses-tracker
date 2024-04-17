@@ -11,6 +11,7 @@ $rows = $expensesList->getExpenses();
 $categoryList = new ExpenseCategoryList();
 if (!PermissionsManager::isPermittedAction('expense_report', $current_user)) {
     header('Location: index.php');
+    return;
 }
 ?>
 <?php if ($categoryList->countTotalCategoriesByTimeFrame() > 0): ?>

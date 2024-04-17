@@ -8,6 +8,7 @@ use Permissions\PermissionsManager;
 
 if (!PermissionsManager::isPermittedAction('expense_category', $current_user)) {
     header('Location: index.php');
+    return;
 }
 
 $expenseCategoryList = new ExpenseCategoryList();

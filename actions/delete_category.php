@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 
+use engine\History;
 use ExpenseTracker\ExpenseCategory;
 use ExpenseTracker\ExpenseCategoryList;
 use Permissions\PermissionsManager;
@@ -33,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 
 
     if ($result) {
+        History::logTrack('Expense Category', $categoryId, 'delete_expense_category', $current_user->id, json_encode([]));
         $_SESSION['success'][] = 'Category deleted.';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;

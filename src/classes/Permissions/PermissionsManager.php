@@ -95,11 +95,31 @@ class PermissionsManager
             return self::$permissions[$actionName];
         }
         $query = "SELECT `action_id` FROM `{$tables['actions_table_name']}` WHERE `action` = ?";
-        $result = $adb->pquery($query, [$actionName], true);
+        $result = $adb->pquery($query, [$actionName]);
         if (!$adb->num_rows($result)) {
             return false;
         }
         return $adb->query_result($result, 0, 'action_id');
+    }
+
+    public static function listAllPermissionsForRole(int $roleId): array
+    {
+        $adb = PearDatabase::getInstance();
+        $tables = $adb->getTablesConfig();
+        $query = "SELECT * FROM `{$tables['actions_table_name']}` AS `actions`
+                          JOIN `{$tables['role_permissions_table_name']}` rp on `actions`.action_id = rp.action_id  
+                          WHERE `role_id` = ?";
+        $result = $adb->pquery($query, [$roleId]);
+        if (!$result || !$adb->num_rows($result)) {
+            return [];
+        }
+
+        $permissions = [];
+        while ($row = $adb->fetchByAssoc($result)) {
+            $permissions[$row['action_id']] = $row;
+        }
+
+        return $permissions;
     }
 
 }

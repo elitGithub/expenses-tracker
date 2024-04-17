@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 
+use engine\History;
 use ExpenseTracker\ExpenseCategory;
 use Permissions\PermissionsManager;
 
@@ -27,6 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
         $_SESSION['success'][] = 'Default category changed to category ' . $name;
     }
     if ($catId) {
+        $historicalData = [
+            'name'       => $name,
+            'amount'     => $amount,
+            'is_default' => $isDefault,
+        ];
+        History::logTrack('Expense Category', $catId, 'add_expense_category', $current_user->id, json_encode($historicalData));
         $_SESSION['success'][] = 'Successfully added a new category with ID ' . $catId;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;
