@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user->login($username, $password)) {
         $user->retrieveUserInfoFromFile();
         JWTHelper::generateJwtDataCookie($user->id, $default_language, JWTHelper::MODE_LOGIN);
+        $user->session->sessionAddKey('application_key', $app_unique_key);
         header('Location: index.php');
         return;
     }

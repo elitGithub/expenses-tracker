@@ -104,7 +104,7 @@ $current_user->retrieveUserInfoFromFile();
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
                         <li class="dropdown-header">Hello, <?php echo $current_user->name ?></li>
-                        <li><a class="dropdown-item" href="#">Change Password</a></li>
+                        <li><a class="dropdown-item" href="index.php?action=user_page">My Profile</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>

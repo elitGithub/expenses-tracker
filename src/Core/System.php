@@ -127,7 +127,7 @@ class System
         $this->uniqueIdsGenerator = new UniqueIdsGenerator();
         $this->mainConfig = [
             'currentVersion'    => System::getVersion(),
-            'appKey'            => $this->getRandomString(16),
+            'appKey'            => $this->getRandomString(36),
             'enableCaptchaCode' => (extension_loaded('gd') ? 'true' : 'false'),
         ];
     }

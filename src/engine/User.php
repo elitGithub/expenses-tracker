@@ -183,6 +183,7 @@ class User
             if ($ajax) {
                 die(json_encode(['success' => false, 'message' => $exception->getMessage()]));
             }
+            var_dump($exception);
             die('Privileges not found.');
         }
     }
