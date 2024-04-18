@@ -13,5 +13,8 @@
     <orderEntry type="library" name="datatables" level="application" />
     <orderEntry type="library" name="pdfmake" level="application" />
     <orderEntry type="library" name="chart.js" level="application" />
+    <orderEntry type="library" name="morris" level="application" />
+    <orderEntry type="library" name="metismenujs" level="application" />
+    <orderEntry type="library" name="raphael" level="application" />
   </component>
 </module>

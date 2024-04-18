@@ -5,10 +5,10 @@ declare(strict_types = 1);
 namespace Permissions;
 
 use database\PearDatabase;
+use engine\User;
 use Exception;
 use Memcached;
 use Redis;
-use engine\User;
 
 global $permissionsConfig, $redisConfig, $memcachedConfig;
 require_once 'system/user/permissions.php';
@@ -87,10 +87,10 @@ class CacheSystemManager
      */
     private static function writeFile($key, array $data, $expiration = null)
     {
-        $fileName = EXTR_ROOT_DIR . '/system/data/' . $key .'.txt';
+        $fileName = EXTR_ROOT_DIR . '/system/data/' . $key . '.txt';
         $res = file_put_contents($fileName, serialize($data));
         if (is_int($expiration)) {
-            $expiryFile =  EXTR_ROOT_DIR . '/system/data/' . 'expirations.php';
+            $expiryFile = EXTR_ROOT_DIR . '/system/data/' . 'expirations.php';
 
             $ttl = time() + $expiration;
             $data[$key] = $ttl;
@@ -103,7 +103,6 @@ class CacheSystemManager
 
             file_put_contents($expiryFile, serialize($data), FILE_APPEND);
         }
-
     }
 
 
@@ -256,7 +255,18 @@ class CacheSystemManager
      */
     public static function refreshUserInCache(User $user)
     {
-        self::writeUser($user->id, ['userName' =>  $user->user_name, 'name' => $user->first_name . ' ' . $user->last_name, 'active' => $user->active, 'role' => $user->roleid, 'is_admin' => $user->is_admin ?? 'Off']);
+        self::writeUser($user->id, [
+            'userName'   => $user->user_name,
+            'user_id'    => $user->id,
+            'name'       => $user->first_name . ' ' . $user->last_name,
+            'email'      => $user->email,
+            'first_name' => $user->first_name,
+            'last_name'  => $user->last_name,
+            'active'     => $user->active,
+            'role'       => $user->roleid,
+            'last_login' => $user->last_login,
+            'is_admin'   => $user->is_admin ?? 'Off',
+        ]);
         $adb = PearDatabase::getInstance();
         self::createPermissionsFile($adb, $adb->getTablesConfig()['role_permissions_table_name']);
     }
@@ -270,7 +280,6 @@ class CacheSystemManager
      */
     public static function createPermissionsFile(PearDatabase $adb, string $rolePermissionsTable)
     {
-
         $rolePermRes = $adb->query("SELECT * FROM `$rolePermissionsTable`;");
         $rolePermissionsArray = [];
         while ($row = $adb->fetchByAssoc($rolePermRes)) {
@@ -278,7 +287,7 @@ class CacheSystemManager
         }
         self::refreshPermissionsInCache($rolePermissionsArray);
         $result = file_put_contents(EXTR_ROOT_DIR . '/system/user/default_permissions.php',
-                          '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
+                                    '<?php $rolePermissionsArray=' . var_export($rolePermissionsArray, true) . ';');
         if ($result === false) {
             throw new Exception('Unable to write permissions file.');
         }
@@ -294,7 +303,7 @@ class CacheSystemManager
     {
         global $permissionsConfig;
         $key = self::CACHE_WRITE_PREFIX . '_' . $permissionsConfig['writing_key'] . self::PERMISSION_HASH_KEY;
-        self::hashWrite($key,self::PERMISSION_HASH_KEY, $rolePermissionsArray);
+        self::hashWrite($key, self::PERMISSION_HASH_KEY, $rolePermissionsArray);
     }
 
     /**

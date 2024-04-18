@@ -142,6 +142,7 @@ class UserModel
                   WHERE `user_id` = ?; ";
 
         $result = $this->adb->pquery($query, [$email, $firstName, $lastName, $active, $isAdmin, $user->id]);
+        $userChanges = $this->adb->getAffectedRowCount($result);
         if (!$result) {
             return false;
         }
@@ -151,14 +152,12 @@ class UserModel
         if (!$result) {
             return false;
         }
-        CacheSystemManager::writeUser($user->id, [
-            'userName' => $user->user_name, 'name' => $user->first_name . ' ' . $user->last_name,
-            'active'   => 1,
-            'role'     => $roleId,
-            'is_admin' => 'On',
-        ]);
 
-        return true;
+        CacheSystemManager::refreshUserInCache($user);
+        PermissionsManager::refreshPermissionsInCache();
+        $user->refreshUserInSession();
+
+        return $userChanges > 0;
     }
 
 }

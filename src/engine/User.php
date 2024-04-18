@@ -106,6 +106,7 @@ class User
      * @param $password
      *
      * @return bool
+     * @throws \Throwable
      */
     public function login($userName, $password): bool
     {
@@ -136,16 +137,38 @@ class User
         $this->retrieveUserInfoFromFile();
 
         $this->session->sessionAddKey('authenticated_user_language', $default_language);
-        $this->session->sessionAddKey('authenticated_user_id', $this->id);
         $this->session->sessionAddKey('username', $userName);
         $this->session->sessionAddKey('authenticated_user_name', $userName);
         $this->session->sessionAddKey('loggedin', true);
+        $this->session->sessionAddKey('last_login', date('Y-m-d H:i:s'));
         $this->session->sessionAddKey('ua', $_SERVER['HTTP_USER_AGENT']);
         $this->session->sessionAddKey('is_logged_in', true);
-        $this->session->sessionAddKey('username', $this->user_name);
-        $this->session->sessionAddKey('password', $this->password);
+
+        $this->refreshUserInSession();
+
         $this->updateLastLogin();
         return true;
+    }
+
+    /**
+     * @return void
+     */
+    public function refreshUserInSession()
+    {
+        $this->session->sessionAddKey('authenticated_user_id', $this->id);
+        $this->session->sessionAddKey('authenticated_user_data', [
+            'userName'   => $this->user_name,
+            'user_id'    => $this->id,
+            'name'       => $this->first_name . ' ' . $this->last_name,
+            'email'      => $this->email,
+            'first_name' => $this->first_name,
+            'last_name'  => $this->last_name,
+            'active'     => $this->active,
+            'role'       => $this->roleid,
+            'is_admin'   => $this->is_admin ?? 'Off',
+        ]);
+        $this->session->sessionAddKey('username', $this->user_name);
+        $this->session->sessionAddKey('password', $this->password);
     }
 
     /**
@@ -175,6 +198,7 @@ class User
             $userData = PermissionsManager::getUserPrivileges($this->id);
             foreach ($userData['user_data'] as $propertyName => $propertyValue) {
                 $this->$propertyName = $propertyValue;
+                $this->session->sessionAddKey($propertyName, $propertyValue);
             }
             foreach ($userData['permissions'] as $actionId => $isEnabled) {
                 $this->permissions[$actionId] = $isEnabled;

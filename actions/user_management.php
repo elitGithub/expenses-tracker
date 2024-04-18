@@ -185,10 +185,10 @@ require_once 'modals.php';
     toggleUserPassword?.addEventListener('click', () => {
       if (adminPassword.type === 'password') {
         adminPassword.type = 'text';
-        showAdminPassword.className = 'fa fa-eye-slash';
+          showUserPassword.className = 'fa fa-eye-slash';
       } else {
         adminPassword.type = 'password';
-        showAdminPassword.className = 'fa fa-eye';
+          showUserPassword.className = 'fa fa-eye';
       }
     });
     toggleRetypePassword?.addEventListener('click', () => {
