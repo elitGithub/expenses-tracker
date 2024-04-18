@@ -26,16 +26,14 @@ class ExpenseList
 
 
     /**
-     * @param  int  $limit
-     * @param  int  $offset
      *
      * @return array
      */
-    public function getExpenses(int $limit = 10, int $offset = 0): array
+    public function getExpenses(): array
     {
         $query = "SELECT * FROM `{$this->tables['expense_category_table_name']}` `i`
                            LEFT JOIN `{$this->tables['expenses_table_name']}` `s` ON `i`.`expense_category_id`= `s`.`expense_category_id`
-                           WHERE (`s`.`expense_category_id` > 0) AND `s`.`deleted` = 0 LIMIT {$limit} OFFSET {$offset}";
+                           WHERE (`s`.`expense_category_id` > 0) AND `s`.`deleted` = 0;";
         $result = $this->adb->query($query);
         $expenses = [];
 

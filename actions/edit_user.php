@@ -47,14 +47,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 
 
     $userModel = new UserModel();
-    $email = Filter::filterInput(INPUT_POST, 'email', FILTER_SANITIZE_SPECIAL_CHARS);
-    $firstName = Filter::filterInput(INPUT_POST, 'first_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
-    $lastName = Filter::filterInput(INPUT_POST, 'last_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
-    $roleId = Filter::filterInput(INPUT_POST, 'user_role', FILTER_VALIDATE_INT);
+    $email = Filter::filterInput(INPUT_POST, 'email', FILTER_SANITIZE_SPECIAL_CHARS, $user->email);
+    $firstName = Filter::filterInput(INPUT_POST, 'first_name', FILTER_SANITIZE_SPECIAL_CHARS, $user->first_name);
+    $lastName = Filter::filterInput(INPUT_POST, 'last_name', FILTER_SANITIZE_SPECIAL_CHARS, $user->last_name);
+    $roleId = Filter::filterInput(INPUT_POST, 'user_role', FILTER_VALIDATE_INT, $user->roleid);
     $isAdmin = Filter::filterInput(INPUT_POST, 'is_admin', FILTER_VALIDATE_BOOLEAN, false);
     $uploadPhoto = Filter::filterInput(INPUT_POST, 'upload_user_photo', FILTER_VALIDATE_BOOLEAN, false);
     $active = Filter::filterInput(INPUT_POST, 'active', FILTER_VALIDATE_BOOLEAN, false);
     $isAdmin = $isAdmin ? 'On' : 'Off';
+
+    if (!$email) {
+        $email = $user->email;
+    }
+    if (!$firstName) {
+        $firstName = $user->first_name;
+    }
+    if (!$lastName) {
+        $lastName = $user->last_name;
+    }
+    if (!$roleId) {
+        $roleId = $user->roleid;
+    }
 
     try {
         $validRole = Role::validateRole((int)$roleId);
