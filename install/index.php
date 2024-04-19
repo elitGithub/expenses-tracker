@@ -20,7 +20,7 @@ if (version_compare(PHP_VERSION, '7.4.0') < 0) {
 set_time_limit(0);
 
 if (!defined('DEBUG')) {
-    define('DEBUG', true);
+    define('DEBUG', false);
 }
 
 if (DEBUG) {
