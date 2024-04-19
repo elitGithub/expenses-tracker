@@ -96,11 +96,11 @@ $collection = $userList->loadUserList($current_user);
                                                                                                                     echo $user->user_id ?>" data-role_id="<?php
                                                                                                                                                             echo $user->role_id ?>" data-first_name="<?php
                                                                                                                                                                                                         echo htmlspecialchars($user->first_name) ?>" data-last_name="<?php
-                                                                                                                                                                                                    echo htmlspecialchars($user->last_name) ?>" data-email="<?php
-                                                                                                                                                                                                                    echo $user->email ?>" data-userName="<?php
-                                                                                                                                                                                                                echo $user->user_name ?>" data-active="<?php
-                                                                                                                                                                                        echo $user->active ?>" data-is_admin="<?php
-                                                                                                                                                                        echo $user->is_admin ?>" data-bs-toggle="modal" data-bs-target="#editUserModal">
+                                                                                                                                                                                                                                                                        echo htmlspecialchars($user->last_name) ?>" data-email="<?php
+                                                                                                                                                                                                                                                                                                                                echo $user->email ?>" data-userName="<?php
+                                                                                                                                                                                                                                                                                                                                                                        echo $user->user_name ?>" data-active="<?php
+                                                                                                                                                                                                                                                                                                                                                                                                                echo $user->active ?>" data-is_admin="<?php
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        echo $user->is_admin ?>" data-bs-toggle="modal" data-bs-target="#editUserModal">
                                                 <span class='fa fa-pencil'></span> Edit
                                             </button>
                                             <?php
@@ -173,30 +173,22 @@ require_once 'modals.php';
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        const toggleUserPassword = document.getElementById('toggleChangeUserPassword');
-        const toggleRetypePassword = document.getElementById('toggleRetypeChangePassword');
-        const showUserPassword = document.getElementById('showChangeUserPassword');
-        const showRetypePassword = document.getElementById('showChangeRetypePassword');
-        const adminPassword = document.getElementById('change_password');
-        const passwordRetype = document.getElementById('retype_change_password');
+        const passwordTogglers = document.querySelectorAll('.password-toggler');
 
-        toggleUserPassword?.addEventListener('click', () => {
-            if (adminPassword.type === 'password') {
-                adminPassword.type = 'text';
-                showUserPassword.className = 'fa fa-eye-slash';
-            } else {
-                adminPassword.type = 'password';
-                showUserPassword.className = 'fa fa-eye';
-            }
-        });
-        toggleRetypePassword?.addEventListener('click', () => {
-            if (passwordRetype.type === 'password') {
-                passwordRetype.type = 'text';
-                showRetypePassword.className = 'fa fa-eye-slash';
-            } else {
-                passwordRetype.type = 'password';
-                showRetypePassword.className = 'fa fa-eye';
-            }
+        passwordTogglers.forEach((toggler) => {
+            toggler.addEventListener('click', () => {
+                const togglerIDom = toggler.querySelector('i');
+                const input = toggler.previousElementSibling || toggler.nextElementSibling;
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    togglerIDom.classList.remove('fa-eye');
+                    togglerIDom.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    togglerIDom.classList.remove('fa-eye-slash');
+                    togglerIDom.classList.add('fa-eye');
+                }
+            });
         });
 
         document.getElementById('user_photo').addEventListener('change', (ev) => {
