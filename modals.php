@@ -162,12 +162,14 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3 class="modal-title" id="deleteExpenseModalLabel">System</h3>
+                            <h4 class="modal-title" id="deleteExpenseModalLabel">
+                                <i class="fa fa-warning fa-1x"></i> System
+                            </h4>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form method="POST" action="index.php?action=delete_expense">
                             <div class="modal-body text-center">
-                                <h4>Are you sure you want to delete this expense?</h4>
+                                <p>Are you sure you want to delete this expense?</p>
                                 <!-- Hidden input for CSRF protection -->
                                 <input type="hidden" id="del_expense_id" name="expense_id">
                                 <input type="hidden" name="formToken" value="<?php
@@ -282,7 +284,10 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                         </div>
                         <form method="POST" action="index.php?action=delete_category">
                             <div class="modal-body text-center">
-                                <p>Are you sure you want to delete this category All expenses will be moved to the category marked as default.</p>
+                                <p>Are you sure you want to delete this category?
+                                    <br>
+                                    All expenses will be moved to the category marked as default.
+                                </p>
                                 <!-- Hidden input for CSRF protection -->
                                 <input type="hidden" id="del_category_id" name="category_id">
                                 <input type="hidden" name="formToken" value="<?php
@@ -308,13 +313,12 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
             <div class="panel-body">
                 <!-- Modal -->
                 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
+                    <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header d-flex justify-content-between">
                                 <h4 class="modal-title" id="addUserModalLabel">
                                     <i class="fa fa-plus-circle fa-1x"></i> Add User
                                 </h4>
-                                <!-- 'data-bs-dismiss' attribute for Bootstrap 5 -->
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
@@ -322,21 +326,21 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="row">
                                         <div class="mb-3">
                                             <label for="user_photo" class="form-label">Add user profile picture</label>
-                                            <input class="form-control" name="user_photo" type="file" id="user_photo">
+                                            <input class="form-control mt-2" name="user_photo" type="file" id="user_photo">
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="user_name">Username:</label>
-                                            <input type="text" class="form-control" name="user_name" id="user_name" placeholder="Please Enter the username" required>
+                                            <input type="text" class="form-control mt-2" name="user_name" id="user_name" placeholder="Please Enter the username" required>
                                         </div>
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="email">User email:</label>
-                                            <input type="email" class="form-control" name="email" id="email" placeholder="Please Enter user email" required>
+                                            <input type="email" class="form-control mt-2" name="email" id="email" placeholder="Please Enter user email" required>
                                         </div>
-                                        <div class="form-group col-md-12">
+                                        <div class="form-group mb-3 col-md-12">
                                             <label for="user_role">User role:</label>
-                                            <select class="form-control" name="user_role" id="user_role" required>
+                                            <select class="form-control mt-2" name="user_role" id="user_role" required>
                                                 <option value="" selected disabled>Choose Role</option>
                                                 <?php
                                                 echo join('', Role::getChildRoles($current_user, true)) ?>
@@ -345,30 +349,30 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     </div>
 
                                     <div class="row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="first_name">User first name:</label>
-                                            <input type="text" class="form-control" name="first_name" id="first_name" placeholder="Please Enter first name" required>
+                                            <input type="text" class="form-control mt-2" name="first_name" id="first_name" placeholder="Please Enter first name" required>
                                         </div>
 
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="last_name">User last name:</label>
-                                            <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Please Enter last name" required>
+                                            <input type="text" class="form-control mt-2" name="last_name" id="last_name" placeholder="Please Enter last name" required>
                                         </div>
                                     </div>
 
                                     <div class="row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="password">User password:</label>
                                             <div class="input-group" id="show_user_password">
-                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="password" class="form-control">
+                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="password" class="form-control mt-2">
                                                 <span class="input-group-text cursor-pointer" id="toggleUserPassword"><i class="fa fa-eye" id="showUserPassword"></i></span>
                                             </div>
                                         </div>
 
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="password_retype">Retype password:</label>
                                             <div class="input-group" id="show_retype_password">
-                                                <input type="password" autocomplete="off" name="password_retype" id="password_retype" minlength="8" class="form-control" required>
+                                                <input type="password" autocomplete="off" name="password_retype" id="password_retype" minlength="8" class="form-control mt-2" required>
                                                 <span class="input-group-text cursor-pointer" id="toggleRetypePassword"><i class="fa fa-eye" id="showRetypePassword"></i></span>
                                             </div>
                                         </div>
@@ -377,7 +381,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <?php
                                     if (PermissionsManager::isAdmin($current_user)) : ?>
                                         <div class="row">
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <input type="checkbox" class="form-check-input" name="is_admin" id="add_user_is_admin">
                                                 <label for="add_user_is_admin">Make user admin</label>
                                             </div>
@@ -406,13 +410,12 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
             <div class="panel-body">
                 <!-- Modal -->
                 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
+                    <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header d-flex justify-content-between">
                                 <h4 class="modal-title" id="editUserModalLabel">
                                     <i class="fa fa-edit fa-1x"></i> Edit User
                                 </h4>
-                                <!-- 'data-bs-dismiss' attribute for Bootstrap 5 -->
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
@@ -420,21 +423,21 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="row">
                                         <div class="mb-3">
                                             <label for="edit_user_photo" class="form-label">Change user profile picture</label>
-                                            <input class="form-control" name="user_photo" type="file" id="edit_user_photo">
+                                            <input class="form-control mt-2" name="user_photo" type="file" id="edit_user_photo">
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="edit_user_name">Username:</label>
-                                            <input type="text" class="form-control" name="user_name" id="edit_user_name" placeholder="Please Enter the username" disabled="disabled">
+                                            <input type="text" class="form-control mt-2" name="user_name" id="edit_user_name" placeholder="Please Enter the username" disabled="disabled">
                                         </div>
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="edit_user_email">User email:</label>
-                                            <input type="email" class="form-control" name="email" id="edit_user_email" placeholder="Please Enter user email" required>
+                                            <input type="email" class="form-control mt-2" name="email" id="edit_user_email" placeholder="Please Enter user email" required>
                                         </div>
-                                        <div class="form-group col-md-12">
+                                        <div class="form-group mb-3 col-md-12">
                                             <label for="edit_user_role">User role:</label>
-                                            <select class="form-control" name="user_role" id="edit_user_role" required>
+                                            <select class="form-control mt-2" name="user_role" id="edit_user_role" required>
                                                 <option value="" selected disabled>Choose Role</option>
                                                 <?php
                                                 echo join('', Role::getChildRoles($current_user, true)) ?>
@@ -443,30 +446,30 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     </div>
 
                                     <div class="row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="edit_first_name">User first name:</label>
-                                            <input type="text" class="form-control" name="first_name" id="edit_first_name" placeholder="Please Enter first name" required>
+                                            <input type="text" class="form-control mt-2" name="first_name" id="edit_first_name" placeholder="Please Enter first name" required>
                                         </div>
 
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="edit_last_name">User last name:</label>
-                                            <input type="text" class="form-control" name="last_name" id="edit_last_name" placeholder="Please Enter last name" required>
+                                            <input type="text" class="form-control mt-2" name="last_name" id="edit_last_name" placeholder="Please Enter last name" required>
                                         </div>
                                     </div>
 
                                     <div class="row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="change_password">User password:</label>
                                             <div class="input-group" id="show_edit_user_password">
-                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="change_password" class="form-control">
+                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="change_password" class="form-control mt-2">
                                                 <span class="input-group-text cursor-pointer" id="toggleChangeUserPassword"><i class="fa fa-eye" id="showChangeUserPassword"></i></span>
                                             </div>
                                         </div>
 
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group mb-3 col-md-6">
                                             <label for="retype_change_password">Retype password:</label>
                                             <div class="input-group" id="show_retype_change_password">
-                                                <input type="password" autocomplete="off" name="password_retype" id="retype_change_password" minlength="8" class="form-control">
+                                                <input type="password" autocomplete="off" name="password_retype" id="retype_change_password" minlength="8" class="form-control mt-2">
                                                 <span class="input-group-text cursor-pointer" id="toggleRetypeChangePassword"><i class="fa fa-eye" id="showChangeRetypePassword"></i></span>
                                             </div>
                                         </div>
@@ -475,7 +478,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <?php
                                     if (PermissionsManager::isAdmin($current_user)) : ?>
                                         <div class="row">
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <input type="checkbox" class="form-check-input" name="is_admin" id="edit_is_admin">
                                                 <label for="edit_is_admin">Make user admin</label>
                                             </div>
@@ -483,7 +486,7 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <?php
                                     endif; ?>
                                     <div class="row">
-                                        <div class="form-group">
+                                        <div class="form-group mb-3">
                                             <input type="checkbox" class="form-check-input" name="active" id="edit_is_active">
                                             <label for="edit_is_active">Active</label>
                                         </div>
@@ -512,12 +515,14 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3 class="modal-title" id="deleteUserModalLabel">System</h3>
+                            <h4 class="modal-title" id="deleteUserModalLabel">
+                                <i class="fa fa-warning fa-1x"></i> System
+                            </h4>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form method="POST" action="index.php?action=delete_user">
                             <div class="modal-body text-center">
-                                <h4 id="del_user_message">Are you sure you want to delete this User?</h4>
+                                <p id="del_user_message">Are you sure you want to delete this User?</p>
                                 <!-- Hidden input for CSRF protection -->
                                 <input type="hidden" id="del_user_id" name="userId">
                                 <input type="hidden" name="formToken" value="<?php
