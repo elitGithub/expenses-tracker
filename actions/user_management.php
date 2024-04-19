@@ -70,8 +70,7 @@ $collection = $userList->loadUserList($current_user);
                                         <?php
                                         if ((int) $user->active === 1) : ?>
                                             <p>Active</p>
-                                        <?php
-                                        else : ?>
+                                        <?php else : ?>
                                             <p>Inactive</p>
                                         <?php
                                         endif ?>
@@ -166,7 +165,7 @@ require_once 'modals.php';
                 editUserModal.querySelector('#edit_user_role').value = roleId;
                 editUserModal.querySelector('#edit_first_name').value = firstName;
                 editUserModal.querySelector('#edit_last_name').value = lastName;
-                editUserModal.querySelector('#edit_is_active').checked = active;
+                editUserModal.querySelector('#edit_is_active').checked = active === '1';
                 editUserModal.querySelector('#edit_is_admin').checked = isAdmin === 'On';
             });
         });
