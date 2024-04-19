@@ -90,13 +90,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
         if (!PermissionsManager::isAdmin($current_user)) {
             $isAdmin = $user->is_admin;
         }
-        if ($isAdmin === ' Off') {
+        if ($isAdmin === 'Off') {
             if ($user->isLastAdminUser($userId)) {
                 $_SESSION['errors'][] = 'You may not delete the last admin user.';
                 header('Location: ' . $_SERVER['HTTP_REFERER']);
                 return;
             }
         }
+
+        if (!$active) {
+            if ($userId === (int)$current_user->id) {
+                $active = true;
+            }
+        }
+
         $success = $userModel->updateUser($user, (int)$roleId, $email, $firstName, $lastName, $active, $isAdmin);
     } catch (Throwable $e) {
         $_SESSION['errors'][] = $e->getMessage();

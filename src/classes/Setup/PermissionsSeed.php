@@ -12,10 +12,10 @@ use database\PearDatabase;
 class PermissionsSeed
 {
     protected static array $hierarchyTree = [
-        'administrator' => ['manager', 'supervisor', 'user'],
-        'manager'       => ['supervisor', 'user'],
-        'supervisor'    => ['user'],
-        'user'          => [],
+        'Administrator' => ['Manager', 'Supervisor', 'User'],
+        'Manager'       => ['Supervisor', 'User'],
+        'Supervisor'    => ['User'],
+        'User'          => [],
     ];
 
     /**

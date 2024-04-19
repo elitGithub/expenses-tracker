@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace engine;
 
 use database\PearDatabase;
 use Permissions\PermissionsManager;
 use Permissions\Role;
-use engine\User;
 
 class UsersList
 {
@@ -28,9 +27,9 @@ class UsersList
     }
 
     /**
-     * @param  \User  $user
+     * @param  \engine\User  $user
      *
-     * @return array|\User[]
+     * @return array|\engine\User[]
      * @throws \Exception
      */
     public function loadUserList(User $user): array

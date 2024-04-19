@@ -941,7 +941,7 @@ class PearDatabase implements LoggerAwareInterface
         $result->Move($row);
         $rowdata = $this->change_key_case($result->FetchRow());
         //Commented strip_selected_tags and added to_html function for HTML tags vulnerability
-        return ($col === 'fieldlabel') ? $rowdata[$col] : to_html($rowdata[$col]);
+        return is_array($rowdata) ? to_html($rowdata[$col]) : $rowdata;
     }
 
     // Function to get particular row from the query result

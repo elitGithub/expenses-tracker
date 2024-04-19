@@ -22,21 +22,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     $roleId = Filter::filterInput(INPUT_POST, 'user_role', FILTER_VALIDATE_INT);
     $isAdmin = Filter::filterInput(INPUT_POST, 'is_admin', FILTER_VALIDATE_BOOLEAN, false);
     $uploadPhoto = Filter::filterInput(INPUT_POST, 'upload_user_photo', FILTER_VALIDATE_BOOLEAN, false);
-
+    $isAdmin = $isAdmin ? 'On' : 'Off';
+    if (!PermissionsManager::isAdmin($current_user)) {
+        $isAdmin = 'Off';
+    }
     if (is_null($password) || is_null($confirmPassword)) {
         $_SESSION['errors'][] = 'Please make sure you typed password and confirm password';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;
     }
 
-    if (strcmp($password, $confirmPassword) !== 0) {
+
+    if ($password !== $confirmPassword) {
         $_SESSION['errors'][] = 'Passwords do not match';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;
     }
 
     try {
-        $validRole = Role::validateRole((int)$roleId);
+        $validRole = Role::validateRole((int) $roleId);
     } catch (Throwable $e) {
         $_SESSION['errors'][] = $e->getMessage();
         header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -50,7 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     }
 
     try {
-        $userId = $userModel->createNew($email, $userName, $password, $firstName, $lastName, (int) $current_user->id, (int) $roleId, $isAdmin ? 'On' : 'Off');
+        $userId = $userModel->createNew($email, $userName, $password, $firstName, $lastName, (int) $current_user->id, (int) $roleId,
+                                        $isAdmin ? 'On' : 'Off');
     } catch (Throwable $e) {
         $_SESSION['errors'][] = $e->getMessage();
         header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -73,17 +78,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     }
     $_SESSION['success'][] = 'New user created successfully.';
     $historyData = [
-        'user_name' => $userName,
-        'email' => $email,
+        'user_name'  => $userName,
+        'email'      => $email,
         'first_name' => $firstName,
-        'last_name' => $lastName,
-        'role_id' => $roleId,
-        'is_admin' => $isAdmin,
+        'last_name'  => $lastName,
+        'role_id'    => $roleId,
+        'is_admin'   => $isAdmin,
     ];
     History::logTrack('User', $userId, 'add_user', $current_user->id, json_encode($historyData));
     header('Location: ' . $_SERVER['HTTP_REFERER']);
     return;
-
 }
 
 $_SESSION['errors'][] = 'Wrong request format.';

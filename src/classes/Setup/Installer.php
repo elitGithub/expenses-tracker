@@ -530,7 +530,7 @@ class Installer extends Setup
             throw new Exception('Passwords do not match', 500);
         }
 
-        $userId = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('administrator'), 'On');
+        $userId = $userModel->createNew($email, $userName, $password, $firstName, $lastName, 1, Role::getRoleIdByName('Administrator'), 'On');
         if (!$userId) {
             $existUserData = $userModel->getByEmailAndUserName($email, $userName) ?? false;
             if (!$existUserData) {

@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (int)$userId === (int)$current_user
 
     $changed = $userModel->updateUser($user, (int)$current_user->role, $email, $firstName, $lastName, 1, $current_user->is_admin);
     if ($changed) {
+        $current_user->refreshUserInSession();
         $_SESSION['success'][] = 'Preferences updated successfully';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;

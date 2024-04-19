@@ -268,7 +268,13 @@ class CacheSystemManager
             'is_admin'   => $user->is_admin ?? 'Off',
         ]);
         $adb = PearDatabase::getInstance();
-        self::createPermissionsFile($adb, $adb->getTablesConfig()['role_permissions_table_name']);
+        $rolePermissionsTable = $adb->getTablesConfig()['role_permissions_table_name'];
+        $rolePermRes = $adb->query("SELECT * FROM `$rolePermissionsTable`;");
+        $rolePermissionsArray = [];
+        while ($row = $adb->fetchByAssoc($rolePermRes)) {
+            $rolePermissionsArray[] = $row;
+        }
+        self::refreshPermissionsInCache($rolePermissionsArray);
     }
 
     /**

@@ -172,10 +172,9 @@ class UserModel
             return false;
         }
 
+
         CacheSystemManager::refreshUserInCache($user);
         PermissionsManager::refreshPermissionsInCache();
-        $user->refreshUserInSession();
-
         return $userChanges > 0;
     }
 
