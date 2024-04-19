@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace engine;
 
@@ -21,7 +21,8 @@ class UsersList
      */
     protected $tables;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->adb = PearDatabase::getInstance();
         $this->tables = $this->adb->getTablesConfig();
     }
@@ -49,11 +50,11 @@ class UsersList
         if (!PermissionsManager::isAdmin($user)) {
             $roles = $roleSubordinates = Role::getChildRoles($user);
             $roleIds = array_column($roles, 'role_id');
-            $where = ' AND `roles`.`role_id` IN (' . generateQuestionMarks($roleIds) . ') AND `users`.`is_admin` != "On" ' ;
+            $where = ' AND `roles`.`role_id` IN (' . generateQuestionMarks($roleIds) . ') AND `users`.`is_admin` != "On" ';
             $params = $roleIds;
         }
 
-        $query .= $where . ' GROUP BY  `users`.`user_id` ORDER BY  `users`.`user_id` DESC ';
+        $query .= $where . ' GROUP BY  users.user_id, roles.role_name, roles.role_id, creators.first_name, creators.last_name ORDER BY users.user_id DESC ';
         $result = $this->adb->pquery($query, $params);
         if (!$result || $this->adb->num_rows($result) === 0) {
             return [];
@@ -66,5 +67,4 @@ class UsersList
 
         return $this->usersCollection;
     }
-
 }
