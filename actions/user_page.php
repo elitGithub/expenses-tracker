@@ -12,7 +12,10 @@ $userInfo = $current_user->session->sessionReadKey('authenticated_user_data');
         <div class="row mb-3">
             <?php
             $src = fileExists(USER_AVATARS_UPLOAD_DIR, $current_user->id . '_avatar');
-            $src = USER_AVATARS_FILE_URL . $src;
+            if ($src) {
+                $src = USER_AVATARS_FILE_URL . $src;
+            }
+
             if (!$src) {
                 $src = 'assets/img/find_user.png';
             }
@@ -27,41 +30,41 @@ $userInfo = $current_user->session->sessionReadKey('authenticated_user_data');
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 mb-3">
                 <label for="user_name">Username:</label>
-                <input type="text" class="form-control" name="user_name" id="user_name" value="<?php
+                <input type="text" class="form-control mt-2" name="user_name" id="user_name" value="<?php
                 echo $userInfo['userName'] ?>" placeholder="Please Enter the username" disabled="disabled">
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 mb-3">
                 <label for="email">Email:</label>
-                <input type="email" class="form-control" value="<?php
+                <input type="email" class="form-control mt-2" value="<?php
                 echo $userInfo['email'] ?>" name="email" id="email" placeholder="Please Enter user email" required>
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 mb-3">
                 <label for="first_name">First Name:</label>
-                <input type="text" class="form-control" name="first_name" id="first_name" value="<?php
+                <input type="text" class="form-control mt-2" name="first_name" id="first_name" value="<?php
                 echo $userInfo['first_name'] ?>" placeholder="Please Enter first name" required>
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 mb-3">
                 <label for="last_name">Last Name:</label>
-                <input type="text" class="form-control" name="last_name" id="last_name" value="<?php
+                <input type="text" class="form-control mt-2" name="last_name" id="last_name" value="<?php
                 echo $userInfo['last_name'] ?>" placeholder="Please Enter last name" required>
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 mb-3">
                 <label for="password">Change password:</label>
-                <div class="input-group">
+                <div class="input-group mt-2">
                     <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                            id="password" class="form-control">
                     <span class="input-group-text cursor-pointer" id="toggleUserPassword"><i class="fa fa-eye" id="showUserPassword"></i></span>
                 </div>
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 mb-3">
                 <label for="password_retype">Confirm change password:</label>
-                <div class="input-group">
+                <div class="input-group mt-2">
                     <input type="password" autocomplete="off" name="password_retype" id="password_retype" minlength="8" class="form-control">
                     <span class="input-group-text cursor-pointer" id="toggleRetypePassword"><i class="fa fa-eye" id="showRetypePassword"></i></span>
                 </div>
