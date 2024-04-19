@@ -172,6 +172,23 @@ class User
     }
 
     /**
+     * @param  int  $userId
+     *
+     * @return bool
+     */
+    public function isLastAdminUser(int $userId): bool
+    {
+        $this->tables();
+        $query = "SELECT * FROM `$this->entityTable` WHERE `user_id` != ? AND `is_admin` = 'On' AND `active` = 1";
+        $result = $this->database()->pquery($query, [$userId]);
+        if (!$result || !$this->database()->num_rows($result)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @return false|mixed
      */
     public function isLoggedIn()

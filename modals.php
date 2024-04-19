@@ -17,6 +17,7 @@ $editExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
 $deleteExpenseToken = $uniqueIdGenerator->generateTrueRandomString();
 $addUserToken = $uniqueIdGenerator->generateTrueRandomString();
 $editUserToken = $uniqueIdGenerator->generateTrueRandomString();
+$deleteUserToken = $uniqueIdGenerator->generateTrueRandomString();
 
 
 $_SESSION['formToken']['add_new_category'] = password_hash($addNewCatToken, PASSWORD_DEFAULT);
@@ -27,6 +28,7 @@ $_SESSION['formToken']['edit_expense'] = password_hash($editExpenseToken, PASSWO
 $_SESSION['formToken']['delete_expense'] = password_hash($deleteExpenseToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['add_user_token'] = password_hash($addUserToken, PASSWORD_DEFAULT);
 $_SESSION['formToken']['edit_user_token'] = password_hash($editUserToken, PASSWORD_DEFAULT);
+$_SESSION['formToken']['delete_user_token'] = password_hash($deleteUserToken, PASSWORD_DEFAULT);
 
 $expenseCategoryList = new ExpenseCategoryList();
 $expenseCategories = $expenseCategoryList->getAllCategories();
@@ -504,5 +506,34 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
         </div>
     <?php
     endif ?>
+    <?php if (PermissionsManager::isPermittedAction('delete_user', $current_user)) : ?>
+        <div class="panel panel-default" id="modal_delete_user">
+            <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="deleteUserModalLabel">System</h3>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="index.php?action=delete_user">
+                            <div class="modal-body text-center">
+                                <h4 id="del_user_message">Are you sure you want to delete this User?</h4>
+                                <!-- Hidden input for CSRF protection -->
+                                <input type="hidden" id="del_user_id" name="userId">
+                                <input type="hidden" name="formToken" value="<?php
+                                echo htmlspecialchars($deleteUserToken); ?>">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                <button type="submit" class="btn btn-danger">Yes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <?php
+    endif; ?>
 </div>
 <!-- End Modals-->

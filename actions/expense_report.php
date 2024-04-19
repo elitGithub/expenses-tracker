@@ -14,14 +14,18 @@ if (!PermissionsManager::isPermittedAction('expense_report', $current_user)) {
     return;
 }
 ?>
-<?php if ($categoryList->countTotalCategoriesByTimeFrame() > 0): ?>
-<!-- Modal trigger button with Bootstrap 5 data attributes -->
-<button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
-    <i class="fa fa-plus-circle fa-2x"></i> Add Expenses
-</button>
-<?php else: ?>
-<h5>You have no expense categories, please add some, so we can follow your expenses.</h5>
-<?php endif ?>
+<?php
+if ($categoryList->countTotalCategoriesByTimeFrame() > 0): ?>
+    <!-- Modal trigger button with Bootstrap 5 data attributes -->
+    <button class="btn btn-primary btn-sm search-prepend me-3" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+        <i class="fa fa-plus-circle"></i> Add Expenses
+    </button>
+
+<?php
+else: ?>
+    <h5>You have no expense categories, please add some, so we can follow your expenses.</h5>
+<?php
+endif ?>
 <div class="row">
     <div class="col-md-12">
         <!-- Advanced Tables -->
@@ -58,11 +62,16 @@ if (!PermissionsManager::isPermittedAction('expense_report', $current_user)) {
                                     <?php
                                     if (PermissionsManager::isPermittedAction('edit_expense', $current_user)): ?>
                                         <button type="button" class="btn btn-info btn-xs editButton"
-                                                data-id="<?php echo $row['expense_id']; ?>"
-                                                data-expense-category-id="<?php echo $row['expense_category_id']; ?>"
-                                                data-description="<?php echo htmlspecialchars($row['expense_description']); ?>"
-                                                data-amount="<?php echo htmlspecialchars($row['amount_spent']); ?>"
-                                                data-date="<?php echo htmlspecialchars($row['created_at']); ?>"
+                                                data-id="<?php
+                                                echo $row['expense_id']; ?>"
+                                                data-expense-category-id="<?php
+                                                echo $row['expense_category_id']; ?>"
+                                                data-description="<?php
+                                                echo htmlspecialchars($row['expense_description']); ?>"
+                                                data-amount="<?php
+                                                echo htmlspecialchars($row['amount_spent']); ?>"
+                                                data-date="<?php
+                                                echo htmlspecialchars($row['created_at']); ?>"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editExpenseModal">
                                             <span class='fa fa-pencil'></span> Edit
@@ -72,7 +81,8 @@ if (!PermissionsManager::isPermittedAction('expense_report', $current_user)) {
                                     <?php
                                     if (PermissionsManager::isPermittedAction('delete_expense', $current_user)): ?>
                                         <button type="button" class="btn btn-danger btn-xs deleteButton"
-                                                data-id="<?php echo $row['expense_id']; ?>"
+                                                data-id="<?php
+                                                echo $row['expense_id']; ?>"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#deleteExpenseModal"><span
                                                 class='fa fa-trash'></span> Delete
@@ -111,8 +121,8 @@ require_once 'modals.php';
             });
         });
 
-        editButtons.forEach(function(button) {
-            button.addEventListener('click', function() {
+        editButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
                 const expenseId = this.getAttribute('data-id');
                 const expenseCategoryId = this.getAttribute('data-expense-category-id');
                 const description = this.getAttribute('data-description');
@@ -126,6 +136,13 @@ require_once 'modals.php';
                 editExpenseModal.querySelector('#expense_date').value = date;
             });
         });
+
+        setTimeout(() => {
+            // Add a div next to the search input
+            const searchInput = document.querySelector('.dt-search');
+            const searchPrepend = document.querySelector('.search-prepend');
+            searchInput.insertAdjacentElement('afterbegin', searchPrepend);
+        }, 0);
     });
 </script>
 

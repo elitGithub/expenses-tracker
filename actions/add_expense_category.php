@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
         return;
     }
     $catId = $expenseCategory->addNew($name, (float) $amount, $isDefault);
-
+    settype($catId, 'integer');
     if ($expenseCategory->defaultChanged) {
         $_SESSION['success'][] = 'Default category changed to category ' . $name;
     }

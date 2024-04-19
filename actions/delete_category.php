@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     if (empty($categoryId)) {
         $_SESSION['errors'][] = 'Missing category id.';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
+        return;
     }
 
     $category->getById((int)$categoryId);

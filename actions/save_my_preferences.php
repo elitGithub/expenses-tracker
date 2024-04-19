@@ -8,6 +8,7 @@ use Models\UserModel;
 
 
 $userId = Filter::filterInput(INPUT_POST, 'userId', FILTER_VALIDATE_INT);
+settype($userId, 'integer');
 if (!$userId) {
     $_SESSION['errors'][] = 'Please provide user id';
     header('Location: ' . $_SERVER['HTTP_REFERER']);

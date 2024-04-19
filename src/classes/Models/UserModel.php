@@ -116,6 +116,25 @@ class UserModel
         return ($this->adb->query_result($result, 0, 'total') < 1);
     }
 
+    public function deleteUser(int $userId)
+    {
+        $query = "UPDATE
+                      `$this->entityTable`
+                    SET
+                        `active` = '0',
+                        `deleted_at` = CURRENT_TIMESTAMP(),
+                        `email` = CONCAT(`email`, '_', 'DELETED_USER'),
+                        `user_name` = CONCAT(`user_name`, '_', 'DELETED_USER')
+                    WHERE `user_id` = ?;";
+        $result = $this->adb->preparedQuery($query, [$userId]);
+        if ($result && $this->adb->getAffectedRowCount($result)) {
+            $this->adb->pquery("DELETE FROM `$this->userToRoleTable` WHERE `user_id` = ?", [$userId]);
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * @param  \engine\User  $user
      * @param  int           $roleId

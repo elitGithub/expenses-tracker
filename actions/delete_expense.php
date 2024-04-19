@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     if (empty($expenseId)) {
         $_SESSION['errors'][] = 'Missing expense id.';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
+        return;
     }
     $result = $expense->delete((int)$expenseId);
 

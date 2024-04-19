@@ -14,8 +14,8 @@ $collection = $userList->loadUserList($current_user);
 ?>
 
 <!-- Modal trigger button with Bootstrap 5 data attributes -->
-<button class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#addUserModal">
-    <i class="fa fa-plus-circle fa-2x"></i> Add User
+<button class="btn btn-primary btn-sm search-prepend me-3" data-bs-toggle="modal" data-bs-target="#addUserModal">
+    <i class="fa fa-plus-circle"></i> Add User
 </button>
 <div class="row">
     <div class="col-md-12">
@@ -62,14 +62,14 @@ $collection = $userList->loadUserList($current_user);
                                 <td><?php
                                     echo $user->first_name . ' ' . $user->last_name; ?></td>
                                 <td><?php
-                                echo $user->role_name;
+                                    echo $user->role_name;
                                     ?>
                                 </td>
                                 <td><?php
                                     echo $user->creator; ?></td>
                                 <td>
                                     <?php
-                                    if ((int)$user->active === 1): ?>
+                                    if ((int) $user->active === 1): ?>
                                         <p class="bg-success-subtle">Active</p>
                                     <?php
                                     else: ?>
@@ -94,25 +94,37 @@ $collection = $userList->loadUserList($current_user);
                                 if (PermissionsManager::isPermittedAction('edit_user', $current_user)): ?>
                                     <td>
                                         <button type="button" class="btn btn-info btn-xs editButton"
-                                                data-id="<?php echo $user->user_id ?>"
-                                                data-role_id="<?php echo $user->role_id ?>"
-                                                data-first_name="<?php echo htmlspecialchars($user->first_name) ?>"
-                                                data-last_name="<?php echo htmlspecialchars($user->last_name) ?>"
-                                                data-email="<?php echo $user->email ?>"
-                                                data-userName="<?php echo $user->user_name ?>"
-                                                data-active="<?php echo $user->active ?>"
-                                                data-is_admin="<?php echo $user->is_admin ?>"
+                                                data-id="<?php
+                                                echo $user->user_id ?>"
+                                                data-role_id="<?php
+                                                echo $user->role_id ?>"
+                                                data-first_name="<?php
+                                                echo htmlspecialchars($user->first_name) ?>"
+                                                data-last_name="<?php
+                                                echo htmlspecialchars($user->last_name) ?>"
+                                                data-email="<?php
+                                                echo $user->email ?>"
+                                                data-userName="<?php
+                                                echo $user->user_name ?>"
+                                                data-active="<?php
+                                                echo $user->active ?>"
+                                                data-is_admin="<?php
+                                                echo $user->is_admin ?>"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editUserModal">
                                             <span class='fa fa-pencil'></span> Edit
                                         </button>
-                                        <?php if (PermissionsManager::isPermittedAction('delete_user', $current_user) &&
-                                                  !PermissionsManager::isAdmin($user)):?>
+                                        <?php
+                                        if (PermissionsManager::isPermittedAction('delete_user', $current_user) &&
+                                            !PermissionsManager::isAdmin($user)): ?>
                                             <button type="button" class="btn btn-danger btn-xs deleteButton"
-                                                    data-id="<?php echo $user->user_id ?>"
+                                                    data-id="<?php
+                                                    echo $user->user_id ?>"
+                                                    data-userName="<?php
+                                                    echo $user->user_name ?>"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#deleteUserModal"><span
-                                                        class='fa fa-trash'></span> Delete
+                                                    class='fa fa-trash'></span> Delete
                                             </button>
                                         <?php
                                         endif; ?>
@@ -138,76 +150,83 @@ $collection = $userList->loadUserList($current_user);
 require_once 'modals.php';
 ?>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const editButtons = document.querySelectorAll('.editButton');
-    const deleteButtons = document.querySelectorAll('.deleteButton');
-    const editUserModal = document.getElementById('editUserModal');
-    const deleteUserModal = document.getElementById('deleteUserModal');
+    document.addEventListener('DOMContentLoaded', function () {
+        const editButtons = document.querySelectorAll('.editButton');
+        const deleteButtons = document.querySelectorAll('.deleteButton');
+        const editUserModal = document.getElementById('editUserModal');
+        const deleteUserModal = document.getElementById('deleteUserModal');
 
-    deleteButtons.forEach((button) => {
-      button.addEventListener('click', function () {
-        deleteUserModal.querySelector('#del_user_id').value = this.getAttribute('data-id');
-      });
+        deleteButtons.forEach((button) => {
+            button.addEventListener('click', function () {
+                deleteUserModal.querySelector('#del_user_id').value = this.getAttribute('data-id');
+                deleteUserModal.querySelector('#del_user_message').innerText = `Are you sure you want to delete the user ${ this.getAttribute('data-userName') }?`;
+            });
+        });
+
+        editButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const userId = this.getAttribute('data-id');
+                const roleId = this.getAttribute('data-role_id');
+                const userName = this.getAttribute('data-userName');
+                const userEmail = this.getAttribute('data-email');
+                const firstName = this.getAttribute('data-first_name');
+                const lastName = this.getAttribute('data-last_name');
+                const active = this.getAttribute('data-active');
+                const isAdmin = this.getAttribute('data-is_admin');
+
+                editUserModal.querySelector('#edit_user_id').value = userId;
+                editUserModal.querySelector('#edit_user_name').value = userName;
+                editUserModal.querySelector('#edit_user_email').value = userEmail;
+                editUserModal.querySelector('#edit_user_role').value = roleId;
+                editUserModal.querySelector('#edit_first_name').value = firstName;
+                editUserModal.querySelector('#edit_last_name').value = lastName;
+                editUserModal.querySelector('#edit_is_active').checked = active;
+                editUserModal.querySelector('#edit_is_admin').checked = isAdmin === 'On';
+            });
+        });
     });
 
-    editButtons.forEach(function(button) {
-      button.addEventListener('click', function() {
-        const userId = this.getAttribute('data-id');
-        const roleId = this.getAttribute('data-role_id');
-        const userName = this.getAttribute('data-userName');
-        const userEmail = this.getAttribute('data-email');
-        const firstName = this.getAttribute('data-first_name');
-        const lastName = this.getAttribute('data-last_name');
-        const active = this.getAttribute('data-active');
-        const isAdmin = this.getAttribute('data-is_admin');
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleUserPassword = document.getElementById('toggleChangeUserPassword');
+        const toggleRetypePassword = document.getElementById('toggleRetypeChangePassword');
+        const showUserPassword = document.getElementById('showChangeUserPassword');
+        const showRetypePassword = document.getElementById('showChangeRetypePassword');
+        const adminPassword = document.getElementById('change_password');
+        const passwordRetype = document.getElementById('retype_change_password');
 
-        editUserModal.querySelector('#edit_user_id').value = userId;
-        editUserModal.querySelector('#edit_user_name').value = userName;
-        editUserModal.querySelector('#edit_user_email').value = userEmail;
-        editUserModal.querySelector('#edit_user_role').value = roleId;
-        editUserModal.querySelector('#edit_first_name').value = firstName;
-        editUserModal.querySelector('#edit_last_name').value = lastName;
-        editUserModal.querySelector('#edit_is_active').checked = active;
-        editUserModal.querySelector('#edit_is_admin').checked = isAdmin === 'On';
-      });
+        toggleUserPassword?.addEventListener('click', () => {
+            if (adminPassword.type === 'password') {
+                adminPassword.type = 'text';
+                showUserPassword.className = 'fa fa-eye-slash';
+            } else {
+                adminPassword.type = 'password';
+                showUserPassword.className = 'fa fa-eye';
+            }
+        });
+        toggleRetypePassword?.addEventListener('click', () => {
+            if (passwordRetype.type === 'password') {
+                passwordRetype.type = 'text';
+                showRetypePassword.className = 'fa fa-eye-slash';
+            } else {
+                passwordRetype.type = 'password';
+                showRetypePassword.className = 'fa fa-eye';
+            }
+        });
+
+        document.getElementById('user_photo').addEventListener('change', (ev) => {
+            document.querySelector('#upload_user_photo').value = ev.target.files.length;
+        });
+
+        document.getElementById('edit_user_photo').addEventListener('change', (ev) => {
+            document.querySelector('#edit_user_upload_user_photo').value = ev.target.files.length;
+        });
+
+        setTimeout(() => {
+            // Add a div next to the search input
+            const searchInput = document.querySelector('.dt-search');
+            const searchPrepend = document.querySelector('.search-prepend');
+            searchInput.insertAdjacentElement('afterbegin', searchPrepend);
+        }, 0);
     });
-  });
-
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const toggleUserPassword = document.getElementById('toggleChangeUserPassword');
-    const toggleRetypePassword = document.getElementById('toggleRetypeChangePassword');
-    const showUserPassword = document.getElementById('showChangeUserPassword');
-    const showRetypePassword = document.getElementById('showChangeRetypePassword');
-    const adminPassword = document.getElementById('change_password');
-    const passwordRetype = document.getElementById('retype_change_password');
-
-    toggleUserPassword?.addEventListener('click', () => {
-      if (adminPassword.type === 'password') {
-        adminPassword.type = 'text';
-          showUserPassword.className = 'fa fa-eye-slash';
-      } else {
-        adminPassword.type = 'password';
-          showUserPassword.className = 'fa fa-eye';
-      }
-    });
-    toggleRetypePassword?.addEventListener('click', () => {
-      if (passwordRetype.type === 'password') {
-        passwordRetype.type = 'text';
-        showRetypePassword.className = 'fa fa-eye-slash';
-      } else {
-        passwordRetype.type = 'password';
-        showRetypePassword.className = 'fa fa-eye';
-      }
-    });
-
-    document.getElementById('user_photo').addEventListener('change', (ev) => {
-      document.querySelector('#upload_user_photo').value = ev.target.files.length;
-    });
-
-    document.getElementById('edit_user_photo').addEventListener('change', (ev) => {
-      document.querySelector('#edit_user_upload_user_photo').value = ev.target.files.length;
-    });
-  });
 </script>
 

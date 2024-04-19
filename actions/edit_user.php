@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     PermissionsManager::isPermittedAction('edit_user', $current_user) &&
     password_verify($_POST['formToken'], $_SESSION['formToken']['edit_user_token'])) {
     $userId = Filter::filterInput(INPUT_POST, 'userId', FILTER_VALIDATE_INT);
+    settype($userId, 'integer');
     if (!$userId) {
         $_SESSION['errors'][] = 'Please provide user id';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -87,7 +88,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
         if (!PermissionsManager::isAdmin($current_user)) {
             $isAdmin = $user->is_admin;
         }
-
+        if ($isAdmin === ' Off') {
+            if ($user->isLastAdminUser($userId)) {
+                $_SESSION['errors'][] = 'You may not delete the last admin user.';
+                header('Location: ' . $_SERVER['HTTP_REFERER']);
+                return;
+            }
+        }
         $success = $userModel->updateUser($user, (int)$roleId, $email, $firstName, $lastName, $active, $isAdmin);
     } catch (Throwable $e) {
         $_SESSION['errors'][] = $e->getMessage();

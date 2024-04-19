@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     $categoryId = Filter::filterInput(INPUT_POST, 'expense_category_id', FILTER_SANITIZE_NUMBER_INT);
     $date = Filter::filterInput(INPUT_POST, 'expense_date', FILTER_SANITIZE_SPECIAL_CHARS);
     $expenseId = $expense->add($description, $date, (float) $amount, (int) $categoryId);
+    settype($expenseId, 'integer');
 
     if ($expenseId > 0) {
         $historyData = [
