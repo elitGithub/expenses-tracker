@@ -11,11 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     password_verify($_POST['formToken'], $_SESSION['formToken']['edit_category'])) {
     $category = new ExpenseCategory();
     $categoryId = Filter::filterInput(INPUT_POST, 'category_id', FILTER_SANITIZE_NUMBER_INT);
-    settype($categoryId, 'integer');
+
     if (empty($categoryId)) {
         $_SESSION['errors'][] = 'Missing category id.';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
     }
+
+    settype($categoryId, 'integer');
     $category->getById((int)$categoryId);
     $name = Filter::filterInput(INPUT_POST, 'expense_category_name', FILTER_SANITIZE_SPECIAL_CHARS, '');
     $budget = Filter::filterInput(INPUT_POST, 'expense_category_budget', FILTER_SANITIZE_NUMBER_FLOAT, 0.00);

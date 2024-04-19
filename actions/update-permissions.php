@@ -12,7 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     unset($_POST['formToken']);
     $roleId = Filter::filterInput(INPUT_POST, 'role_id', FILTER_SANITIZE_NUMBER_INT);
     if ($roleId) {
-        $rolePermissions = PermissionsManager::listAllPermissionsForRole((int) $roleId);
+        settype($roleId, 'int');
+        $rolePermissions = PermissionsManager::listAllPermissionsForRole($roleId);
         foreach ($rolePermissions as $actionId => $permissionData) {
             $actionEnabled = false;
             if (isset($_POST[$actionId])) {

@@ -13,12 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     PermissionsManager::isPermittedAction('edit_user', $current_user) &&
     password_verify($_POST['formToken'], $_SESSION['formToken']['edit_user_token'])) {
     $userId = Filter::filterInput(INPUT_POST, 'userId', FILTER_VALIDATE_INT);
-    settype($userId, 'integer');
+
     if (!$userId) {
         $_SESSION['errors'][] = 'Please provide user id';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;
     }
+
+    settype($userId, 'integer');
     try {
         $user = User::getUserById($userId);
     } catch (Throwable $exception) {

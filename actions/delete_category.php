@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;
     }
-
-    $category->getById((int)$categoryId);
+    settype($categoryId, 'int');
+    $category->getById($categoryId);
 
     try {
         $result = $category->delete();

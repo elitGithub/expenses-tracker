@@ -15,13 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     password_verify($_POST['formToken'], $_SESSION['formToken']['delete_user_token'])) {
     $userModel = new UserModel();
     $userId = Filter::filterInput(INPUT_POST, 'userId', FILTER_SANITIZE_NUMBER_INT);
-    settype($userId, 'int');
+
     if (empty($userId)) {
         $_SESSION['errors'][] = 'Missing user id.';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         return;
     }
-
+    settype($userId, 'int');
     try {
         $user = User::getUserById((int) $userId);
     } catch (Exception $e) {
