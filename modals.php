@@ -363,16 +363,16 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="row">
                                         <div class="form-group mb-3 col-md-6">
                                             <label for="password">User password:</label>
-                                            <div class="input-group" id="show_user_password">
-                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="password" class="form-control mt-2">
+                                            <div class="input-group mt-2" id="show_user_password">
+                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="password" class="form-control">
                                                 <span class="input-group-text cursor-pointer" id="toggleUserPassword"><i class="fa fa-eye" id="showUserPassword"></i></span>
                                             </div>
                                         </div>
 
                                         <div class="form-group mb-3 col-md-6">
                                             <label for="password_retype">Retype password:</label>
-                                            <div class="input-group" id="show_retype_password">
-                                                <input type="password" autocomplete="off" name="password_retype" id="password_retype" minlength="8" class="form-control mt-2" required>
+                                            <div class="input-group mt-2" id="show_retype_password">
+                                                <input type="password" autocomplete="off" name="password_retype" id="password_retype" minlength="8" class="form-control" required>
                                                 <span class="input-group-text cursor-pointer" id="toggleRetypePassword"><i class="fa fa-eye" id="showRetypePassword"></i></span>
                                             </div>
                                         </div>
@@ -460,16 +460,16 @@ $expenseCategories = $expenseCategoryList->getAllCategories();
                                     <div class="row">
                                         <div class="form-group mb-3 col-md-6">
                                             <label for="change_password">User password:</label>
-                                            <div class="input-group" id="show_edit_user_password">
-                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="change_password" class="form-control mt-2">
+                                            <div class="input-group mt-2" id="show_edit_user_password">
+                                                <input name="password" type="password" minlength="8" autocomplete="off" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="change_password" class="form-control">
                                                 <span class="input-group-text cursor-pointer" id="toggleChangeUserPassword"><i class="fa fa-eye" id="showChangeUserPassword"></i></span>
                                             </div>
                                         </div>
 
                                         <div class="form-group mb-3 col-md-6">
                                             <label for="retype_change_password">Retype password:</label>
-                                            <div class="input-group" id="show_retype_change_password">
-                                                <input type="password" autocomplete="off" name="password_retype" id="retype_change_password" minlength="8" class="form-control mt-2">
+                                            <div class="input-group mt-2" id="show_retype_change_password">
+                                                <input type="password" autocomplete="off" name="password_retype" id="retype_change_password" minlength="8" class="form-control">
                                                 <span class="input-group-text cursor-pointer" id="toggleRetypeChangePassword"><i class="fa fa-eye" id="showChangeRetypePassword"></i></span>
                                             </div>
                                         </div>
