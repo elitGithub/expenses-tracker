@@ -46,7 +46,11 @@ $catList = $expenseCategoryList->categoryReport();
                         <?php
                         foreach ($catList as $row) : ?>
                             <tr <?php
-                            if ((float) $row['cat_expenses'] >= (float) $row['amount']) echo 'class="bg-color-red"' ?>>
+                            if ((float) $row['cat_expenses'] >= (float) $row['amount']) echo 'class="bg-color-red"' ?>
+                            <?php if ($row['is_default']): ?>
+                                title="This is a default category and cannot be deleted."
+                            <?php endif ?>
+                            >
                                 <td><?php
                                     echo $row['expense_category_id'] ?>
                                 </td>

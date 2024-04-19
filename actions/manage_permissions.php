@@ -37,7 +37,7 @@ if (isset($_POST['user_role'])) {
 
 <?php
 if (isset($rolePermissions) && count($rolePermissions)): ?>
-    <h3>Editing permissions for <?php
+    <h3 class="mb-4">Editing permissions for <?php
         echo htmlspecialchars($roleName) ?></h3>
     <form action="index.php?action=update-permissions" method="POST" id="permissionsForm">
         <div class="row">

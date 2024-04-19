@@ -32,7 +32,6 @@ endif ?>
         <div class="panel panel-default">
             <div class="h3">
                 Expense Categories
-                <div class="h6 pull-right">Filter Report using the search</div>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
