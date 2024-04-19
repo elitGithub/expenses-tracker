@@ -11,11 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     password_verify($_POST['formToken'], $_SESSION['formToken']['edit_expense'])) {
     $expense = new Expense();
     $expenseId = Filter::filterInput(INPUT_POST, 'expense_id', FILTER_SANITIZE_NUMBER_INT);
-    settype($expenseId, 'integer');
+
     if (empty($expenseId)) {
         $_SESSION['errors'][] = 'Missing expense id.';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
     }
+
+    settype($expenseId, 'integer');
     $description = Filter::filterInput(INPUT_POST, 'expense_description', FILTER_SANITIZE_SPECIAL_CHARS, '');
     $amount = Filter::filterInput(INPUT_POST, 'amount_spent', FILTER_SANITIZE_NUMBER_FLOAT, 0.00);
     $categoryId = Filter::filterInput(INPUT_POST, 'expense_category_id', FILTER_SANITIZE_NUMBER_INT);

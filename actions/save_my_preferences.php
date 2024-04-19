@@ -8,7 +8,7 @@ use Models\UserModel;
 
 
 $userId = Filter::filterInput(INPUT_POST, 'userId', FILTER_VALIDATE_INT);
-settype($userId, 'integer');
+
 if (!$userId) {
     $_SESSION['errors'][] = 'Please provide user id';
     header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -16,6 +16,7 @@ if (!$userId) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (int)$userId === (int)$current_user->id) {
+    settype($userId, 'integer');
     try {
         $user = User::getUserById($userId);
     } catch (Throwable $exception) {
