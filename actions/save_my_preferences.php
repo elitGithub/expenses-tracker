@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 
+use Core\Upload;
 use engine\User;
 use Models\UserModel;
 
@@ -49,6 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (int)$userId === (int)$current_user
         }
         if (!$changePassword) {
             $_SESSION['errors'][] = 'Passwords not changed';
+        }
+    }
+
+    if (isset($_FILES['user_photo']) && $uploadPhoto) {
+        $uploader = new Upload();
+        $fileUpload = $uploader->uploadUserAvatar($userId);
+        if ($fileUpload) {
+            $_SESSION['success'][] = 'Uploaded new file successfully';
         }
     }
 

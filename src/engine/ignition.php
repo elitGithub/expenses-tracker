@@ -15,9 +15,9 @@ require_once EXTR_ROOT_DIR . '/system/config.php';
 
 require_once EXTR_SRC_DIR . '/engine/functions.php';
 
-const USER_AVATARS_UPLOAD_DIR = EXTR_ROOT_DIR . '/system/user/images/';
-const SITE_IMAGES_UPLOAD_DIR = EXTR_ROOT_DIR . '/system/user/attachments/';
-const USER_AVATARS_FILE_URL = 'system/user/images/';
+const USER_AVATARS_UPLOAD_DIR = EXTR_ROOT_DIR . '/assets/public/userImages';
+const SITE_IMAGES_UPLOAD_DIR = EXTR_ROOT_DIR . '/assets/public/images/';
+const USER_AVATARS_FILE_URL = 'assets/public/userImages/';
 
 const ENVIRONMENT = 'production';
 

@@ -4,4 +4,8 @@ system/logs
 system/user
 system/installation_includes.php
 storage/
-public/
+# Ignore everything in the assets/public folder
+assets/public/userImages/*
+
+# But do not ignore the assets/public folder itself
+!assets/public/.gitkeep

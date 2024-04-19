@@ -502,6 +502,7 @@ class Upload
     private function validate_upload_path(bool $isUserPhotoUpload = false)
     {
         $uploadPath = $isUserPhotoUpload ? USER_AVATARS_UPLOAD_DIR : SITE_IMAGES_UPLOAD_DIR;
+
         if ($uploadPath === '') {
             $_SESSION['errors'][] = 'No file path for upload';
             return false;
