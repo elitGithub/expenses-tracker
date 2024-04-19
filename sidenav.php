@@ -12,7 +12,10 @@ use Permissions\PermissionsManager;
             <li class="text-center">
                 <?php
                 $src = fileExists(USER_AVATARS_UPLOAD_DIR, $current_user->id . '_avatar');
-                $src = USER_AVATARS_FILE_URL . $src;
+                if ($src) {
+                    $src = USER_AVATARS_FILE_URL . $src;
+                }
+
                 if (!$src) {
                     $src = 'assets/img/find_user.png';
                 }
