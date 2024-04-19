@@ -123,8 +123,8 @@ class UserModel
                     SET
                         `active` = '0',
                         `deleted_at` = CURRENT_TIMESTAMP(),
-                        `email` = CONCAT(`email`, '_', 'DELETED_USER'),
-                        `user_name` = CONCAT(`user_name`, '_', 'DELETED_USER')
+                        `email` = CONCAT(`email`, '_', `user_id`, 'DELETED_USER'),
+                        `user_name` = CONCAT(`user_name`, '_', `user_id`, 'DELETED_USER')
                     WHERE `user_id` = ?;";
         $result = $this->adb->preparedQuery($query, [$userId]);
         if ($result && $this->adb->getAffectedRowCount($result)) {
