@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 
 use engine\UsersList;
@@ -28,113 +28,100 @@ $collection = $userList->loadUserList($current_user);
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                         <thead>
-                        <tr>
-                            <th>User ID</th>
-                            <th>Email</th>
-                            <th>Username</th>
-                            <th>User Name</th>
-                            <th>User Role</th>
-                            <th>Created By</th>
-                            <th>Active</th>
-                            <?php
-                            if (PermissionsManager::isAdmin($current_user)): ?>
-                                <th>Is Admin</th> <?php
-                            endif; ?>
-                            <th>Created At</th>
-                            <?php
-                            if (PermissionsManager::isPermittedAction('edit_user', $current_user)): ?>
-                                <th>Actions</th>
-                            <?php
-                            endif; ?>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                        foreach ($collection as $user): ?>
                             <tr>
-                                <td><?php
-                                    echo $user->user_id; ?></td>
-                                <td><?php
-                                    echo $user->email; ?></td>
-                                <td><?php
-                                    echo $user->user_name; ?></td>
-                                <td><?php
-                                    echo $user->first_name . ' ' . $user->last_name; ?></td>
-                                <td><?php
-                                    echo $user->role_name;
-                                    ?>
-                                </td>
-                                <td><?php
-                                    echo $user->creator; ?></td>
-                                <td>
-                                    <?php
-                                    if ((int) $user->active === 1): ?>
-                                        <p class="bg-success-subtle">Active</p>
-                                    <?php
-                                    else: ?>
-                                        <p>Inactive</p>
-                                    <?php
-                                    endif ?>
-                                </td>
+                                <th>User ID</th>
+                                <th>Email</th>
+                                <th>Username</th>
+                                <th>User Name</th>
+                                <th>User Role</th>
+                                <th>Created By</th>
+                                <th>Active</th>
                                 <?php
-                                if (PermissionsManager::isAdmin($current_user)): ?>
-                                    <td>
-                                        <?php
-                                        echo $user->is_admin; ?>
-                                    </td>
+                                if (PermissionsManager::isAdmin($current_user)) : ?>
+                                    <th>Is Admin</th> <?php
+                                                    endif; ?>
+                                <th>Created At</th>
                                 <?php
-                                endif; ?>
-                                <td>
-                                    <?php
-                                    echo $user->created_at ?>
-                                </td>
-
-                                <?php
-                                if (PermissionsManager::isPermittedAction('edit_user', $current_user)): ?>
-                                    <td>
-                                        <button type="button" class="btn btn-info btn-xs editButton"
-                                                data-id="<?php
-                                                echo $user->user_id ?>"
-                                                data-role_id="<?php
-                                                echo $user->role_id ?>"
-                                                data-first_name="<?php
-                                                echo htmlspecialchars($user->first_name) ?>"
-                                                data-last_name="<?php
-                                                echo htmlspecialchars($user->last_name) ?>"
-                                                data-email="<?php
-                                                echo $user->email ?>"
-                                                data-userName="<?php
-                                                echo $user->user_name ?>"
-                                                data-active="<?php
-                                                echo $user->active ?>"
-                                                data-is_admin="<?php
-                                                echo $user->is_admin ?>"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editUserModal">
-                                            <span class='fa fa-pencil'></span> Edit
-                                        </button>
-                                        <?php
-                                        if (PermissionsManager::isPermittedAction('delete_user', $current_user) &&
-                                            !PermissionsManager::isAdmin($user)): ?>
-                                            <button type="button" class="btn btn-danger btn-xs deleteButton"
-                                                    data-id="<?php
-                                                    echo $user->user_id ?>"
-                                                    data-userName="<?php
-                                                    echo $user->user_name ?>"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#deleteUserModal"><span
-                                                    class='fa fa-trash'></span> Delete
-                                            </button>
-                                        <?php
-                                        endif; ?>
-                                    </td>
-
+                                if (PermissionsManager::isPermittedAction('edit_user', $current_user)) : ?>
+                                    <th>Actions</th>
                                 <?php
                                 endif; ?>
                             </tr>
-                        <?php
-                        endforeach;
-                        ?>
+                        </thead>
+                        <tbody>
+                            <?php
+                            foreach ($collection as $user) : ?>
+                                <tr>
+                                    <td><?php
+                                        echo $user->user_id; ?></td>
+                                    <td><?php
+                                        echo $user->email; ?></td>
+                                    <td><?php
+                                        echo $user->user_name; ?></td>
+                                    <td><?php
+                                        echo $user->first_name . ' ' . $user->last_name; ?></td>
+                                    <td><?php
+                                        echo $user->role_name;
+                                        ?>
+                                    </td>
+                                    <td><?php
+                                        echo $user->creator; ?></td>
+                                    <td <?php if ((int) $user->active === 1) : ?> class="bg-success-subtle" <?php else : ?> class="bg-danger-subtle" <?php endif ?>>
+                                        <?php
+                                        if ((int) $user->active === 1) : ?>
+                                            <p>Active</p>
+                                        <?php
+                                        else : ?>
+                                            <p>Inactive</p>
+                                        <?php
+                                        endif ?>
+                                    </td>
+                                    <?php
+                                    if (PermissionsManager::isAdmin($current_user)) : ?>
+                                        <td>
+                                            <?php
+                                            echo $user->is_admin; ?>
+                                        </td>
+                                    <?php
+                                    endif; ?>
+                                    <td>
+                                        <?php
+                                        echo $user->created_at ?>
+                                    </td>
+
+                                    <?php
+                                    if (PermissionsManager::isPermittedAction('edit_user', $current_user)) : ?>
+                                        <td>
+                                            <button type="button" class="btn btn-info btn-xs editButton" data-id="<?php
+                                                                                                                    echo $user->user_id ?>" data-role_id="<?php
+                                                                                                                                                            echo $user->role_id ?>" data-first_name="<?php
+                                                                                                                                                                                                        echo htmlspecialchars($user->first_name) ?>" data-last_name="<?php
+                                                                                                                                                                                                    echo htmlspecialchars($user->last_name) ?>" data-email="<?php
+                                                                                                                                                                                                                    echo $user->email ?>" data-userName="<?php
+                                                                                                                                                                                                                echo $user->user_name ?>" data-active="<?php
+                                                                                                                                                                                        echo $user->active ?>" data-is_admin="<?php
+                                                                                                                                                                        echo $user->is_admin ?>" data-bs-toggle="modal" data-bs-target="#editUserModal">
+                                                <span class='fa fa-pencil'></span> Edit
+                                            </button>
+                                            <?php
+                                            if (
+                                                PermissionsManager::isPermittedAction('delete_user', $current_user) &&
+                                                !PermissionsManager::isAdmin($user)
+                                            ) : ?>
+                                                <button type="button" class="btn btn-danger btn-xs deleteButton" data-id="<?php
+                                                                                                                            echo $user->user_id ?>" data-userName="<?php
+                                                                                                                                                                    echo $user->user_name ?>" data-bs-toggle="modal" data-bs-target="#deleteUserModal"><span class='fa fa-trash'></span> Delete
+                                                </button>
+                                            <?php
+                                            endif; ?>
+                                        </td>
+
+                                    <?php
+                                    endif; ?>
+                                </tr>
+                            <?php
+                            endforeach;
+                            ?>
                         </tbody>
                     </table>
                 </div>
@@ -149,21 +136,21 @@ $collection = $userList->loadUserList($current_user);
 require_once 'modals.php';
 ?>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const editButtons = document.querySelectorAll('.editButton');
         const deleteButtons = document.querySelectorAll('.deleteButton');
         const editUserModal = document.getElementById('editUserModal');
         const deleteUserModal = document.getElementById('deleteUserModal');
 
         deleteButtons.forEach((button) => {
-            button.addEventListener('click', function () {
+            button.addEventListener('click', function() {
                 deleteUserModal.querySelector('#del_user_id').value = this.getAttribute('data-id');
                 deleteUserModal.querySelector('#del_user_message').innerText = `Are you sure you want to delete the user ${ this.getAttribute('data-userName') }?`;
             });
         });
 
-        editButtons.forEach(function (button) {
-            button.addEventListener('click', function () {
+        editButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-id');
                 const roleId = this.getAttribute('data-role_id');
                 const userName = this.getAttribute('data-userName');
@@ -228,4 +215,3 @@ require_once 'modals.php';
         }, 0);
     });
 </script>
-
